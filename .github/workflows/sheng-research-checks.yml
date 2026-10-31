@@ -1,11 +1,5 @@
 name: sheng research host checks
 on:
-  push:
-    branches: [research/sheng-ipados27]
-    paths:
-      - package/UniXNUPkg/Driver/UniXNURamDiskDxe/**
-      - research/sheng-ipados27/**
-      - .github/workflows/sheng-research-checks.yml
   workflow_dispatch:
 permissions:
   contents: read
