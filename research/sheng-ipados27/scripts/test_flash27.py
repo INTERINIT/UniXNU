@@ -31,6 +31,17 @@ BLOCK = 4096
 LAB_SERIAL = "OFFLINE-FIXTURE"
 
 
+class SimulatedClock:
+    def __init__(self):
+        self.now = 0.0
+
+    def monotonic(self):
+        return self.now
+
+    def sleep(self, seconds):
+        self.now += seconds
+
+
 def hashed(path):
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
@@ -247,9 +258,11 @@ class OfflineFlashTests(unittest.TestCase):
             if "flash" in args:
                 self.assertEqual(json.loads(state.read_text())["status"], "flashing")
                 self.assertEqual(args[args.index("flash") + 1], "userdata")
+            if args[-2:] == ["getvar", "product"]:
+                return "(bootloader) product: sheng\n"
             return LAB_SERIAL + "\tfastboot\n" if args == ["devices"] else "offline simulation"
 
-        with mock.patch.object(f, "invoke", side_effect=simulated_invoke), mock.patch.object(f, "device_check"):
+        with mock.patch.object(f, "invoke", side_effect=simulated_invoke), mock.patch.object(f, "device_check"), mock.patch.object(f.time, "sleep"):
             self.call_main("install", "--fastboot", str(tool))
         self.assertEqual(sum("flash" in args for args in commands), 1)
         self.assertEqual(sum("boot" in args for args in commands), 1)
@@ -288,12 +301,99 @@ class OfflineFlashTests(unittest.TestCase):
         def simulated_invoke(_tool, arguments, **_kwargs):
             args = list(map(str, arguments))
             commands.append(args)
+            if args[-2:] == ["getvar", "product"]:
+                return "(bootloader) product: sheng\n"
             return LAB_SERIAL + "\tfastboot\n" if args == ["devices"] else "offline simulation"
 
-        with mock.patch.object(f, "invoke", side_effect=simulated_invoke), mock.patch.object(f, "device_check"):
+        with mock.patch.object(f, "invoke", side_effect=simulated_invoke), mock.patch.object(f, "device_check"), mock.patch.object(f.time, "sleep"):
             self.call_main("boot", "--fastboot", str(tool))
         self.assertFalse(any("flash" in args or "erase" in args or "format" in args for args in commands))
         self.assertEqual(sum("boot" in args for args in commands), 1)
+
+    def test_reconnect_ignores_stale_enumeration_until_protocol_responds(self):
+        clock = SimulatedClock()
+        probes = []
+        replies = iter((LAB_SERIAL + "\tfastboot\n", f.subprocess.TimeoutExpired("offline-probe", 3),
+                        "", LAB_SERIAL + "\tfastboot\n", "(bootloader) product: sheng\n"))
+
+        def simulated_invoke(_tool, arguments, **kwargs):
+            self.assertGreaterEqual(clock.now, 3)
+            self.assertGreater(kwargs["timeout"], 0)
+            self.assertLessEqual(kwargs["timeout"], 3)
+            probes.append(list(arguments))
+            reply = next(replies)
+            if isinstance(reply, Exception):
+                clock.sleep(kwargs["timeout"])
+                raise reply
+            return reply
+
+        with mock.patch.object(f, "invoke", side_effect=simulated_invoke), mock.patch.object(f.time, "monotonic", clock.monotonic), mock.patch.object(f.time, "sleep", clock.sleep):
+            f.wait_fastboot("never-executed", LAB_SERIAL)
+        self.assertEqual(sum("getvar" in args for args in probes), 2)
+        self.assertEqual(sum(args == ["devices"] for args in probes), 3)
+
+    def test_reconnect_retries_transient_transport_failures(self):
+        clock = SimulatedClock()
+        replies = iter((ValueError("USB temporarily unavailable"), LAB_SERIAL + "\tfastboot\n",
+                        ValueError("interface not ready"), LAB_SERIAL + "\tfastboot\n", "product: sheng\n"))
+
+        def simulated_invoke(_tool, _arguments, **_kwargs):
+            reply = next(replies)
+            if isinstance(reply, Exception):
+                raise reply
+            return reply
+
+        with mock.patch.object(f, "invoke", side_effect=simulated_invoke), mock.patch.object(f.time, "monotonic", clock.monotonic), mock.patch.object(f.time, "sleep", clock.sleep):
+            f.wait_fastboot("never-executed", LAB_SERIAL)
+        self.assertGreaterEqual(clock.now, 5)
+
+    def test_reconnect_allows_a_slow_driver_without_requiring_disconnect(self):
+        clock = SimulatedClock()
+
+        def simulated_invoke(_tool, arguments, **_kwargs):
+            if list(arguments) == ["devices"]:
+                return "OTHER-TABLET\tfastboot\n" if clock.now < 65 else LAB_SERIAL + "\tfastboot\n"
+            return "product: sheng\n"
+
+        with mock.patch.object(f, "invoke", side_effect=simulated_invoke), mock.patch.object(f.time, "monotonic", clock.monotonic), mock.patch.object(f.time, "sleep", clock.sleep):
+            f.wait_fastboot("never-executed", LAB_SERIAL)
+        self.assertEqual(clock.now, 65)
+
+    def test_reconnect_deadline_bounds_repeated_probe_timeouts(self):
+        clock = SimulatedClock()
+
+        def simulated_invoke(_tool, _arguments, **kwargs):
+            clock.sleep(kwargs["timeout"])
+            raise f.subprocess.TimeoutExpired("offline-probe", kwargs["timeout"])
+
+        with mock.patch.object(f, "invoke", side_effect=simulated_invoke), mock.patch.object(f.time, "monotonic", clock.monotonic), mock.patch.object(f.time, "sleep", clock.sleep):
+            with self.assertRaisesRegex(ValueError, r"retry Boot\.cmd; do not repeat Flash\.cmd"):
+                f.wait_fastboot("never-executed", LAB_SERIAL, timeout=10)
+        self.assertEqual(clock.now, 10)
+
+    def test_reconnect_failure_after_flash_can_resume_with_boot(self):
+        tool = self.base / "dummy-tool-never-executed"
+        tool.write_bytes(b"")
+        commands = []
+
+        def simulated_invoke(_tool, arguments, **_kwargs):
+            commands.append(list(map(str, arguments)))
+            return "offline simulation"
+
+        with mock.patch.object(f, "invoke", side_effect=simulated_invoke), mock.patch.object(f, "device_check"), mock.patch.object(f, "wait_fastboot", side_effect=ValueError("simulated reconnect timeout")):
+            with self.assertRaises(ValueError):
+                self.call_main("install", "--fastboot", str(tool))
+        self.assertEqual(sum("flash" in args for args in commands), 1)
+        self.assertFalse(any("boot" in args for args in commands))
+        state = self.base / "install-state.json"
+        receipt = state.read_bytes()
+        self.assertTrue(json.loads(receipt)["flash_completed"])
+        commands.clear()
+        with mock.patch.object(f, "invoke", side_effect=simulated_invoke), mock.patch.object(f, "device_check"), mock.patch.object(f, "wait_fastboot"):
+            self.call_main("boot", "--fastboot", str(tool))
+        self.assertEqual(sum("boot" in args for args in commands), 1)
+        self.assertFalse(any("flash" in args for args in commands))
+        self.assertEqual(state.read_bytes(), receipt)
 
     def test_optional_real_sparse_is_checked_read_only(self):
         if REAL_USERDATA is None:

@@ -1,0 +1,35 @@
+{
+  "date": "2026-10-31",
+  "problem": "USB enumeration after bootloader reset could be stale or present before the fastboot interface responds; one transient error aborted the previous 40-second loop.",
+  "repair": {
+    "initial_settle_seconds": 3,
+    "overall_wait_seconds": 120,
+    "per_probe_timeout_seconds": 3,
+    "responsive_getvar_required": true,
+    "transient_transport_errors_retried": true,
+    "disconnect_observation_required": false
+  },
+  "offline_tests": {
+    "tests_run": 19,
+    "passed": true,
+    "skipped": 1,
+    "flash_script_sha256": "32a0c322cab91dcea8589157140b1420dbf04623703f70ce1a34c5c3079e6f93",
+    "test_script_sha256": "3d60a6841c91f376f8d2fbf590204d746cf10a0e6eda3e3b91ac27f192033044",
+    "actual_userdata_sparse_parser_checked": false,
+    "actual_userdata_whole_file_SHA256_recomputed": false,
+    "all_external_subprocesses_forbidden": true,
+    "install_and_boot_tests_are_in_memory_simulations_only": true,
+    "device_operations": false,
+    "hardware_tested": false
+  },
+  "package_script_sha256": "32a0c322cab91dcea8589157140b1420dbf04623703f70ce1a34c5c3079e6f93",
+  "package_updated": true,
+  "existing_install_receipt_preserved": true,
+  "existing_install_flash_completed": true,
+  "boot_and_userdata_untouched": true,
+  "new_Actions_dispatched": false,
+  "device_operations": false,
+  "hardware_tested": false,
+  "resume_instruction": "Enter FASTBOOT and run Boot.cmd; userdata was already completely written, so do not repeat Flash.cmd.",
+  "updated_utc": "2026-10-31T09:31:55.975656+00:00"
+}

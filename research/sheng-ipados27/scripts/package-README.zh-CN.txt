@@ -18,6 +18,7 @@ GPU／Metal 和持久化 Data 已启用，实际启动、图形和外设可用�
 
 Check.cmd 可单独检查电脑上的包文件，不连接或操作平板。
 出现错误时，保留脚本显示的日志和最后画面，不要反复运行 Flash.cmd。
+若 userdata 已写完、只是重启后回连超时，等 FASTBOOT 出现后运行 Boot.cmd 即可。
 
 电脑需有 Python 3.11 或更新版本。脚本会使用已有 py/python 或包内 tools\python\python.exe。
 fastboot 优先使用 D:\platform-tools\fastboot.exe。刷写入口仅处理 userdata，不修改其他启动分区。

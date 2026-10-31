@@ -234,11 +234,39 @@ def invoke(tool, arguments, *, stream=False, timeout=45):
     return output
 
 
-def variable(tool, serial, name):
-    output = invoke(tool, ["-s", serial, "getvar", name])
+def variable(tool, serial, name, *, timeout=45):
+    output = invoke(tool, ["-s", serial, "getvar", name], timeout=timeout)
     match = re.search(r"(?:\(bootloader\)\s*)?" + re.escape(name) + r":\s*(\S+)", output, re.I)
     require(match is not None, "Missing fastboot variable: " + name)
     return match[1]
+
+
+def wait_fastboot(tool, serial, *, timeout=120):
+    """Wait for a responsive bootloader after USB re-enumeration."""
+    deadline = time.monotonic() + timeout
+    print("Waiting for bootloader FASTBOOT to reconnect (up to %s seconds)..." % timeout, flush=True)
+    # A reboot command can finish before Windows removes the old USB entry.
+    time.sleep(min(3, timeout))
+    last_error = "target has not appeared in the USB list"
+    while time.monotonic() < deadline:
+        try:
+            listing = invoke(tool, ["devices"], timeout=min(3, deadline - time.monotonic()))
+            if re.search(r"^" + re.escape(serial) + r"\s+fastboot\s*$", listing, re.M):
+                remaining = deadline - time.monotonic()
+                if remaining <= 0:
+                    break
+                # Enumeration alone does not mean the new interface is ready.
+                variable(tool, serial, "product", timeout=min(3, remaining))
+                return
+            last_error = "target has not appeared in the USB list"
+        except (ValueError, subprocess.TimeoutExpired) as error:
+            last_error = str(error)
+        remaining = deadline - time.monotonic()
+        if remaining > 0:
+            time.sleep(min(1, remaining))
+    raise ValueError("FASTBOOT did not become responsive within %s seconds. "
+                     "Once the tablet shows FASTBOOT, retry Boot.cmd; do not repeat Flash.cmd. "
+                     "Last connection result: %s" % (timeout, last_error))
 
 
 def device_check(tool, serial, boot_bytes):
@@ -289,13 +317,7 @@ def main():
         receipt.update(status="completed", flash_completed=True)
         write_install_state(state, receipt)
     invoke(tool, ["-s", serial, "reboot", "bootloader"])
-    deadline = time.monotonic() + 40
-    while True:
-        listing = invoke(tool, ["devices"])
-        if re.search(r"^" + re.escape(serial) + r"\s+fastboot\s*$", listing, re.M):
-            break
-        require(time.monotonic() < deadline, "Tablet did not return to FASTBOOT after bootloader reset")
-        time.sleep(1)
+    wait_fastboot(tool, serial)
     device_check(tool, serial, files["boot.img"].stat().st_size)
     invoke(tool, ["-s", serial, "boot", files["boot.img"]], stream=True)
     print("RAM boot accepted. Observe the tablet; this alone does not prove iPadOS boot success.")
