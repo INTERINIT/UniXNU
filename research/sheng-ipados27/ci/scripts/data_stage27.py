@@ -151,6 +151,14 @@ def find_policies(ctx, result, profile):
     require(present, "Restore the fully verified 24A446 policy cache before the Data stage")
     checked = [(path, *root_plan(profile, path)) for path in present]
     require(all(header == checked[0][2] for _, _, header in checked), "Policy cache copies disagree; preserve them for review")
+    # Identical block tables produce an identical SHNGROOT manifest even when
+    # somebody signed the policy envelopes with different owner keys. Native
+    # storage and the payload must consume the very same signed envelopes.
+    fingerprints = [{name: {field: plan["policies"][name][field]
+                            for field in ("manifest_sha256", "trusted_key_sha256")}
+                     for name in ("OS", "SystemOS")} for _, plan, _ in checked]
+    require(all(item == fingerprints[0] for item in fingerprints),
+            "Policy cache owner anchors or signed manifests disagree; do not mix native and payload policy copies")
     return checked[0]
 
 

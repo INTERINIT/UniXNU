@@ -74,7 +74,23 @@ def native_bootstrap(ctx, modules, output):
         ctx.config["XNU_NATIVE_LEGACY_DISPLAY"] = False
         ctx.config["XNU_NATIVE_ADRENO"] = False
         ctx.config["XNU_BOOT_PROGRESS"] = False
-        keep = {"ArmDTPlatform", "ArmCpu", "ShengUfs", "RamBlock"}
+        # archive_plan traverses each selected component's declared dependencies.
+        # Keep the real catalog closure (ShengUfs also needs VirtioMmioBlock),
+        # even when this source-storage configuration does not link that archive.
+        by_id = {spec["id"]: spec for spec in specs}
+        keep = set()
+
+        def retain(identifier):
+            if identifier in keep:
+                return
+            if identifier not in by_id:
+                raise ValueError("Bootstrap dependency is not selected: " + identifier)
+            keep.add(identifier)
+            for dependency in by_id[identifier].get("dependencies", []):
+                retain(dependency)
+
+        for identifier in ("ArmDTPlatform", "ArmCpu", "ShengUfs", "RamBlock"):
+            retain(identifier)
         ctx.component_specs = [s for s in specs if s["id"] in keep or not s.get("build") or s.get("build_stage", "kernel") != "kernel"]
         ctx.board["kernel"]["archives"] = [
             "build-corecrypto-14.py", "build-corecrypto-14.py --namespace",
