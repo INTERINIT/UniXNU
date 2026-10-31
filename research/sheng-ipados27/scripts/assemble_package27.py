@@ -151,7 +151,7 @@ def launcher(mode):
             "where py >nul 2>nul\r\nif not errorlevel 1 goto py\r\n"
             f"python \"%~dp0flash27.py\" {mode} --package \"%~dp0.\"\r\nexit /b %errorlevel%\r\n"
             ":py\r\n" + f"py -3 \"%~dp0flash27.py\" {mode} --package \"%~dp0.\"\r\nexit /b %errorlevel%\r\n"
-            ":bundled\r\n" + f"\"%~dp0tools\\python\\python.exe\" \"%~dp0flash27.py\" {mode} --package \"%~dp0.\"\r\nexit /b %errorlevel%\r\n")
+            ":bundled\r\n" + f"\"%~dp0tools\\python\\python.exe\" \"%~dp0flash27.py\" {mode} --package \"%~dp0.\"\r\nexit /b %errorlevel%\r\n").replace("exit /b %errorlevel%", 'set "guard_result=%errorlevel%"\r\npause\r\nexit /b %guard_result%')
 
 
 def link_or_copy(source, target, *, large=False, allow_large_copy=False):
@@ -208,6 +208,9 @@ def assemble(args):
             storage_mode = link_or_copy(sparse, stage / "userdata.sparse.img", large=True, allow_large_copy=args.copy_large)
             (stage / "userdata-report.json").write_text(json.dumps(bound, indent=2) + "\n", encoding="utf-8")
             link_or_copy(SCRIPTS / "flash27.py", stage / "flash27.py")
+            guide = SCRIPTS / "package-README.zh-CN.txt"
+            require(guide.is_file(), "Missing the candidate package's operation guide")
+            link_or_copy(guide, stage / "先读我.txt")
             for name, mode in (("Check.cmd", "check"), ("Flash.cmd", "install"), ("Boot.cmd", "boot")):
                 (stage / name).write_bytes(launcher(mode).encode("ascii"))
             files = {path.name: {"path": path.name, "bytes": path.stat().st_size,
