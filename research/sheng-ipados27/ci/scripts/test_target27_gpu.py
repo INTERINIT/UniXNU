@@ -64,6 +64,7 @@ class ReplayScopeTests(unittest.TestCase):
         host = self.tree / "build/turnip-darwin-host"
         host.mkdir(parents=True)
         (host / "plugin_smoke").write_bytes(b"left by earlier failed aggregate")
+        (self.output / "gpu27-host-checks.json").write_text('{"passed": ["stale run"]}')
         with patch.object(target, "run", side_effect=subprocess.CalledProcessError(1, "host-check")) as call:
             with self.assertRaises(subprocess.CalledProcessError):
                 target.gpu_host_check(self.tree, self.output, {})

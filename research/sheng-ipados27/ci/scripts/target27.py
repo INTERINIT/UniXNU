@@ -161,6 +161,8 @@ def prepare_gpu_host_check(tree, output):
 
 
 def gpu_host_check(tree, output, env):
+    report_path = output / "gpu27-host-checks.json"
+    report_path.unlink(missing_ok=True)
     local = prepare_gpu_host_check(tree, output)
     # Run even when a previous failed aggregate left plugin_smoke in the cache.
     # Its existence alone is not evidence that the watchdog/controls passed.
@@ -185,7 +187,7 @@ def gpu_host_check(tree, output, env):
         "hardware_tested": False, "shader_execution_verified": False,
         "inputs": {name: {"bytes": path.stat().st_size, "sha256": sha(path)} for name, path in inputs.items()},
     }
-    (output / "gpu27-host-checks.json").write_text(json.dumps(report, indent=2) + "\n")
+    report_path.write_text(json.dumps(report, indent=2) + "\n")
     for path in host.glob("*.log"):
         shutil.copy2(path, output / ("host-turnip-" + path.name))
 
