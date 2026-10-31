@@ -1,0 +1,283 @@
+{
+  "status": "minimal_source_fix_prepared_and_offline_controls_passed",
+  "actual_failed_run": 41173083070,
+  "actual_package_phases": {
+    "data": {
+      "status": "passed",
+      "elapsed_seconds": 704.868
+    },
+    "native": {
+      "status": "failed",
+      "error_type": "Error",
+      "traceback": "package-native-failure.log",
+      "elapsed_seconds": 188.202
+    },
+    "gpu": {
+      "status": "passed",
+      "elapsed_seconds": 895.194
+    },
+    "firmware": {
+      "status": "passed",
+      "elapsed_seconds": 88.656
+    },
+    "payload": {
+      "status": "blocked",
+      "dependencies": [
+        "native"
+      ]
+    }
+  },
+  "actual_kernel_log_sha256": "8960faabd6a2e571ba686691f4a80db71038a04d196bf46c431d1b23267ee572",
+  "observed_undefined_count": 20,
+  "all_observed_undefineds_referenced_only_by_diagnostic_export_object": true,
+  "missing_symbol_source_contracts": [
+    {
+      "symbol": "_native_adreno_call_count",
+      "referring_object": "BootDiagExport.o",
+      "declaration": {
+        "line": 211,
+        "text": "extern volatile uint32_t native_adreno_call_count __attribute__((weak_import));"
+      }
+    },
+    {
+      "symbol": "_native_adreno_call_ring",
+      "referring_object": "BootDiagExport.o",
+      "declaration": {
+        "line": 210,
+        "text": "extern struct gpu_call_rec *native_adreno_call_ring __attribute__((weak_import));"
+      }
+    },
+    {
+      "symbol": "_native_adreno_stall_log",
+      "referring_object": "BootDiagExport.o",
+      "declaration": {
+        "line": 81,
+        "text": "extern volatile uint64_t native_adreno_stall_log[32][8] __attribute__((weak_import));"
+      }
+    },
+    {
+      "symbol": "_native_adreno_tl",
+      "referring_object": "BootDiagExport.o",
+      "declaration": {
+        "line": 78,
+        "text": "extern volatile uint64_t (*native_adreno_tl)[6] __attribute__((weak_import));"
+      }
+    },
+    {
+      "symbol": "_native_adreno_tl_cap",
+      "referring_object": "BootDiagExport.o",
+      "declaration": {
+        "line": 79,
+        "text": "extern volatile uint32_t native_adreno_tl_cap __attribute__((weak_import));"
+      }
+    },
+    {
+      "symbol": "_native_gop_virtual",
+      "referring_object": "BootDiagExport.o",
+      "declaration": {
+        "line": 61,
+        "text": "extern volatile uint64_t native_gop_virtual __attribute__((weak_import));"
+      }
+    },
+    {
+      "symbol": "_native_gop_wait_ring",
+      "referring_object": "BootDiagExport.o",
+      "declaration": {
+        "line": 86,
+        "text": "extern volatile uint64_t native_gop_wait_ring[64][3] __attribute__((weak_import));"
+      }
+    },
+    {
+      "symbol": "_native_gop_wait_ring_count",
+      "referring_object": "BootDiagExport.o",
+      "declaration": {
+        "line": 85,
+        "text": "extern volatile uint32_t native_gop_wait_ring_count __attribute__((weak_import));"
+      }
+    },
+    {
+      "symbol": "_native_gpu_dcvs_log",
+      "referring_object": "BootDiagExport.o",
+      "declaration": {
+        "line": 83,
+        "text": "extern volatile uint64_t native_gpu_dcvs_log[256][2] __attribute__((weak_import));"
+      }
+    },
+    {
+      "symbol": "_native_ioc_count",
+      "referring_object": "BootDiagExport.o",
+      "declaration": {
+        "line": 202,
+        "text": "extern volatile uint32_t native_ioc_count __attribute__((weak_import));"
+      }
+    },
+    {
+      "symbol": "_native_ioc_ring",
+      "referring_object": "BootDiagExport.o",
+      "declaration": {
+        "line": 201,
+        "text": "extern struct ioc_rec *native_ioc_ring __attribute__((weak_import));"
+      }
+    },
+    {
+      "symbol": "_native_ioc_trace_start",
+      "referring_object": "BootDiagExport.o",
+      "declaration": {
+        "line": 203,
+        "text": "extern void native_ioc_trace_start(const int *, unsigned) __attribute__((weak_import));"
+      }
+    },
+    {
+      "symbol": "_native_legacy_direct_snapshot",
+      "referring_object": "BootDiagExport.o",
+      "declaration": {
+        "line": 62,
+        "text": "extern void native_legacy_direct_snapshot(void) __attribute__((weak_import));   // direct scanout: copies the surface on screen into the boot memory"
+      }
+    },
+    {
+      "symbol": "_native_legacy_ring",
+      "referring_object": "BootDiagExport.o",
+      "declaration": {
+        "line": 72,
+        "text": "extern volatile uint64_t (*native_legacy_ring)[2] __attribute__((weak_import));"
+      }
+    },
+    {
+      "symbol": "_native_legacy_ring_cap",
+      "referring_object": "BootDiagExport.o",
+      "declaration": {
+        "line": 73,
+        "text": "extern volatile uint32_t native_legacy_ring_cap __attribute__((weak_import));"
+      }
+    },
+    {
+      "symbol": "_native_legacy_ring_count",
+      "referring_object": "BootDiagExport.o",
+      "declaration": {
+        "line": 74,
+        "text": "extern volatile uint32_t native_legacy_ring_count __attribute__((weak_import));"
+      }
+    },
+    {
+      "symbol": "_native_legacy_snap",
+      "referring_object": "BootDiagExport.o",
+      "declaration": {
+        "line": 75,
+        "text": "extern volatile uint64_t native_legacy_snap[64][2] __attribute__((weak_import));"
+      }
+    },
+    {
+      "symbol": "_native_legacy_snap_count",
+      "referring_object": "BootDiagExport.o",
+      "declaration": {
+        "line": 76,
+        "text": "extern volatile uint32_t native_legacy_snap_count __attribute__((weak_import));"
+      }
+    },
+    {
+      "symbol": "_native_touch_report_count",
+      "referring_object": "BootDiagExport.o",
+      "declaration": {
+        "line": 182,
+        "text": "extern volatile uint32_t native_touch_report_count __attribute__((weak_import));"
+      }
+    },
+    {
+      "symbol": "_native_touch_report_ring",
+      "referring_object": "BootDiagExport.o",
+      "declaration": {
+        "line": 181,
+        "text": "extern volatile uint64_t *native_touch_report_ring __attribute__((weak_import));"
+      }
+    }
+  ],
+  "root_cause": "Native export bootstrap intentionally excludes display/GPU/input archives, but the pinned source-storage recipe unconditionally included BootDiagExport.c. Its weak_import declarations still leave unresolved references at the static arm64e kernel link. This was a translation-unit dependency, beyond the earlier catalog-only dependency closure check.",
+  "existing_optional_interface": {
+    "file": "UniXNU-sheng/package/BootLog.c",
+    "sha256": "4c779b636779587eed34061430e575eae9ef014cdd2d5f0398c7bc2b0c4e9ede",
+    "weak_entries": [
+      "boot_diag_scan",
+      "boot_diag_stream",
+      "boot_diag_shot_tick"
+    ],
+    "activation_gate": "if (&boot_diag_scan && &boot_diag_stream)",
+    "existing_upstream_weak_defaults_function_unchanged": true
+  },
+  "fix": {
+    "pinned_source_sha256": "03de4edd3188646d583f1ca7d00dc554d2d83a9e9fc182741fd267ad683c307a",
+    "adapted_source_sha256": "d5ec1491c6897c0bae19d026ad2f231ba1d3bdb569137828042cf6ecfa9ba704",
+    "environment_flag": "UNIXNU_SHENG_EXPORT_BOOTSTRAP",
+    "default_mode": "0: compile exact original diagnostic exporter",
+    "bootstrap_mode": "1: omit only BootDiagExport.c; require both Legacy and Adreno explicitly disabled",
+    "bootstrap_environment_and_original_catalog_configuration_restored_on_exception": true,
+    "full_kernel_rejects_bootstrap_mode_and_checks_real_archive_receipt": true,
+    "full_diagnostic_source_sha256": "b0b2ee212d8f0e7f6066b66ab6b75b01e289c6a4126b087f1e12f19425f0e227",
+    "new_weak_or_fake_hardware_definitions_added": false
+  },
+  "actual_source_selection_control": {
+    "normal_matches_original_exactly": true,
+    "normal_source_names": [
+      "IOBlockStorageDevice.cpp",
+      "NativeUfs.cpp",
+      "NativeRamBlock.cpp",
+      "SourceStorage.cpp",
+      "SourceRootPolicies.cpp",
+      "SourceRootBinding.cpp",
+      "BootLog.c",
+      "BootLogDefaults.c",
+      "BootReset.c",
+      "verified_root.c",
+      "xnu_crypto.c",
+      "RootAnchor.c",
+      "BootProcessProbe.c",
+      "BootUiTraceProbe.c",
+      "BootProcessWorker.c",
+      "BootWatchdogPolicy.c",
+      "BootDiagExport.c"
+    ],
+    "bootstrap_source_names": [
+      "IOBlockStorageDevice.cpp",
+      "NativeUfs.cpp",
+      "NativeRamBlock.cpp",
+      "SourceStorage.cpp",
+      "SourceRootPolicies.cpp",
+      "SourceRootBinding.cpp",
+      "BootLog.c",
+      "BootLogDefaults.c",
+      "BootReset.c",
+      "verified_root.c",
+      "xnu_crypto.c",
+      "RootAnchor.c",
+      "BootProcessProbe.c",
+      "BootUiTraceProbe.c",
+      "BootProcessWorker.c",
+      "BootWatchdogPolicy.c"
+    ],
+    "normal_and_bootstrap_compile_flags_equal": true,
+    "compiled_objects_created": false
+  },
+  "offline_tests": {
+    "new_controls_passed": 7,
+    "prior_native_recipe_controls_passed": 3,
+    "actual_Context_catalog_archive_plan_used": true,
+    "target_finally_and_full_restore_checked_with_injected_exception_only": true,
+    "fake_MachO_or_successful_compile_output_created": false,
+    "git_apply_check_on_original_recipe": "passed",
+    "python_syntax_check": "passed"
+  },
+  "files": {
+    "ci\\scripts\\source_storage27.py": "6da2f30b4f24321cd1caed80a460be5e5b4511c76883f16de4450a579603cca3",
+    "scripts\\test_source_storage27.py": "6f474e33645a8835916994b928bfa9c2a58f69627bcb93651eb0f2b32ed040e6",
+    "patches\\kernel\\source-storage-bootstrap27.patch": "212f5d02ce8b0b4d1311438f0691fc3591ac20c5b9049af787a88e2e34dbb203"
+  },
+  "remaining_qualification": [
+    "The repaired native export bootstrap has not been compiled on Mac.",
+    "The full GPU/display/input kernel, RELEASE reference, prelink and final payload are still unqualified by an actual successful build.",
+    "Only the source-list preservation and configuration restoration were verified offline; full provider symbol resolution still requires the real full link."
+  ],
+  "source_Data_GPU_Firmware_implementations_modified": false,
+  "Actions_started_after_fix": false,
+  "device_operations": false,
+  "hardware_tested": false
+}

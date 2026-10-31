@@ -1,0 +1,45 @@
+{
+  "run_id": 41173083070,
+  "research_commit": "48d8d2b88cc2c926d3ad3af6f20f6787d0cdae3f",
+  "status": "completed_failure",
+  "phases": {
+    "data": {
+      "status": "passed",
+      "elapsed_seconds": 704.868
+    },
+    "native": {
+      "status": "failed",
+      "error_type": "Error",
+      "traceback": "package-native-failure.log",
+      "elapsed_seconds": 188.202
+    },
+    "gpu": {
+      "status": "passed",
+      "elapsed_seconds": 895.194
+    },
+    "firmware": {
+      "status": "passed",
+      "elapsed_seconds": 88.656
+    },
+    "payload": {
+      "status": "blocked",
+      "dependencies": [
+        "native"
+      ]
+    }
+  },
+  "passed_artifacts_sha256": {
+    "data.dbr": "b8433fd0cc979fbc1584a256d5a677b005cffed7d6da620ed18f3e6e1ec50e72",
+    "gpu27.gpuaddon": "df489e5fde60c2bd7bd5991b4aa508ce288e41e5e637a738c7ba337e029e69e6",
+    "firmware/SILICIUM_UEFI.fd": "5ea559e296eea36b168f0f6bf680b08142041cfdd0c75cd15c3acacc9b405fb7"
+  },
+  "offline_reuse_verification": "actual downloaded files, packed seed, policy RSA/tables, addon identities and FD/BootShim receipts checked",
+  "native_failure": "20 unresolved diagnostic symbols, all referenced by BootDiagExport.o during export bootstrap",
+  "native_fix": "exclude only optional exporter in export bootstrap; original full-build source preserved",
+  "native_fix_offline_controls_passed": 10,
+  "native_fix_real_link_passed": false,
+  "new_Actions_started": false,
+  "complete_boot_built": false,
+  "device_operations": false,
+  "hardware_tested": false
+}

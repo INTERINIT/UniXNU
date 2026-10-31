@@ -1,6 +1,28 @@
 {
   "target": "iPadOS 27.0.1 / 24A446 / sheng",
-  "cloud_builds": {
+  "cloud_dispatch_suspended": true,
+  "public_checks_trigger": "workflow_dispatch only",
+  "successful_phases": {
+    "prepare": 41166231424,
+    "root_policies": 41166392969,
+    "firmware": 41173083070,
+    "data": 41173083070,
+    "gpu": 41173083070
+  },
+  "full_boot_assembled": false,
+  "new_Data_created": true,
+  "kernel_completed": false,
+  "GPU_completed": true,
+  "iPadOS27_hardware_tested": false,
+  "existing_userdata_replaced_with_27": false,
+  "pending_mac_verification": [
+    "repaired native bootstrap real link",
+    "full arm64e27 kernel and RELEASE reference/prelink",
+    "complete payload assembly"
+  ],
+  "latest_device_operation": "User-requested temporary empty UEFI v4 RAM boot for power-off, no partition flash",
+  "offline_work_continues_without_cloud_dispatch": true,
+  "previous_cloud_count_snapshot": {
     "repository": "INTERINIT/sheng-ipados27-build-20261031",
     "total": 13,
     "success": 3,
@@ -8,25 +30,8 @@
     "cancelled": 2,
     "active": 0
   },
-  "cloud_dispatch_suspended": true,
-  "public_checks_trigger": "workflow_dispatch only",
-  "successful_phases": {
-    "prepare": 41166231424,
-    "root_policies": 41166392969,
-    "firmware": 41169230896
-  },
-  "full_boot_assembled": false,
-  "new_Data_created": false,
-  "kernel_completed": false,
-  "GPU_completed": false,
-  "iPadOS27_hardware_tested": false,
-  "existing_userdata_replaced_with_27": false,
-  "pending_mac_verification": [
-    "read-only Data mount compatibility correction",
-    "monotonic GPU watchdog correction",
-    "native bootstrap, full kernel and prelink",
-    "complete payload assembly"
-  ],
-  "latest_device_operation": "User-requested temporary empty UEFI v4 RAM boot for power-off, no partition flash",
-  "offline_work_continues_without_cloud_dispatch": true
+  "latest_combined_run": 41173083070,
+  "latest_combined_run_conclusion": "failure",
+  "GPU_hardware_tested": false,
+  "Windows_local_build": "official Linux toolchain exists; current arm64e27 recipe and this Windows WSL environment are not ready"
 }

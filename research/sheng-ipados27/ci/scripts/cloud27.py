@@ -313,7 +313,7 @@ def complete_package(ctx):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("stage", choices=("prepare", "policies", "data", "bootstrap", "kernel", "gpu", "firmware", "package"))
+    parser.add_argument("stage", choices=("prepare", "policies", "data", "bootstrap", "kernel", "gpu", "firmware", "package", "package-reuse"))
     args = parser.parse_args()
     os.environ["NOBOOT"] = "1"
     ctx = prepare()
@@ -329,6 +329,8 @@ def main():
         helper("firmware_stage27").run(MAIN, DEVICE, RESULT, ROOT, ctx=ctx)
     elif args.stage == "package":
         complete_package(ctx)
+    elif args.stage == "package-reuse":
+        helper("resume_package27").run(sys.modules[__name__], ctx)
     print("PASS: requested host phase completed; no hardware operation.", flush=True)
 
 

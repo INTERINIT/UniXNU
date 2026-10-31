@@ -117,6 +117,14 @@ def bootstrap_recipe(ctx):
     return specs, recipe
 
 
+def storage_adapter():
+    path = Path(__file__).with_name("source_storage27.py")
+    spec = importlib.util.spec_from_file_location("target27_source_storage", path)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
 def native_bootstrap(ctx, modules, output):
     """Real source kernel for the source-driver export audit, without display/GPU."""
     from unixnu import kernel
@@ -126,12 +134,16 @@ def native_bootstrap(ctx, modules, output):
         ctx.config["XNU_NATIVE_ADRENO"] = False
         ctx.config["XNU_BOOT_PROGRESS"] = False
         ctx.component_specs, ctx.board["kernel"]["archives"] = bootstrap_recipe(ctx)
-        kernel.build(ctx, modules)
+        adapter = storage_adapter()
+        adapter.apply(ctx.tree, output)
+        with adapter.export_bootstrap_mode():
+            kernel.build(ctx, modules)
+        storage = adapter.verify_archive_sources(ctx.tree, bootstrap=True)
         native = ctx.tree / "build/xnu/ios-obj/DEVELOPMENT_ARM64_BCM2837/mach.development.bcm2837.unstripped.noctf"
         if not native.is_file():
             raise ValueError("Native bootstrap produced no real Mach-O")
         shutil.copy2(native, output / "native-bootstrap.macho")
-        (output / "native-bootstrap.json").write_text(json.dumps({"sha256": sha(native), "purpose": "source-driver export audit only", "hardware_tested": False}, indent=2))
+        (output / "native-bootstrap.json").write_text(json.dumps({"sha256": sha(native), "purpose": "source-driver export audit only", "source_storage": storage, "hardware_tested": False}, indent=2))
     finally:
         ctx.config, ctx.component_specs, ctx.board["kernel"]["archives"] = config, specs, recipe
 
@@ -212,8 +224,12 @@ def symbols(path):
 
 def full_kernel(device, ctx, modules):
     from unixnu import kernel
+    adapter = storage_adapter()
+    adapter.require_normal_mode()
+    adapter.apply(ctx.tree)
     for iteration in range(3):
         kernel.build(ctx, modules)
+        adapter.verify_archive_sources(ctx.tree, bootstrap=False)
         kernel.prelink(ctx)
         # Measure the same native image the profile passed to emit_prelink.
         native = ctx.tree / ctx.board["kernel"]["prelink"]["kernel"]

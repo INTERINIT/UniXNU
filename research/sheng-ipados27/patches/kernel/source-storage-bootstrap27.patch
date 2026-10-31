@@ -1,0 +1,20 @@
+--- a/scripts/build-sheng-source-storage.py
++++ b/scripts/build-sheng-source-storage.py
+@@ -186,7 +186,16 @@
+         # iPadOS 17; the kernel runs it after the Data mount.
+         sources.append(device_source('BootWatchdogPolicy.c'))
+         # The diagnostic file export (sheng-diag-export): the unified log, crash reports and a screenshot, read through the VFS.
+-        sources.append(device_source('BootDiagExport.c'))
++        # This optional exporter reads GPU/display/input rings absent from the
++        # source-kernel export bootstrap. Normal builds retain the original TU.
++        export_bootstrap = os.environ.get('UNIXNU_SHENG_EXPORT_BOOTSTRAP', '0')
++        if export_bootstrap not in ('0', '1'):
++            parser.error('UNIXNU_SHENG_EXPORT_BOOTSTRAP must be 0 or 1')
++        if export_bootstrap == '1' and (os.environ.get('XNU_NATIVE_LEGACY_DISPLAY') != '0' or
++                                        os.environ.get('XNU_NATIVE_ADRENO') != '0'):
++            parser.error('The export bootstrap requires Legacy display and Adreno explicitly disabled')
++        if export_bootstrap != '1':
++            sources.append(device_source('BootDiagExport.c'))
+     objects, inputs = [], {}
+     objcopy = shutil.which('llvm-objcopy') or '/opt/homebrew/opt/llvm/bin/llvm-objcopy'
+     for source in sources:
