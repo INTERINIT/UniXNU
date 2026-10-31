@@ -12,8 +12,8 @@
     "blue",
     "magenta"
   ],
-  "highest_confirmed_checkpoint": "XNU entry executed and reached the point before SCTLR_EL1/MMU enable",
-  "MMU_enabled_confirmed": false,
+  "highest_confirmed_checkpoint": "Security extension loading: sandbox entered its rd boot-argument parse; missing import triggered a visible panic",
+  "MMU_enabled_confirmed": true,
   "full_iPadOS_boot_confirmed": false,
   "GPU_execution_confirmed": false,
   "CPU_and_GPU_boot_arguments_unchanged": true,
@@ -21,7 +21,25 @@
   "userdata_reflashed_by_agent": false,
   "Data_reset_requested": false,
   "new_Actions_dispatched": false,
-  "next_diagnostic": "Preserve original MSR/ISB adjacency; timed PSCI reset6 seconds after MMU enable",
+  "next_diagnostic": "Bind the reviewed PE_parse_boot_arg_str import and retry RAM boot with the visible panic renderer",
   "photo_sha256": "62cb8c259be6e7af93d2ca0cc6e5e02f3248008d87f806b181cb5e10a93a224c",
-  "updated_utc": "2026-10-31T09:48:46.724633+00:00"
+  "updated_utc": "2026-10-31T10:08:33.405132+00:00",
+  "arm_vm_init_return_confirmed": true,
+  "additional_boots": [
+    {
+      "boot_sha256": "04f50533da206eb509f3588c41aa67d68bb42e2a260620be820daff97dea0410",
+      "checkpoint": "after MMU enable",
+      "user_observed": "auto reset after approximately6 seconds"
+    },
+    {
+      "boot_sha256": "f6806bf9c168c689a425dc2169b4dedf2fd283f14ab9d992f458098535b1f508",
+      "checkpoint": "after arm_vm_init return",
+      "user_observed": "auto reset after approximately6 seconds"
+    },
+    {
+      "boot_sha256": "b33856ddb8b789bc7339358d3e495be54da9c32308262d87e468126a403071cb",
+      "checkpoint": "visible panic, no timed reset",
+      "user_observed": "fileset unmapped function panic from sandbox"
+    }
+  ]
 }

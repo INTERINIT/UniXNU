@@ -27,8 +27,14 @@ the package is undergoing manual hardware diagnosis.
 The first hardware test on 2026-10-31 reached the green loader handoff bar and
 stopped with the firmware menu still visible. A RAM-only diagnostic kernel
 then produced the blue entry and magenta pre-MMU bars. This confirms native
-kernel entry, but does not confirm MMU enable or OS startup. Root media and
-Data were not rewritten during diagnostics. See
+kernel entry. Two timed reset checkpoints subsequently confirmed MMU enable
+and return from `arm_vm_init`. A visible panic renderer then identified a
+missing sandbox boot-argument import. Binding it to the real
+`PE_parse_boot_arg_str` moved hardware startup into IOKit service matching,
+where an IOCPU virtual import was the next reported gap. The reviewed IOCPU
+get/set/serialization identities are recorded alongside the sandbox fix.
+Full OS startup is still unconfirmed. Root media and Data were not reflashed
+during diagnostics. See
 `evidence/hardware-entry-20261031.json`.
 
 `scripts/build_entry_diagnostic27.py` builds these diagnostics locally with
@@ -39,6 +45,14 @@ timed reset checkpoint after MMU enable; the default only draws the two bars.
 The generated directory provides `Boot.cmd` and no flash launcher. Select the
 first normal system entry; the original payload's First install entry is still
 present and must not be selected for diagnostics.
+
+`--panic-screen --uefi <Mu-Silicium>` adds the visible panic renderer.
+`--bindings patches/prelink/diagnostic-bindings-41186106830.json` rebinds the
+reviewed imports in the exact original candidate while preserving each chain's
+authentication metadata. The corresponding source-backed records in
+`patches/prelink/fileset-24A446-runtime-symbols.json` are also copied into the
+resolved prelink fixtures for future cloud builds. No cloud retry is required
+to test these local RAM-only candidates.
 
 ## Source baseline
 

@@ -1,0 +1,36 @@
+{
+  "inputs": {
+    "kernelcache_sha256": "38e6d9fa5f789b8228f4617ef4c6d2a3fd8ab564abdc9b62920f1db53fc1780a",
+    "entry": "com.apple.kernel"
+  },
+  "functions": [
+    {
+      "original": "0xfffffe000b55a1e4",
+      "original_size": 36,
+      "original_sha256": "9bdee17cc648fb23edf1766101a36d4ded2746cd5b918c6ece6f798f63bb79ac",
+      "native_symbol": "_PE_parse_boot_arg_str",
+      "evidence": "Runtime sandbox initialization calls this import with name rd, a stack buffer and length16. The original wrapper forwards name/buffer/length to PE_parse_boot_argn_internal using BootArgs.CommandLine+0x6c and string mode TRUE (w4=1), matching pinned Apple pexpert/gen/bootargs.c PE_parse_boot_arg_str. Its tail target is already paired to that internal parser. The native board wrapper preserves the interface and adds PE_builtin_boot_args fallback, explaining its different shape. Hardware panic and exact chain evidence: sandbox-bootarg-binding-20261031.json."
+    },
+    {
+      "original": "0xfffffe000b4c8900",
+      "original_size": 20,
+      "original_sha256": "be7d2eae4436664bfb86f084e059835f106e9aba9ecf4bc9c2222598e279bfeb",
+      "native_symbol": "__ZNK5IOCPU11getPropertyEPK8OSSymbol",
+      "evidence": "Paired original and native IOCPU vtables identify the same virtual method slot; pinned Apple iokit/Kernel/IOCPU.cpp defines its ABI. Original get/set wrappers null-check and tail-call the already identified IORegistryEntry implementation; serializeProperties copies/serializes the property dictionary. The native methods preserve CPU-state behavior. See iocpu-property-bindings-20261031.json; runtime getProperty call at IORegistryEntry::init+0x1cc hit the retained AppleARMPlatform vtable slot with discriminator0x82eb."
+    },
+    {
+      "original": "0xfffffe000b4c8914",
+      "original_size": 20,
+      "original_sha256": "b819b50321598c5226a8e478e1739c4d8459ede75902e2efd490fadf8de2cdf7",
+      "native_symbol": "__ZN5IOCPU11setPropertyEPK8OSSymbolP8OSObject",
+      "evidence": "Paired original and native IOCPU vtables identify the same virtual method slot; pinned Apple iokit/Kernel/IOCPU.cpp defines its ABI. Original get/set wrappers null-check and tail-call the already identified IORegistryEntry implementation; serializeProperties copies/serializes the property dictionary. The native methods preserve CPU-state behavior. See iocpu-property-bindings-20261031.json; runtime getProperty call at IORegistryEntry::init+0x1cc hit the retained AppleARMPlatform vtable slot with discriminator0x82eb."
+    },
+    {
+      "original": "0xfffffe000b4c8844",
+      "original_size": 188,
+      "original_sha256": "49d1e76b881dd6b4adb868582b7836f8d691c36aff50461032833a3169db2e2c",
+      "native_symbol": "__ZNK5IOCPU19serializePropertiesEP11OSSerialize",
+      "evidence": "Paired original and native IOCPU vtables identify the same virtual method slot; pinned Apple iokit/Kernel/IOCPU.cpp defines its ABI. Original get/set wrappers null-check and tail-call the already identified IORegistryEntry implementation; serializeProperties copies/serializes the property dictionary. The native methods preserve CPU-state behavior. See iocpu-property-bindings-20261031.json; runtime getProperty call at IORegistryEntry::init+0x1cc hit the retained AppleARMPlatform vtable slot with discriminator0x82eb."
+    }
+  ]
+}

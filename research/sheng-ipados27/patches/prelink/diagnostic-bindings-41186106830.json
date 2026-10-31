@@ -1,0 +1,37 @@
+{
+  "kernel_sha256": "e23c8972975f31d0b4890fe42828ee9fd30395d8d6a0eabbaaea0178a26fd786",
+  "bindings": [
+    {
+      "site": "0xfffffff00848d098",
+      "expected_word": "0x8011000004699a64",
+      "expected_target_symbol": "_unixnu_fileset_unmapped",
+      "native_symbol": "_PE_parse_boot_arg_str",
+      "reviewed_original": "0xfffffe000b55a1e4",
+      "evidence": "sandbox-bootarg-binding-20261031.json"
+    },
+    {
+      "site": "0xfffffff007f6d580",
+      "expected_word": "0x801182eb04699a64",
+      "expected_target_symbol": "_unixnu_fileset_unmapped",
+      "native_symbol": "__ZNK5IOCPU11getPropertyEPK8OSSymbol",
+      "reviewed_original": "0xfffffe000b4c8900",
+      "evidence": "iocpu-property-bindings-20261031.json"
+    },
+    {
+      "site": "0xfffffff007f6d530",
+      "expected_word": "0x8011457804699a64",
+      "expected_target_symbol": "_unixnu_fileset_unmapped",
+      "native_symbol": "__ZN5IOCPU11setPropertyEPK8OSSymbolP8OSObject",
+      "reviewed_original": "0xfffffe000b4c8914",
+      "evidence": "iocpu-property-bindings-20261031.json"
+    },
+    {
+      "site": "0xfffffff007f6d5d0",
+      "expected_word": "0x801100d704699a64",
+      "expected_target_symbol": "_unixnu_fileset_unmapped",
+      "native_symbol": "__ZNK5IOCPU19serializePropertiesEP11OSSerialize",
+      "reviewed_original": "0xfffffe000b4c8844",
+      "evidence": "iocpu-property-bindings-20261031.json"
+    }
+  ]
+}

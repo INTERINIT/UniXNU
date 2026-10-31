@@ -256,6 +256,8 @@ def symbols(path):
 
 def full_kernel(device, ctx, modules):
     from unixnu import kernel
+    reviewed = Path(__file__).resolve().parents[2] / "patches/prelink/fileset-24A446-runtime-symbols.json"
+    shutil.copy2(reviewed, ctx.tree / "kits/XnuPrelink/fixtures" / reviewed.name)
     adapter = storage_adapter()
     adapter.require_normal_mode()
     adapter.apply(ctx.tree)

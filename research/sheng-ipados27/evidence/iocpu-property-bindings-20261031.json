@@ -1,0 +1,125 @@
+{
+  "kind": "source-backed-iocpu-virtual-function-identities",
+  "inputs": {
+    "kernelcache_sha256": "38e6d9fa5f789b8228f4617ef4c6d2a3fd8ab564abdc9b62920f1db53fc1780a",
+    "entry": "com.apple.kernel"
+  },
+  "evidence_candidate_sha256": "e23c8972975f31d0b4890fe42828ee9fd30395d8d6a0eabbaaea0178a26fd786",
+  "current_candidate_difference": "The sandbox PE_parse_boot_arg_str import was corrected; the IOCPU imports still pointed to the diagnostic panic stub.",
+  "runtime_observation": {
+    "photo": "codex-clipboard-f64e2bea-1b30-401f-9d08-49a951662aa0.jpg",
+    "panic_return": "0xfffffff00b4281d0",
+    "native_caller": "IORegistryEntry::init(OSDictionary*) + 0x1cc",
+    "callsite": "0xfffffff00b4281cc",
+    "dispatch": "BLRAA x8, x16 after loading vtable address-point + 0x108",
+    "source_call": "getProperty(gIONameKey) in IORegistryEntry::init under IOREGSPLITTABLES",
+    "source_url": "https://github.com/apple-oss-distributions/xnu/blob/ac9718fb1af618d5ce8678d0dc6e8a58f252216f/iokit/Kernel/IORegistryEntry.cpp#L335"
+  },
+  "vtable_identity": {
+    "symbol": "__ZTV5IOCPU",
+    "original": "0xfffffe0007ed0500",
+    "actual_final_native": "0xfffffff007e59958",
+    "existing_map": {
+      "native": "0xfffffff007279958",
+      "name": "__ZTV5IOCPU",
+      "how": "reference-data",
+      "sections": [
+        "__DATA_CONST,__const",
+        "__DATA_CONST,__const"
+      ]
+    },
+    "itanium_address_point_bytes": 16
+  },
+  "functions": [
+    {
+      "original": "0xfffffe000b4c8914",
+      "original_size": 20,
+      "original_sha256": "b819b50321598c5226a8e478e1739c4d8459ede75902e2efd490fadf8de2cdf7",
+      "native_symbol": "__ZN5IOCPU11setPropertyEPK8OSSymbolP8OSObject",
+      "evidence": "Original mapped IOCPU vtable address point + 0xb8 and the actual native IOCPU vtable same slot identify this override, not an adjacent-address guess. Fixed Apple XNU IOCPU.cpp line 459 declares the same ABI. Runtime observed getter invocation is identified separately.",
+      "abi": "bool IOCPU::setProperty(const OSSymbol *aKey, OSObject *anObject)",
+      "original_machine_code_hex": "5f2403d5410000b4fe18fe1700008052c0035fd6",
+      "original_vtable_slot": "0xfffffe0007ed05c8",
+      "native_vtable_slot": "0xfffffff007e59a20",
+      "address_point_offset": "0xb8",
+      "vtable_symbol_offset": "0xc8",
+      "original_chain_word": "0x80114578044c4914",
+      "native_chain_word": "0x8011457804490cac",
+      "actual_final_native_target": "0xfffffff00b494cac",
+      "source_line": 459,
+      "source_url": "https://github.com/apple-oss-distributions/xnu/blob/ac9718fb1af618d5ce8678d0dc6e8a58f252216f/iokit/Kernel/IOCPU.cpp#L459",
+      "runtime_getter_dispatch_observed": false,
+      "non_null_tail_target": "0xfffffe000b44ed14",
+      "existing_tail_target_mapping": {
+        "native": "0xfffffff007afe478",
+        "name": "__ZN15IORegistryEntry11setPropertyEPK8OSSymbolP8OSObject",
+        "addend": 0,
+        "how": "reference-order"
+      },
+      "original_null_argument_returns_zero": true
+    },
+    {
+      "original": "0xfffffe000b4c8900",
+      "original_size": 20,
+      "original_sha256": "be7d2eae4436664bfb86f084e059835f106e9aba9ecf4bc9c2222598e279bfeb",
+      "native_symbol": "__ZNK5IOCPU11getPropertyEPK8OSSymbol",
+      "evidence": "Original mapped IOCPU vtable address point + 0x108 and the actual native IOCPU vtable same slot identify this override, not an adjacent-address guess. Fixed Apple XNU IOCPU.cpp line 447 declares the same ABI. Runtime observed getter invocation is identified separately.",
+      "abi": "OSObject *IOCPU::getProperty(const OSSymbol *aKey) const",
+      "original_machine_code_hex": "5f2403d5410000b41517fe17000080d2c0035fd6",
+      "original_vtable_slot": "0xfffffe0007ed0618",
+      "native_vtable_slot": "0xfffffff007e59a70",
+      "address_point_offset": "0x108",
+      "vtable_symbol_offset": "0x118",
+      "original_chain_word": "0x801182eb044c4900",
+      "native_chain_word": "0x801182eb04490c68",
+      "actual_final_native_target": "0xfffffff00b494c68",
+      "source_line": 447,
+      "source_url": "https://github.com/apple-oss-distributions/xnu/blob/ac9718fb1af618d5ce8678d0dc6e8a58f252216f/iokit/Kernel/IOCPU.cpp#L447",
+      "runtime_getter_dispatch_observed": true,
+      "non_null_tail_target": "0xfffffe000b44e55c",
+      "existing_tail_target_mapping": {
+        "native": "0xfffffff007afe394",
+        "name": "__ZNK15IORegistryEntry11getPropertyEPK8OSSymbol",
+        "addend": 0,
+        "how": "reference-order"
+      },
+      "original_null_argument_returns_zero": true
+    },
+    {
+      "original": "0xfffffe000b4c8844",
+      "original_size": 188,
+      "original_sha256": "49d1e76b881dd6b4adb868582b7836f8d691c36aff50461032833a3169db2e2c",
+      "native_symbol": "__ZNK5IOCPU19serializePropertiesEP11OSSerialize",
+      "evidence": "Original mapped IOCPU vtable address point + 0x158 and the actual native IOCPU vtable same slot identify this override, not an adjacent-address guess. Fixed Apple XNU IOCPU.cpp line 469 declares the same ABI. Runtime observed getter invocation is identified separately.",
+      "abi": "bool IOCPU::serializeProperties(OSSerialize *serialize) const",
+      "original_machine_code_hex": "7f2303d5f44fbea9fd7b01a9fd430091f30301aa100040f9f10300aa31b4f9f2301ac1da112a80d21002118b080240f9500ceaf210093fd7c00300b4100040f9f10300aa31b4f9f2301ac1da080e4ff8f40300aa010080d2020080d2d0b3f1f210093fd7900240f9f10314aa31b4f9f2301ac1da080e43f8e00314aae10313aa3035f1f210093fd7f30300aa900240f9f10314aa31b4f9f2301ac1da088e42f8e00314aaf050e7f210093fd7e00313aafd7b41a9f44fc2a8ff0f5fd6",
+      "original_vtable_slot": "0xfffffe0007ed0668",
+      "native_vtable_slot": "0xfffffff007e59ac0",
+      "address_point_offset": "0x158",
+      "vtable_symbol_offset": "0x168",
+      "original_chain_word": "0x801100d7044c4844",
+      "native_chain_word": "0x801100d704490ce0",
+      "actual_final_native_target": "0xfffffff00b494ce0",
+      "source_line": 469,
+      "source_url": "https://github.com/apple-oss-distributions/xnu/blob/ac9718fb1af618d5ce8678d0dc6e8a58f252216f/iokit/Kernel/IOCPU.cpp#L469",
+      "runtime_getter_dispatch_observed": false
+    }
+  ],
+  "important_distinction": "These are setProperty(OSSymbol*,OSObject*), getProperty(OSSymbol*) const and serializeProperties(OSSerialize*) const, not three getProperty overloads. IOCPU slot 0x110/0x118 use already-paired parent IORegistryEntry getters.",
+  "source_pin": "ac9718fb1af618d5ce8678d0dc6e8a58f252216f",
+  "source_file": "iokit/Kernel/IOCPU.cpp",
+  "source_git_blob": "278be1390171966f7aa42bec1182c1ffb8697fd7",
+  "source_behavior_note": "The native source preserves IOCPU-state handling while original getter/setter are shorter null-check plus parent-tail wrappers. The named virtual interfaces are the same; this report does not claim identical machine-code bodies or successful boot after replacement.",
+  "code_modified": false,
+  "artifact_modified": false,
+  "fixture_applied": false,
+  "patched_functions_hardware_tested": false,
+  "device_operations": false,
+  "runtime_candidate_kernel_sha256": "2fdf43e478edb2d163657ee8dad13aa660c59cbe3bbfa9a3a30446892a705366",
+  "local_candidate": {
+    "boot_sha256": "b6b3539d1e57afb2ac6e07f074c4aa382ff28ab3359008f66b9b7c4639619053",
+    "three_reviewed_bindings_applied": true,
+    "PAC_and_chain_metadata_preserved": true,
+    "hardware_tested": false
+  }
+}

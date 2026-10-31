@@ -1,0 +1,109 @@
+{
+  "kind": "runtime-observed-source-backed-symbol-binding-evidence",
+  "kernelcache_sha256": "38e6d9fa5f789b8228f4617ef4c6d2a3fd8ab564abdc9b62920f1db53fc1780a",
+  "entry": "com.apple.kernel",
+  "candidate_sha256_before_diagnostic": "e23c8972975f31d0b4890fe42828ee9fd30395d8d6a0eabbaaea0178a26fd786",
+  "runtime_observation": {
+    "photo": "IMG_20261031_175944..jpg",
+    "panic": "fileset: original component called an unmapped kernel function",
+    "return_address": "0xfffffff00aa5a14c",
+    "x0": "0xfffffff007d67397",
+    "x0_actual_image_string": "rd",
+    "consumer": "com.apple.security.sandbox",
+    "callsite": "0xfffffff00aa5a148",
+    "import_veneer": "0xfffffff00aa805a4",
+    "call_setup": "x1 = sp + 0x70; w2 = 0x10; x0 points to rd string",
+    "x1": "stack buffer per verified caller instructions; photo digits not used to establish binding",
+    "photo_sha256": "46161c9c7717a40f0ad6090b300c3ccc6e31f744f17ea1de48e34d78bcf4973c"
+  },
+  "original_function": {
+    "address": "0xfffffe000b55a1e4",
+    "bytes": 36,
+    "sha256": "9bdee17cc648fb23edf1766101a36d4ded2746cd5b918c6ece6f798f63bb79ac",
+    "machine_code_hex": "5f2403d5e30302aae20301aae10300aa684dfed0088142f900b101912400805242feff17",
+    "tail_call_target": "0xfffffe000b559b0c",
+    "tail_target_existing_mapping": {
+      "native": "0xfffffff007bf1634",
+      "name": "_PE_parse_boot_argn_internal",
+      "addend": 0,
+      "how": "reference-order"
+    },
+    "observed_semantics": "BTI C; moves x2/x1/x0 to x3/x2/x1; obtains BootArgs command line at +0x6c; sets w4=1; tail branches to PE_parse_boot_argn_internal"
+  },
+  "legitimate_binding": {
+    "native_symbol": "_PE_parse_boot_arg_str",
+    "actual_final_native_address": "0xfffffff00b51da90",
+    "public_abi": "boolean_t PE_parse_boot_arg_str(const char *arg_string, char *arg_ptr, int strlen)",
+    "string_mode_argument": true,
+    "numeric_wrapper_is_distinct_symbol": "_PE_parse_boot_argn",
+    "native_wrapper_bytes": 136,
+    "original_wrapper_bytes": 36,
+    "reason_shape_can_differ": "The board patch adds a fallback to PE_builtin_boot_args, retaining the same external interface."
+  },
+  "primary_source": {
+    "xnu_pin": "ac9718fb1af618d5ce8678d0dc6e8a58f252216f",
+    "path": "pexpert/gen/bootargs.c",
+    "declaration_line": 212,
+    "call_line": 217,
+    "url": "https://github.com/apple-oss-distributions/xnu/blob/ac9718fb1af618d5ce8678d0dc6e8a58f252216f/pexpert/gen/bootargs.c#L212",
+    "exact_body": "return PE_parse_boot_argn_internal(PE_boot_args(), arg_string, arg_ptr, strlen, TRUE);"
+  },
+  "board_source_extension": {
+    "device_pin": "f47b27ad97e97bee945f8af34a8430e3abcf918c",
+    "patch": "patches/xnu-12377/zzzz-sheng-ipados27-bringup.patch",
+    "patch_lines": "1975-1981",
+    "behavior": "Returns command-line string parse success OR the same string parse against PE_builtin_boot_args. Does not change the signature."
+  },
+  "actual_chain_slot": {
+    "output_address": "0xfffffff00848d098",
+    "original_address": "0xfffffe000848d098",
+    "original_target": "0xfffffe000b55a1e4",
+    "current_emitted_target": "0xfffffff00b69da64",
+    "current_target_symbol": "_unixnu_fileset_unmapped",
+    "original_word": "0x80110000045561e4",
+    "emitted_word": "0x8011000004699a64",
+    "original_chain_decode": [
+      72704484,
+      1,
+      0,
+      0,
+      1,
+      2
+    ],
+    "emitted_chain_decode": [
+      74029668,
+      1,
+      0,
+      0,
+      1,
+      2
+    ],
+    "intended_target_symbol": "_PE_parse_boot_arg_str",
+    "intended_final_target": "0xfffffff00b51da90"
+  },
+  "status": {
+    "symbol_identity_supported_by_runtime_and_source": true,
+    "code_or_mapping_modified": false,
+    "artifact_modified": false,
+    "patched_candidate_booted": false,
+    "cloud_build_started": false,
+    "device_operations": false
+  },
+  "followup": "A reviewed function fixture can pin the original 36-byte digest and bind the real native symbol. A local diagnostic fix must preserve chained-fixup authentication/next fields and the source-provider POST seal; it must not replace the function with a stub or change the parser result.",
+  "local_fix": {
+    "site": "0xfffffff00848d098",
+    "old_word": "0x8011000004699a64",
+    "new_word": "0x8011000004519a90",
+    "PAC_and_chain_metadata_preserved": true,
+    "target_symbol": "_PE_parse_boot_arg_str",
+    "candidate_boot_sha256": "5a4d4bcfcc4f9f46b059d04cecb932b8afa93efd08dfbd9c1813fe05b6cc758b",
+    "candidate_hardware_tested": true,
+    "original_package_unchanged": true,
+    "userdata_reflashed": false,
+    "new_Actions_dispatched": false,
+    "host_RAM_boot_accepted": true,
+    "previous_sandbox_rd_panic_crossed": true,
+    "next_panic_caller": "0xfffffff00b4281d0",
+    "next_panic_symbol": "IORegistryEntry::init(OSDictionary*) +0x1cc, virtual call through vtable slot0x108"
+  }
+}
