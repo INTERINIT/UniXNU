@@ -13,6 +13,7 @@
 #include <Library/UefiBootServicesTableLib.h>
 #include <Protocol/BlockIo.h>
 #include <Protocol/DevicePath.h>
+#include "FatWindow.h"
 
 // Mu-Silicium SEC stores the incoming x0 value in this HOB as a UINT64.
 STATIC CONST EFI_GUID mEntryArgHobGuid = {
@@ -143,6 +144,7 @@ PublishInitrd (
   UINT64      Start;
   UINT64      End;
   EFI_HANDLE  Handle;
+  FAT_WINDOW  Window;
 
   Chosen = FdtPathOffset (Fdt, "/chosen");
   if (Chosen < 0) {
@@ -161,11 +163,15 @@ PublishInitrd (
 
   Start = ReadCells (StartProp, StartLength / 4);
   End   = ReadCells (EndProp, EndLength / 4);
-  if ((End <= Start) || (((End - Start) % RAM_BLOCK_SIZE) != 0)) {
-    DEBUG ((DEBUG_ERROR, "UNIXNURAMDISK: initrd 0x%lx-0x%lx is not a whole number of sectors\n", Start, End));
+  DEBUG ((DEBUG_ERROR, "UNIXNURAMDISK: incoming span 0x%lx-0x%lx bytes 0x%lx\n", Start, End, End - Start));
+  if ((End <= Start) || !FatFindWindow ((CONST UINT8 *)(UINTN)Start, End - Start, &Window)) {
+    DEBUG ((DEBUG_ERROR, "UNIXNURAMDISK: no validated FAT volume in the bounded initrd search\n"));
     return;
   }
 
+  DEBUG ((DEBUG_ERROR, "UNIXNURAMDISK: FAT offset 0x%lx bytes 0x%lx\n", Window.Offset, Window.Bytes));
+  Start += Window.Offset;
+  End = Start + Window.Bytes;
   mRamBase                = (UINT8 *)(UINTN)Start;
   mMedia.MediaId          = 1;
   mMedia.RemovableMedia   = FALSE;
