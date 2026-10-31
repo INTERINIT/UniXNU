@@ -228,6 +228,11 @@ panic 屏幕把格式化后的 panic 消息和寄存器写到 framebuffer，并�
 
 配置修改未体现在启动镜像中时，按[应用启动参数](/zh/xnu/boot-arguments#apply-arguments)检查。
 
+入口探针支持 `llvm-nm` 的 fileset 成员标题，并使用实际输出的入口和启动符号，
+仍要求指令匹配、待用填充区域为空。品红探针位于最终 SCTLR 赋值指令之前，
+保留原 `MSR SCTLR_EL1` 与 `ISB` 的相邻顺序。交叉链接显式选择 AArch64 ELF，
+Windows 本地构建也使用相同目标。
+
 ### 颜色条
 
 早期启动会在 framebuffer 上画三条 1/16 屏幕高度的色条。正常方向下从上到下：

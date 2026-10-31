@@ -22,7 +22,23 @@ function references redirected to the diagnostic panic fallback. It retains
 `mapping_complete=false`, `allow_missing=true`, `runtime_qualified=false` and
 `loadable=false`; host build success does not establish hardware bootability.
 See `evidence/integrated-run-41186106830.json`. Builds remain manually dispatched;
-the package is waiting for the user's hardware test.
+the package is undergoing manual hardware diagnosis.
+
+The first hardware test on 2026-10-31 reached the green loader handoff bar and
+stopped with the firmware menu still visible. A RAM-only diagnostic kernel
+then produced the blue entry and magenta pre-MMU bars. This confirms native
+kernel entry, but does not confirm MMU enable or OS startup. Root media and
+Data were not rewritten during diagnostics. See
+`evidence/hardware-entry-20261031.json`.
+
+`scripts/build_entry_diagnostic27.py` builds these diagnostics locally with
+LLVM, the existing package and its exact source kernel. It reuses the shared
+entry-probe tool and reseals the source-provider POST HMAC. The source and
+original package stay unchanged. `--post-mmu-reset-delay 6` adds a deliberate
+timed reset checkpoint after MMU enable; the default only draws the two bars.
+The generated directory provides `Boot.cmd` and no flash launcher. Select the
+first normal system entry; the original payload's First install entry is still
+present and must not be selected for diagnostics.
 
 ## Source baseline
 

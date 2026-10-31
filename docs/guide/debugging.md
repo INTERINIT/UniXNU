@@ -229,6 +229,12 @@ The top green bar is drawn by DarwinBoot's `DarwinEnter` after `ExitBootServices
 
 See [applying boot arguments](/xnu/boot-arguments#apply-arguments) when a configuration change is missing from the booted image.
 
+The entry probe accepts `llvm-nm` fileset member headings and uses the emitted
+entry and startup symbols. It still requires matching instructions and empty
+padding. The magenta probe runs before the final SCTLR-value instruction, so
+the original `MSR SCTLR_EL1` and `ISB` remain adjacent. Its cross-link uses the
+AArch64 ELF target explicitly, including on Windows.
+
 ### Color bars
 
 The early boot draws three bands of 1/16 screen height in the frame buffer. In the normal orientation they run from the top:

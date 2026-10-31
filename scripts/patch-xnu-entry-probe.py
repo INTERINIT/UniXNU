@@ -31,6 +31,7 @@ not match. Offsets are specific to the kernel built by build-xnu-4k-baseline.sh.
 """
 import argparse
 import os
+import re
 import shutil
 import struct
 import subprocess
@@ -71,7 +72,7 @@ PAINT = """
 SOURCES = {
     1: ".text\n.global _start\n_start:\n" + PAINT.format(args='x0', band=1, lo='0x00FF', hi='0xFF00') + "  b target\n",
     2: ".text\n.global _start\n_start:\n" + PAINT.format(args='x20', band=2, lo='0x00FF', hi='0xFFFF')
-       + "  msr SCTLR_EL1, x0\n  b target\n",
+       + "  .inst {pre_sctlr_word}\n  b target\n",
     3: """.text
 .global _start
 _start:
@@ -138,9 +139,9 @@ def kernel_symbols(kernel):
     nm = shutil.which('llvm-nm') or '/opt/homebrew/opt/llvm/bin/llvm-nm'
     table = {}
     for line in subprocess.run([nm, '-n', kernel], capture_output=True, text=True, check=True).stdout.splitlines():
-        parts = line.split()
-        if len(parts) == 3:
-            table.setdefault(int(parts[0], 16), parts[2])
+        match = re.fullmatch(r'\s*([0-9a-fA-F]+)\s+[A-Za-z?]\s+(\S+)\s*', line)
+        if match:
+            table.setdefault(int(match[1], 16), match[2])
     return table
 
 
@@ -212,7 +213,7 @@ def assemble_c(source, va, workdir, symbols):
     if int(sizes[1]) or int(sizes[2]):
         # The code runs from the kernel's read-only text: a global would fault on its first store.
         raise SystemExit(f'{source.name} has writable data (data {sizes[1]}, bss {sizes[2]}); use the stack')
-    subprocess.run([lld, '-T', script, '-e', 'panic_screen', obj, '-o', elf], check=True)
+    subprocess.run([lld, '-m', 'aarch64elf', '-T', script, '-e', 'panic_screen', obj, '-o', elf], check=True)
     # Only .text: a plain binary dump would start at the ELF headers kept in front of it.
     subprocess.run([objcopy, '-O', 'binary', '-j', '.text', elf, binary], check=True)
     readelf = shutil.which('llvm-readelf') or '/opt/homebrew/opt/llvm/bin/llvm-readelf'
@@ -348,7 +349,7 @@ def assemble(source, va, symbols, workdir):
     lld = shutil.which('ld.lld') or '/opt/homebrew/opt/llvm/bin/ld.lld'
     objcopy = shutil.which('llvm-objcopy') or '/opt/homebrew/opt/llvm/bin/llvm-objcopy'
     subprocess.run([clang, '--target=aarch64-none-elf', '-c', asm, '-o', obj], check=True)
-    subprocess.run([lld, f'-Ttext={va:#x}', *[f'--defsym={name}={value:#x}' for name, value in symbols.items()], '-e', '_start', obj, '-o', elf], check=True)
+    subprocess.run([lld, '-m', 'aarch64elf', f'-Ttext={va:#x}', *[f'--defsym={name}={value:#x}' for name, value in symbols.items()], '-e', '_start', obj, '-o', elf], check=True)
     subprocess.run([objcopy, '-O', 'binary', elf, binary], check=True)
     return binary.read_bytes()
 
@@ -377,13 +378,19 @@ def main():
     for va, value in expected.items():
         if word(va) != value:
             raise SystemExit(f'{va:#x} holds {word(va):#010x}, expected {value:#010x}: not the kernel these probes are for')
+    # Paint before the final SCTLR-value instruction. Keep the original
+    # MSR SCTLR / ISB adjacent, including across the MMU transition.
+    pre_sctlr = MMU_ENABLE_VA - 4
+    pre_sctlr_word = word(pre_sctlr)
+    if pre_sctlr_word & 0xFFE0001F != 0xF2800000:
+        raise SystemExit('Expected MOVK x0, #imm before the SCTLR/ISB sequence')
     for va in CAVES.values():
         if any(data[file_offset(va):file_offset(va) + CAVE_SIZE]):
             raise SystemExit(f'Padding at {va:#x} is not empty')
 
     # (site, cave stage, symbols the cave is linked with)
     sites = [(ENTRY_VA, 1, {'target': START_FIRST_CPU}),
-             (MMU_ENABLE_VA, 2, {'target': MMU_ENABLE_VA + 4})]
+             (pre_sctlr, 2, {'target': MMU_ENABLE_VA})]
     if args.no_reset:
         description = 'no reset probe'
     elif args.reset_after:
@@ -397,7 +404,7 @@ def main():
 
     with tempfile.TemporaryDirectory() as tmp:
         for site, stage, symbols in sites:
-            source = RESET_BEFORE if (stage == 4 and args.reset_before) else SOURCES[stage].format(ticks=TIMEBASE * args.reset_delay)
+            source = RESET_BEFORE if (stage == 4 and args.reset_before) else SOURCES[stage].format(ticks=TIMEBASE * args.reset_delay, pre_sctlr_word=hex(pre_sctlr_word))
             code = assemble(source, CAVES[stage], symbols, Path(tmp))
             if len(code) > CAVE_SIZE:
                 raise SystemExit(f'Stage {stage} code is too large')

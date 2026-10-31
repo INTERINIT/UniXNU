@@ -1,0 +1,27 @@
+{
+  "date": "2026-10-31",
+  "device": "sheng",
+  "os_build": "24A446",
+  "original_boot_sha256": "a47871a65a672048a7fce50a4a19a6fdafa6ba6220833e3bb52cdc289ea275eb",
+  "original_hardware_result": "UniXNU menu, normal iPadOS entry selected, green handoff bar, frozen menu residue; no visible XNU text",
+  "SecurityLock_message": "Normal UEFI CapsuleRuntimeDxe ExitBootServices callback, not authentication failure",
+  "diagnostic_boot_sha256": "c7e6d1c09c4e459b0f481ba9106b0734186056ddb49e228567c6539f6cb0edf6",
+  "diagnostic_host_ram_boot": "accepted; Sending OKAY, Booting OKAY",
+  "user_observed_bars": [
+    "green",
+    "blue",
+    "magenta"
+  ],
+  "highest_confirmed_checkpoint": "XNU entry executed and reached the point before SCTLR_EL1/MMU enable",
+  "MMU_enabled_confirmed": false,
+  "full_iPadOS_boot_confirmed": false,
+  "GPU_execution_confirmed": false,
+  "CPU_and_GPU_boot_arguments_unchanged": true,
+  "source_POST_HMAC_resealed": true,
+  "userdata_reflashed_by_agent": false,
+  "Data_reset_requested": false,
+  "new_Actions_dispatched": false,
+  "next_diagnostic": "Preserve original MSR/ISB adjacency; timed PSCI reset6 seconds after MMU enable",
+  "photo_sha256": "62cb8c259be6e7af93d2ca0cc6e5e02f3248008d87f806b181cb5e10a93a224c",
+  "updated_utc": "2026-10-31T09:48:46.724633+00:00"
+}
