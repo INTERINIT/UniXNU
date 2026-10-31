@@ -8,6 +8,11 @@ Metal/GPU stack and a new persistent Data volume.
 **No iPadOS 27 boot, GPU rendering or persistent Data has been verified on our
 tablet yet. A complete flashable package has not been produced.**
 
+2026-10-31 checkpoint: cloud retries have stopped, and research checks are now
+manual only. The 27 build runner recorded 3 successful, 8 failed and 2 cancelled
+runs, with none active. Successful phases are input preparation, full root-media
+authentication and the new firmware. See `evidence/checkpoint-20261031.json`.
+
 ## Source baseline
 
 | Input | Revision |

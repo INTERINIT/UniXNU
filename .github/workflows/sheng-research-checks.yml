@@ -42,3 +42,4 @@ jobs:
         run: |
           python research/sheng-ipados27/ci/scripts/test_payload_stage27.py
           python research/sheng-ipados27/scripts/test_flash27.py
+          python research/sheng-ipados27/scripts/test_assemble_package27.py

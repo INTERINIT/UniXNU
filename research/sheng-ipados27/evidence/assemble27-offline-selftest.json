@@ -1,0 +1,31 @@
+{
+  "tests_run": 7,
+  "passed": true,
+  "skipped": 0,
+  "elapsed_seconds": 18.568,
+  "actual_RSA_policy_envelopes_checked": 2,
+  "actual_complete_sparse_SHA256": "dcc41a9467c84b8dcd02b57b1ef0594e86a3593b32acb4b99af13952c7f348a4",
+  "actual_sparse_file_bytes": 15349546184,
+  "actual_window_and_table_ranges_checked": [
+    "OS",
+    "SystemOS",
+    "OS.vroot",
+    "SystemOS.vroot"
+  ],
+  "whole_sparse_SHA256_recomputed": true,
+  "OS_windows_and_policy_tables_rehashed": true,
+  "prior_actual_Mac_C_block_verification_report_bound": true,
+  "per_block_C_verification_repeated": false,
+  "assembler_script_sha256": "3cd94e8fcf42268e4a68673db27b3b87695f6485d1f97308adeea125780b0965",
+  "test_script_sha256": "4456394d69b2d3ef51f5609dfdc73517025ce0321c2c45b0f8fb1b3648f15c81",
+  "check_command": "python scripts/test_assemble_package27.py --real-userdata <EXISTING_SPARSE> --real-report <ORIGINAL_ALL_BLOCKS_REPORT> --real-policies <ACTUAL_C_VERIFIED_POLICIES>",
+  "full_package_success_path_executed": false,
+  "assembled_package_published": false,
+  "Mac_build_executed": false,
+  "original_root_media_mounted": false,
+  "sparse_or_raw_image_rebuilt": false,
+  "external_process_scope": "Actual OpenSSL dgst verification only; all other subprocesses forbidden",
+  "device_operations": false,
+  "hardware_tested": false,
+  "note": "The real-input test checked unchanged full_policies/verify_sparse paths; no real boot27 result was available or fabricated. Later static metadata guards add image nested-receipt and output-link checks."
+}
