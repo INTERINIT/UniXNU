@@ -1,0 +1,13 @@
+{
+  "tests_run": 14,
+  "passed": true,
+  "skipped": 0,
+  "flash_script_sha256": "1c1c5686280cf655c644746585dec6b52935635e662177e43ccc5fa608368f41",
+  "test_script_sha256": "0b9dfe69c149aa6de28991888fe4445b30da705ee7ce74e248406dd8fce5a11e",
+  "actual_userdata_sparse_parser_checked": true,
+  "actual_userdata_whole_file_SHA256_recomputed": false,
+  "all_external_subprocesses_forbidden": true,
+  "install_and_boot_tests_are_in_memory_simulations_only": true,
+  "device_operations": false,
+  "hardware_tested": false
+}

@@ -42,3 +42,7 @@ jobs:
         run: |
           python research/sheng-ipados27/ci/scripts/firmware_stage27.py --self-test
           python research/sheng-ipados27/ci/scripts/test_target27_gpu.py
+      - name: Payload pairing and offline deployment guards
+        run: |
+          python research/sheng-ipados27/ci/scripts/test_payload_stage27.py
+          python research/sheng-ipados27/scripts/test_flash27.py

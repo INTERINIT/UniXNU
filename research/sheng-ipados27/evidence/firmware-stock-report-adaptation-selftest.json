@@ -1,0 +1,13 @@
+{
+  "upstream_checker_sha256": "f2ef7ac8500e42944ccfd56d8022af1745a974e4f62b944699e2597f0726e4bb",
+  "real_upstream_checker_used": true,
+  "all_statements_before_report_only_stock_read_identical": true,
+  "all_other_functions_identical": true,
+  "missing_stock_header_is_null": true,
+  "no_stock_image_generated_or_substituted": true,
+  "upstream_device_script_unchanged": true,
+  "python_syntax_valid": true,
+  "actual_Mac_FD_or_QEMU_execution_performed": false,
+  "device_operations": false,
+  "hardware_tested": false
+}

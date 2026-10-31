@@ -41,8 +41,10 @@ must not be substituted for the 27 bindings.
   passed real C/RSA signature and every-4K-block authentication on macOS.
 - SoC overlay: affected Apple `start.s` and `bsd_init.c` patch contexts checked
   in arch/SoC/OS/device order. This is not a complete kernel build result.
-- Host prepare and policy phases passed in the private build runner. Source
-  kernel, GPU and firmware compilation remain separate checkpoints.
+- Host prepare and policy phases passed in the private build runner. The new
+  firmware subsequently passed package/FD compilation, FV checks, both real
+  BootShim QEMU cases, and official empty-container round-trip checks. Source
+  kernel, GPU and complete boot assembly remain separate checkpoints.
 - Small userdata transport tests passed real RSA verification, v2 layout,
   zero-fill, tamper and truncation controls. They do not qualify Apple images
   or hardware boot.
@@ -82,8 +84,8 @@ python3 research/sheng-ipados27/scripts/build_userdata27_windows.py --self-test
 ```
 
 The macOS orchestration requires Xcode 26.6, pinned sources, genuine Apple root
-media, vendor firmware, and real policy/ABI checks. See the build scripts and
-evidence for current gaps. Do not run the upstream `cycle27.sh` against a
+media, vendor firmware, and real policy/ABI checks. Use scripts/dispatch27.ps1 to resolve a published full source SHA before
+dispatching a host stage. See the build scripts and evidence for current gaps. Do not run the upstream `cycle27.sh` against a
 connected device: it contains an author's hardware-run sequence. Our build
 orchestration never invokes device commands.
 

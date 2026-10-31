@@ -1,0 +1,21 @@
+{
+  "source_pins": {
+    "MAIN_PIN": "793d6bddf7ea90678e3a61e2b2bd4350e5fdce16",
+    "DEVICE_PIN": "f47b27ad97e97bee945f8af34a8430e3abcf918c",
+    "DARWIN_PIN": "3e3a8a969e1177995984d8ed98c9dcc44e318265",
+    "UEFI_PIN": "20ac23d5e0937106c2129303dfc931b3390ae660",
+    "PROFILE": "ipados-27.0.1-24A446"
+  },
+  "draft_sha256": "d9cf8f6db148ce222715036bff3eb3890f8aa89b68ec7bd229005524f412782d",
+  "fd_sha256": "588b1d57c878883cbe80847dc382c4464a465650c490419ec1c950291865e1e1",
+  "fd_bytes": 3145728,
+  "output_subdirectory": "firmware",
+  "vendor_sha256": "a846d86dc6fc471a879ec02f8c8d87ee28dc1329e819f03629662fe0409ff520",
+  "host_fv_and_bootshim_verified": true,
+  "official_empty_control_verified": true,
+  "stock_boot_header_compared": false,
+  "device_operations": false,
+  "hardware_tested": false,
+  "run_url": "https://github.com/INTERINIT/sheng-ipados27-build-20261031/actions/runs/41169230896",
+  "research_revision": "cc5f1f148a712f0b70a590ae8a96108a27baf4d9"
+}

@@ -223,9 +223,22 @@ def native(stage, ctx):
     }, indent=2) + "\n")
 
 
+def complete_package(ctx):
+    # One runner owns the seed/config/kernel/anchor chain. Independent host
+    # phase artifacts are useful evidence, but never guessed to be interchangeable.
+    native("kernel", ctx)
+    ctx = context()
+    helper("target27").gpu(MAIN, ctx, RESULT / "ipsw-trust27.bundle", RESULT)
+    helper("firmware_stage27").run(MAIN, DEVICE, RESULT, ROOT, ctx=ctx)
+    helper("payload_stage27").run(
+        MAIN, DEVICE, RESULT, ROOT, ctx=context(), uefi=DEVICE / "uefi-sheng",
+        execute=True, unique_chip_id=os.environ.get("UNIXNU_UNIQUE_CHIP_ID"),
+    )
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("stage", choices=("prepare", "policies", "data", "bootstrap", "kernel", "gpu", "firmware"))
+    parser.add_argument("stage", choices=("prepare", "policies", "data", "bootstrap", "kernel", "gpu", "firmware", "package"))
     args = parser.parse_args()
     os.environ["NOBOOT"] = "1"
     ctx = prepare()
@@ -239,6 +252,8 @@ def main():
         helper("target27").gpu(MAIN, ctx, RESULT / "ipsw-trust27.bundle", RESULT)
     elif args.stage == "firmware":
         helper("firmware_stage27").run(MAIN, DEVICE, RESULT, ROOT, ctx=ctx)
+    elif args.stage == "package":
+        complete_package(ctx)
     print("PASS: requested host phase completed; no hardware operation.", flush=True)
 
 

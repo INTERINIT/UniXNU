@@ -1,7 +1,7 @@
 [CmdletBinding()]
 param(
     [Parameter(Mandatory = $true)]
-    [ValidateSet('prepare', 'policies', 'data', 'bootstrap', 'kernel', 'gpu', 'firmware')]
+    [ValidateSet('prepare', 'policies', 'data', 'bootstrap', 'kernel', 'gpu', 'firmware', 'package')]
     [string]$Stage,
     [string]$ResearchRef = 'research/sheng-ipados27',
     [string]$ResearchRepo = 'INTERINIT/UniXNU',
