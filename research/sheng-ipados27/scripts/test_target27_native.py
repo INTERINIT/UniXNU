@@ -91,6 +91,11 @@ class NativeRecipeTests(unittest.TestCase):
             exception = source / "osfmk/kern/exception.c"
             exception.parent.mkdir(parents=True)
             exception.write_text(fixture, encoding="utf-8")
+            patch_text = (DEVICE / "patches/xnu-12377/source-storage-runtime.patch").read_text(encoding="utf-8")
+            hook = "".join(line[1:] + "\n" for line in patch_text.splitlines() if line.startswith("+") and not line.startswith("+++"))
+            storage = source / "bsd/kern/bsd_init.c"
+            storage.parent.mkdir(parents=True)
+            storage.write_text("\tvfsinit();\n" + hook, encoding="utf-8")
             local, _, _ = target.prepare_reference_builder(MAIN, SimpleNamespace(tree=root / "tree"), output)
             snapshot = next(node for node in ast.parse(local.read_text()).body if isinstance(node, ast.If))
             start = next(i for i, node in enumerate(snapshot.body) if isinstance(node, ast.Assign)
@@ -102,6 +107,7 @@ class NativeRecipeTests(unittest.TestCase):
             result = exception.read_text(encoding="utf-8")
             added = '#ifdef MACH_BSD\n#include <sys/proc.h>\n#endif\n'
             self.assertEqual(result.replace(added, ""), fixture)
+            self.assertEqual(storage.read_text(encoding="utf-8"), "\tvfsinit();\n#if defined(XNU_SOURCE_STORAGE) && XNU_SOURCE_STORAGE\n" + hook + "#endif\n")
             with self.assertRaisesRegex(ValueError, "Review changed"):
                 exec(code, {"source": source})
 

@@ -27,15 +27,15 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.13'
-      - name: Install authenticated bundle library
-        run: python -m pip install cryptography==50.0.2 cffi==2.1.1 pycparser==3.12
+      - name: Install Python build dependencies
+        run: python -m pip install cryptography==50.0.2 cffi==2.1.1 pycparser==3.12 capstone==5.0.7
       - name: Restore encrypted fixed inputs
         run: |
           curl --fail --location --retry 2 'https://github.com/INTERINIT/UniXNU/releases/download/sheng27-inputs-41173083070/inputs27-run41173083070.enc' --output "$RUNNER_TEMP/inputs27.enc"
           python research/sheng-ipados27/ci/scripts/load_inputs27.py --bundle "$RUNNER_TEMP/inputs27.enc" --root "$GITHUB_WORKSPACE" --expected-sha256 f905fe8118680b3bc72cc7aa8da52af869610a379e27e48d6d77f66d81abebff
       - name: Install host build dependencies
-        run: brew install acpica qemu cmake ninja unifdef llvm lld mtools dtc openssl@3 glslang shaderc spirv-tools vulkan-headers rustup blacktop/tap/ipsw
-      - name: Mask platform identity variants and validate actual tools
+        run: brew install cmake ninja unifdef llvm lld mtools dtc openssl@3 blacktop/tap/ipsw
+      - name: Select build tools and mask platform identity
         run: |
           python - <<'PY'
           import os
@@ -44,7 +44,11 @@ jobs:
           for variant in {value.upper(), f'{number:08x}', f'{number:08X}', f'{number:016x}', f'{number:016X}', str(number)}:
               print('::add-mask::' + variant)
           PY
-          python research/sheng-ipados27/ci/scripts/host_preflight27.py --root . --output result27/host-preflight27.json
+          for formula in llvm lld openssl@3; do
+            echo "$(brew --prefix "$formula")/bin" >> "$GITHUB_PATH"
+          done
+          xcodebuild -version
+          xcrun --sdk iphoneos --show-sdk-version
       - name: Build repaired native kernel and final payload
         run: python research/sheng-ipados27/ci/scripts/cloud27.py package-reuse
       - name: Encrypt results and logs

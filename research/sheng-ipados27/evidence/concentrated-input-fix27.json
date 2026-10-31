@@ -1,0 +1,27 @@
+{
+  "trigger_run": 41179249404,
+  "actual_failure": "prepare fetch-adreno-inputs.py HTTP403 anonymous API rate limit; native not reached",
+  "download_fix": "API-only non-redirected Authorization using the existing workflow token; unchanged source/firmware content verification",
+  "actual_build_dependencies": [
+    "capstone5.0.7",
+    "official Ath12k Linux sources at458c6079fc1d41d564c37679c8ace02cd83ee817",
+    "physical NativeMetal legacy alias to canonical AdrenoMetal"
+  ],
+  "reference_fix": "Isolated comparison respects the existing XNU_SOURCE_STORAGE flag for its optional startup hook; the full native hook is unchanged",
+  "user_requested_simplification": [
+    "Removed full host-preflight gate from the public build",
+    "Removed unused GPU compiler and fresh-firmware dependencies from the reused-stage workflow",
+    "Ath12k helper records recipe hashes without using them as build gates",
+    "No extra catalog/SHA gate for the physical compatibility alias"
+  ],
+  "developer_checks": {
+    "adreno_fetch": 3,
+    "ath12k_source": 3,
+    "physical_alias": 3,
+    "native_reference": 4,
+    "workflow_actionlint": "passed"
+  },
+  "new_real_Mac_build_pending": true,
+  "complete_boot_built": false,
+  "device_operations": false
+}

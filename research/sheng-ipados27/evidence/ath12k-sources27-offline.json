@@ -1,0 +1,36 @@
+{
+  "status": "source_helper_prepared_offline_controls_passed",
+  "module_commit": "f6bf561f92cc42761bdd417fce1d53fe1db9477c",
+  "linux_source": {
+    "repository": "https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git",
+    "ref": "v7.0.14",
+    "annotated_tag_object": "b38d6c0b6e7f406a7feb7d46f184ec3edaac8c3b",
+    "peeled_commit": "458c6079fc1d41d564c37679c8ace02cd83ee817",
+    "verified_by": "read-only git ls-remote on2026-10-31"
+  },
+  "consumer": "UniXNU-sheng/scripts/build-ath12k-wifi.py at f47b27ad97e97bee945f8af34a8430e3abcf918c",
+  "why_needed": "Full27 display archive unconditionally builds Ath12kWifi; prepare.sh consumes ignored deps/linux but does not fetch it.",
+  "official_fetch_recipe_sha256": "ad7578b276e220d894cbb60df69ecc7eb7b02e78ef3952f9fc5496c34e3c2ce1",
+  "freebsd": "Not referenced by the current sources.txt, shim, src or prepare.sh consumer; omitted rather than downloaded.",
+  "user_requested_scope": "Only real source HEAD/repository/basic required-file checks. Recipe SHA is diagnostic; no tracked-clean, full-file-list or free-space threshold gates.",
+  "recommended_call": "cloud.helper(\"ath12k_sources27\").run(DEVICE, RESULT, execute=True)",
+  "recommended_timing": "For the full kernel stage after target.context has prepared the matched component, before native_bootstrap/RELEASE to discover missing source input early. Not needed for bootstrap-only, GPU, Data or firmware reuse.",
+  "controls": {
+    "passed": 3,
+    "actual_same_pin_module_used": true,
+    "compiler_or_fake_MachO_output_used": false,
+    "default_plan_did_not_fetch_or_write": true,
+    "existing_other_repo_preserved": true
+  },
+  "files": {
+    "ci\\scripts\\ath12k_sources27.py": "aeec07916df43caa0e3919c581b57dc8770a47170831ab60b9ee6c2ec92bf6a8",
+    "ci\\scripts\\test_ath12k_sources27.py": "7466f2e209bfd7d7a5a184a591009c7141dccc8e2c06d90fc0fb4be992c00963"
+  },
+  "remaining": "The filtered source checkout and full27 compilation still await a real controlled host build.",
+  "large_source_download_executed": false,
+  "source_worktrees_modified": false,
+  "Actions_started": false,
+  "device_operations": false,
+  "hardware_tested": false,
+  "fetch_method": "Official two commands: shallow filtered sparse clone at v7.0.14, then official sparse patterns; actual HEAD458c checked afterwards."
+}

@@ -89,8 +89,10 @@ def prepare():
     record = json.loads(status)
     if record["board"]["board"]["os_profile"] != "ipados-27.0.1-24A446":
         raise ValueError("Resolved OS differs")
-    # These upstream tools fetch and hash-check firmware inputs only.
-    run(sys.executable, ctx.tree / "scripts/fetch-adreno-inputs.py", cwd=ctx.tree)
+    # Preserve upstream input verification while authenticating API-only
+    # requests on shared runners, which can exhaust the anonymous quota.
+    fetcher = helper("adreno_fetch27").prepare(ctx.tree, RESULT)
+    run(sys.executable, fetcher, cwd=ctx.tree)
     run(sys.executable, DEVICE / "scripts/extract-files.py", "--device", DEVICE)
     from unixnu import ipsw
     source = ipsw.Ipsw(ctx)
@@ -203,6 +205,9 @@ def native(stage, ctx, seed=None):
     seed = data(ctx) if seed is None else seed
     target = helper("target27")
     ctx, modules = target.context(MAIN, DEVICE, seed)
+    if stage == "kernel":
+        helper("ath12k_sources27").run(DEVICE, RESULT, execute=True)
+        helper("driver_alias27").prepare(ctx, RESULT)
     target.native_bootstrap(ctx, modules, RESULT)
     if stage == "kernel":
         target.release_reference(MAIN, ctx, RESULT)

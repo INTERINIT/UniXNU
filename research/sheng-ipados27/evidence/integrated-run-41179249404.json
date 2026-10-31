@@ -1,0 +1,12 @@
+{
+  "run_id": 41179249404,
+  "repo": "INTERINIT/UniXNU",
+  "source_commit": "41a3df54568061e92320549834599b78950929f3",
+  "conclusion": "failure",
+  "actual_error": "urllib.error.HTTPError: HTTP Error 403: rate limit exceeded",
+  "complete_boot_built": false,
+  "device_operations": false,
+  "failure_stage": "prepare",
+  "native_reached": false,
+  "phase_report_created": false
+}

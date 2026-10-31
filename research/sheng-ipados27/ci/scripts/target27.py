@@ -193,6 +193,16 @@ def prepare_reference_builder(main, ctx, output):
         raise ValueError('Review changed RELEASE exception diagnostic includes')
     exception_text = exception_text.replace(marker, marker + '#ifdef MACH_BSD\\n#include <sys/proc.h>\\n#endif\\n', 1)
     exception.write_text(exception_text, encoding='utf-8', newline='\\n')
+    # This comparison links no SourceStorage archive. Respect the existing
+    # feature switch for its optional startup hook; full native is unchanged.
+    storage = source / 'bsd/kern/bsd_init.c'
+    storage_text = storage.read_text(encoding='utf-8')
+    hook = ('\\t/* Optional source storage runtime registers after the IOKit bootstrap. */\\n'
+            '\\textern void native_source_storage_start(void) __attribute__((weak_import));\\n'
+            '\\tif (&native_source_storage_start)\\n'
+            '\\t\\tnative_source_storage_start();\\n')
+    storage.write_text(storage_text.replace(hook, '#if defined(XNU_SOURCE_STORAGE) && XNU_SOURCE_STORAGE\\n' + hook + '#endif\\n', 1),
+                       encoding='utf-8', newline='\\n')
 '''
     text = text.replace(manifest_marker, header_fix + manifest_marker)
     fingerprint, count = source_identity(ctx.tree / ".cache/xnu-work")
