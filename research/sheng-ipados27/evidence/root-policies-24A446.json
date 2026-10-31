@@ -1,0 +1,34 @@
+{
+  "repository": "INTERINIT/sheng-ipados27-build-20261031",
+  "run_id": 41166392969,
+  "artifact": "sheng-ipados27-host-result",
+  "path": "result27/root-policies",
+  "files": {
+    "OS/manifest.bin": {
+      "bytes": 75104800,
+      "sha256": "3077f088a6d915ad2b5185a5ee8e439fe1fc032164180409c8a755ae007bcaed"
+    },
+    "OS/trusted-key.bin": {
+      "bytes": 395,
+      "sha256": "e9d4304b8ec7253ade83bcc06e9e5c08c3df4312133f1ed037ad7a2397524886"
+    },
+    "OS/verification.json": {
+      "bytes": 1078,
+      "sha256": "702363f1991ea0caaa0e8d7910cb2beba780f224c291de68096ff64f68339786"
+    },
+    "SystemOS/manifest.bin": {
+      "bytes": 47006240,
+      "sha256": "11e56e925fc75cbe15e82ccfe40e3f92241dd26147aaadd181617ded1f0e914b"
+    },
+    "SystemOS/trusted-key.bin": {
+      "bytes": 395,
+      "sha256": "e9d4304b8ec7253ade83bcc06e9e5c08c3df4312133f1ed037ad7a2397524886"
+    },
+    "SystemOS/verification.json": {
+      "bytes": 1088,
+      "sha256": "d896b4ad5c06e506c3afdfb2c53138881c70dba2f68edbf7c92e11de4cd7f131"
+    }
+  },
+  "device_operations": false,
+  "hardware_tested": false
+}

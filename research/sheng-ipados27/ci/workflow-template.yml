@@ -20,6 +20,7 @@ on:
         required: true
 permissions:
   contents: read
+  actions: read
 concurrency:
   group: sheng-ipados27-${{ inputs.stage }}
   cancel-in-progress: false

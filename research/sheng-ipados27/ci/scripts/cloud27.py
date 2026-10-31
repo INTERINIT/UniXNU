@@ -10,6 +10,7 @@ import shutil
 import struct
 import subprocess
 import sys
+import tempfile
 import tomllib
 
 CODE = Path(__file__).resolve().parents[1]
@@ -142,9 +143,50 @@ def helper(name):
     return module
 
 
+def restore_policies(ctx):
+    # Policies are immutable inputs, not an assumption about an opportunistic
+    # source cache. Restore the actual successful run, then check every byte.
+    pin = json.loads((CODE.parent / "evidence/root-policies-24A446.json").read_text())
+    destination = ctx.tree / "build/verified-root-24A446"
+
+    def check(directory):
+        return all((directory / name).is_file()
+                   and (directory / name).stat().st_size == item["bytes"]
+                   and sha(directory / name) == item["sha256"]
+                   for name, item in pin["files"].items())
+
+    if check(destination):
+        return
+    if destination.exists() and any(destination.rglob("manifest.bin")):
+        raise ValueError("Preserve root policies that differ from the selected immutable run")
+    supplied = ROOT / "resources/root-policies-24A446"
+    if check(supplied):
+        source = supplied
+        temporary = None
+    else:
+        temporary = tempfile.TemporaryDirectory(prefix="policy-import27-", dir=WORK)
+        download = Path(temporary.name)
+        run("gh", "run", "download", str(pin["run_id"]), "--repo", pin["repository"],
+            "--name", pin["artifact"], "--dir", download)
+        source = download / pin["path"]
+    try:
+        if not check(source):
+            raise ValueError("Downloaded policy artifact differs from its recorded exact file hashes")
+        for name in pin["files"]:
+            target = destination / name
+            target.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(source / name, target)
+        if not check(destination):
+            raise ValueError("Policy restore changed bytes")
+    finally:
+        if temporary is not None:
+            temporary.cleanup()
+
+
 def data(ctx):
     # Cache the seed beside this exact target, rather than in the ephemeral
     # result directory. Each invocation restores its real UUID after defconfig.
+    restore_policies(ctx)
     cached = ctx.work / "data-seed"
     helper("data_stage27").data(MAIN, ctx, cached, desired_gib=8)
     for name in ("data.dbr", "data-seed.json", "data-stage27.json", "source-root-layout.json", "source-root-manifest.bin"):
