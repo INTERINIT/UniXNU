@@ -1,0 +1,66 @@
+{
+  "run_id": 41184584382,
+  "repo": "INTERINIT/UniXNU",
+  "url": "https://github.com/INTERINIT/UniXNU/actions/runs/41184584382",
+  "source_commit": "df6b70c1ed94b58066e32dd9a8a2c528eea1dd70",
+  "conclusion": "failure",
+  "actual_error": "kits/Sm8550Platform/ShengGmu.c:6:10: fatal error: 'ShengGmuSource.h' file not found",
+  "phases": {
+    "data": {
+      "status": "passed",
+      "elapsed_seconds": 0.243,
+      "reused": true,
+      "fresh_build": false,
+      "source_run": 41173083070
+    },
+    "native": {
+      "status": "failed",
+      "error_type": "Error",
+      "traceback": "package-native-failure.log",
+      "elapsed_seconds": 658.389,
+      "reused": false,
+      "fresh_build": true
+    },
+    "gpu": {
+      "status": "passed",
+      "elapsed_seconds": 0.086,
+      "reused": true,
+      "fresh_build": false,
+      "source_run": 41173083070
+    },
+    "firmware": {
+      "status": "passed",
+      "elapsed_seconds": 36.414,
+      "reused": true,
+      "fresh_build": false,
+      "source_run": 41173083070,
+      "fresh_source_preparation": true
+    },
+    "payload": {
+      "status": "blocked",
+      "dependencies": [
+        "native"
+      ],
+      "reused": false,
+      "fresh_build": true
+    }
+  },
+  "complete_boot_built": false,
+  "device_operations": false,
+  "release_reference_link_passed": true,
+  "release_reference_sha256": "a190b78a380d3193bbe69c1411c7e49944be654e2bda689261903c8473e51e29",
+  "repair": "Run the four existing official source generators before building full native driver archives",
+  "official_prepare_scripts": [
+    "fetch-sheng-dts.py",
+    "prepare-sheng-gmu.py",
+    "prepare-sheng-gmu-votes.py",
+    "prepare-sheng-gpu-smmu.py"
+  ],
+  "generated_headers": [
+    "ShengGmuSource.h",
+    "ShengGmuCommandDbSource.h",
+    "ShengGmuVotesSource.h",
+    "ShengGpuSmmuSource.h"
+  ],
+  "new_validation_gate": false
+}

@@ -208,6 +208,9 @@ def native(stage, ctx, seed=None):
     if stage == "kernel":
         helper("ath12k_sources27").run(DEVICE, RESULT, execute=True)
         helper("driver_alias27").prepare(ctx, RESULT)
+        for script in ("fetch-sheng-dts.py", "prepare-sheng-gmu.py",
+                       "prepare-sheng-gmu-votes.py", "prepare-sheng-gpu-smmu.py"):
+            run(sys.executable, ctx.tree / "scripts" / script, cwd=ctx.tree)
     target.native_bootstrap(ctx, modules, RESULT)
     if stage == "kernel":
         target.release_reference(MAIN, ctx, RESULT)
