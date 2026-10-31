@@ -38,3 +38,7 @@ jobs:
         run: |
           git submodule update --init --depth=1 -- kits/VerifiedRoot
           python research/sheng-ipados27/scripts/build_userdata27_windows.py --self-test
+      - name: Firmware adapter and GPU test scope controls
+        run: |
+          python research/sheng-ipados27/ci/scripts/firmware_stage27.py --self-test
+          python research/sheng-ipados27/ci/scripts/test_target27_gpu.py

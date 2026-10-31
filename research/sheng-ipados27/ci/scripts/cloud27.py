@@ -135,19 +135,68 @@ def policies(ctx):
     return images
 
 
+def helper(name):
+    spec = importlib.util.spec_from_file_location(name, CODE / "scripts" / (name + ".py"))
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+def data(ctx):
+    # Cache the seed beside this exact target, rather than in the ephemeral
+    # result directory. Each invocation restores its real UUID after defconfig.
+    cached = ctx.work / "data-seed"
+    helper("data_stage27").data(MAIN, ctx, cached, desired_gib=8)
+    for name in ("data.dbr", "data-seed.json", "data-stage27.json", "source-root-layout.json", "source-root-manifest.bin"):
+        shutil.copy2(cached / name, RESULT / name)
+    return json.loads((cached / "data-seed.json").read_text())
+
+
+def native(stage, ctx):
+    seed = data(ctx)
+    target = helper("target27")
+    ctx, modules = target.context(MAIN, DEVICE, seed)
+    target.native_bootstrap(ctx, modules, RESULT)
+    if stage == "kernel":
+        target.release_reference(MAIN, ctx, RESULT)
+        target.full_kernel(DEVICE, ctx, modules)
+        for name in ("kernel.macho", "kernel.json", "kernel.map.json"):
+            path = ctx.work / "kernel" / name
+            if path.is_file():
+                shutil.copy2(path, RESULT / name)
+        policy_bundle = ctx.tree / "build/sheng-source-storage/root-policies.bin"
+        shutil.copy2(policy_bundle, RESULT / "root-policies.bin")
+        for name in ("OS", "SystemOS"):
+            location = RESULT / "root-policies" / name
+            location.mkdir(parents=True, exist_ok=True)
+            for member in ("manifest.bin", "trusted-key.bin", "verification.json"):
+                shutil.copy2(ctx.tree / "build/verified-root-24A446" / name / member, location / member)
+    (RESULT / "native-stage27.json").write_text(json.dumps({
+        "stage": stage, "source_pins": PINS,
+        "data_volume_uuid": seed["volume_uuid"],
+        "data_seed_sha256": seed["packed_sha256"],
+        "config_sha256": sha(ctx.config_path),
+        "root_policy_bundle_sha256": sha(RESULT / "root-policies.bin") if stage == "kernel" else None,
+        "device_operations": False, "hardware_tested": False,
+    }, indent=2) + "\n")
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("stage", choices=("prepare", "policies", "gpu"))
+    parser.add_argument("stage", choices=("prepare", "policies", "data", "bootstrap", "kernel", "gpu", "firmware"))
     args = parser.parse_args()
     os.environ["NOBOOT"] = "1"
     ctx = prepare()
     if args.stage == "policies":
         policies(ctx)
+    elif args.stage == "data":
+        data(ctx)
+    elif args.stage in ("bootstrap", "kernel"):
+        native(args.stage, ctx)
     elif args.stage == "gpu":
-        spec = importlib.util.spec_from_file_location("target27", CODE / "scripts/target27.py")
-        target = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(target)
-        target.gpu(MAIN, ctx, RESULT / "ipsw-trust27.bundle", RESULT)
+        helper("target27").gpu(MAIN, ctx, RESULT / "ipsw-trust27.bundle", RESULT)
+    elif args.stage == "firmware":
+        helper("firmware_stage27").run(MAIN, DEVICE, RESULT, ROOT, ctx=ctx)
     print("PASS: requested host phase completed; no hardware operation.", flush=True)
 
 

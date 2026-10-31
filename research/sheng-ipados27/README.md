@@ -37,14 +37,19 @@ must not be substituted for the 27 bindings.
   online CPU count were not measured.
 - iPadOS 27: Apple CDN/BuildManifest identity and small components validated;
   decoded kernelcache matches the selected profile; Windows AEA decryption of
-  the OS produced the exact pinned raw APFS hash.
+  both OS and SystemOS produced the exact pinned raw APFS hashes. Both images
+  passed real C/RSA signature and every-4K-block authentication on macOS.
 - SoC overlay: affected Apple `start.s` and `bsd_init.c` patch contexts checked
   in arch/SoC/OS/device order. This is not a complete kernel build result.
-- Host prepare phase passed in the private build runner. Root authentication,
-  source kernel, GPU and firmware compilation remain separate checkpoints.
+- Host prepare and policy phases passed in the private build runner. Source
+  kernel, GPU and firmware compilation remain separate checkpoints.
 - Small userdata transport tests passed real RSA verification, v2 layout,
   zero-fill, tamper and truncation controls. They do not qualify Apple images
   or hardware boot.
+- The Windows assembler produced a 15,349,546,184-byte sparse image spanning
+  the full 249,497,890,816-byte target geometry with RAW/FILL chunks only.
+  Readback verified both volumes and policy-table objects. Final boot policy
+  header binding and live device checks are still required before deployment.
 
 ## Layout
 

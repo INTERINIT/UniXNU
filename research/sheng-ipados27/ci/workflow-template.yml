@@ -9,7 +9,11 @@ on:
         options:
           - prepare
           - policies
+          - data
+          - bootstrap
+          - kernel
           - gpu
+          - firmware
       research_ref:
         description: Research fork revision to execute
         default: research/sheng-ipados27
@@ -17,7 +21,7 @@ on:
 permissions:
   contents: read
 concurrency:
-  group: sheng-ipados27-build
+  group: sheng-ipados27-${{ inputs.stage }}
   cancel-in-progress: false
 jobs:
   build:
@@ -44,7 +48,7 @@ jobs:
         with:
           python-version: '3.13'
       - name: Install host dependencies
-        run: brew install cmake ninja unifdef llvm lld mtools dtc openssl@3 glslang shaderc spirv-tools vulkan-headers rustup blacktop/tap/ipsw
+        run: brew install acpica qemu cmake ninja unifdef llvm lld mtools dtc openssl@3 glslang shaderc spirv-tools vulkan-headers rustup blacktop/tap/ipsw
       - uses: actions/cache/restore@v4
         with:
           path: |
@@ -66,6 +70,7 @@ jobs:
           path: |
             result27/
             work27/UniXNU/out/sheng/**/logs/*.log
+            work27/UniXNU/out/sheng/**/data-seed/*.log
             work27/UniXNU/out/sheng/**/tree/build/verified-root-host/checks.json
           retention-days: 14
           if-no-files-found: warn

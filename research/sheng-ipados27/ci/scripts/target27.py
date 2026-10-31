@@ -19,6 +19,11 @@ import sys
 
 MAIN_REV = "793d6bddf7ea90678e3a61e2b2bd4350e5fdce16"
 DEVICE_REV = "f47b27ad97e97bee945f8af34a8430e3abcf918c"
+HOST_CHECK_SHA256 = "7ab580b33aa544a0e8931679884d2aa717e5663d6d9ff52ee5cda90c128862c0"
+QUARTZCORE17_CONTROL = """with tempfile.TemporaryDirectory(prefix='quartzcore-driver-cache-', dir=out) as temporary:
+    subprocess.run([sys.executable, ROOT / 'scripts/check-quartzcore-turnip-cache-host.py',
+                    '--output', Path(temporary) / 'control'], check=True, timeout=660)
+"""
 
 
 def sha(path):
@@ -131,6 +136,60 @@ def full_kernel(device, ctx, modules):
     raise ValueError("Display binding slide did not converge in three real links")
 
 
+def prepare_gpu_host_check(tree, output):
+    """Keep the real transport tests separate from the iOS17 AIR fixture.
+
+    The upstream aggregate also requires a specific iOS17.7 QuartzCore library.
+    That original-input qualification is not a prerequisite for recording the
+    synthetic first submission, and passing it would not qualify 24A446 UI AIR.
+    Preserve the pinned script and every other check in an explicit local copy.
+    """
+    source = tree / "scripts/check-turnip-darwin-host.py"
+    text = source.read_text(encoding="utf-8")
+    if hashlib.sha256(text.encode()).hexdigest() != HOST_CHECK_SHA256:
+        raise ValueError("Host Turnip check changed; review the 27 qualification scope")
+    root = "ROOT = Path(__file__).resolve().parents[1]"
+    if text.count(root) != 1 or text.count(QUARTZCORE17_CONTROL) != 1:
+        raise ValueError("Expected exactly one root and iOS17 QuartzCore control")
+    text = text.replace(root, "ROOT = Path(" + repr(str(tree)) + ")")
+    text = text.replace(QUARTZCORE17_CONTROL,
+                        "print('NOT RUN: original iOS17 QuartzCore AIR cache control; "
+                        "the 24A446 UI AIR cache is not qualified by this replay build')\n")
+    destination = output / "check-turnip-host27-local.py"
+    destination.write_text(text, encoding="utf-8", newline="\n")
+    return destination
+
+
+def gpu_host_check(tree, output, env):
+    local = prepare_gpu_host_check(tree, output)
+    # Run even when a previous failed aggregate left plugin_smoke in the cache.
+    # Its existence alone is not evidence that the watchdog/controls passed.
+    run([sys.executable, local], tree, env)
+    host = tree / "build/turnip-darwin-host"
+    inputs = {
+        "host_turnip": tree / "build/mesa-tu/src/freedreno/vulkan/libvulkan_freedreno.dylib",
+        "host_bridge": tree / "build/adreno-metal-bridge/host/libadreno_metal_bridge.a",
+        "software_peer": host / "libhostiokit.dylib",
+        "plugin_smoke": host / "plugin_smoke",
+    }
+    report = {
+        "target": "iPadOS27.0.1 / 24A446",
+        "upstream_check_sha256": HOST_CHECK_SHA256,
+        "local_check_sha256": sha(local),
+        "passed": ["Vulkan host transport", "eight deferred-BO controls",
+                   "Turnip pipeline cache controls", "priming cache controls",
+                   "plugin fill/compute/render command transport", "17-second watchdog control"],
+        "not_run": [{"check": "original iOS17.7 QuartzCore AIR cache",
+                     "reason": "Requires the separate exact 606f913a... iOS17 original library fixture"}],
+        "target27_original_ui_air_cache_qualified": False,
+        "hardware_tested": False, "shader_execution_verified": False,
+        "inputs": {name: {"bytes": path.stat().st_size, "sha256": sha(path)} for name, path in inputs.items()},
+    }
+    (output / "gpu27-host-checks.json").write_text(json.dumps(report, indent=2) + "\n")
+    for path in host.glob("*.log"):
+        shutil.copy2(path, output / ("host-turnip-" + path.name))
+
+
 def gpu(main, ctx, trust, output):
     tree = ctx.tree
     env = dict(os.environ)
@@ -150,10 +209,12 @@ def gpu(main, ctx, trust, output):
     for name, extra in (
         ("build-adreno-compiler-host.py", ["--probe"]),
         ("build-turnip-darwin.py", ["--target", "host"]),
+        ("build-adreno-metal-bridge.py", ["--target", "host"]),
         ("build-turnip-darwin.py", ["--target", "ios27"]),
-        ("build-adreno-metal-plugin.py", ["--target", "ios27"]),
     ):
         run([sys.executable, tree / "scripts" / name, *extra], tree, env)
+    gpu_host_check(tree, output, env)
+    run([sys.executable, tree / "scripts/build-adreno-metal-plugin.py", "--target", "ios27"], tree, env)
     plugin = tree / "build/adreno-metal-plugin27"
     addon = output / "gpu27.gpuaddon"
     env["ADRENO_PLUGIN_DIR"] = str(plugin)

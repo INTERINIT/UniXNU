@@ -1,0 +1,73 @@
+{
+  "build": "24A446",
+  "device": "sheng",
+  "serial": null,
+  "userdata_bytes_expected_not_live_checked": 249497890816,
+  "root_format": "SHNGROOTv2",
+  "sparse_format": "Android RAW/FILL only; every partition block written",
+  "explicit_zero_fill_for_entire_unused_partition_tail": true,
+  "partition_clear_applied_to_device": false,
+  "DONT_CARE_allowed": false,
+  "missing_inputs": [],
+  "input_readiness_only": false,
+  "device_operations": false,
+  "hardware_tested": false,
+  "sparse_image": "userdata27-full.sparse.img",
+  "sparse_file_bytes": 15349546184,
+  "sparse_sha256": "dcc41a9467c84b8dcd02b57b1ef0594e86a3593b32acb4b99af13952c7f348a4",
+  "sparse_validation": {
+    "sha256": "dcc41a9467c84b8dcd02b57b1ef0594e86a3593b32acb4b99af13952c7f348a4",
+    "logical_bytes": 249497890816,
+    "chunks": 944,
+    "raw_bytes": 15349534720,
+    "zero_fill_bytes": 234148356096,
+    "dont_care_chunks": 0,
+    "every_partition_block_written": true,
+    "actual_root_header_sha256": "ebf57107c50274b8e05ce0c39a15901329e54e76d9ea351a4d637c3bd1639b07",
+    "actual_sparse_ranges_hash_verified": [
+      "OS",
+      "SystemOS",
+      "OS.vroot",
+      "SystemOS.vroot"
+    ]
+  },
+  "root_image_bytes": 15753805824,
+  "root_manifest_sha256": "ebf57107c50274b8e05ce0c39a15901329e54e76d9ea351a4d637c3bd1639b07",
+  "windows": [
+    {
+      "name": "OS",
+      "offset": 1048576,
+      "size": 9613344768,
+      "sha256": "8a12cdad43f8f0d33dadcf01a800a560222baf40c05f71374c460ba57ba3a739"
+    },
+    {
+      "name": "SystemOS",
+      "offset": 9614393344,
+      "size": 6016729088,
+      "sha256": "d5b4873d35c85f96eaafaa31c59602b485afe33b5067eff1af67ba31204cdb4a"
+    }
+  ],
+  "objects": [
+    {
+      "name": "OS.vroot",
+      "offset": 15631122432,
+      "size": 75104256,
+      "sha256": "bceb017ee61bccb1367a19e8fd0cb378c77aa7db93c7aa56450b99a6de1e776f"
+    },
+    {
+      "name": "SystemOS.vroot",
+      "offset": 15706619904,
+      "size": 47005696,
+      "sha256": "eccdb04b06e2eac64ce279d0326356c068b41c6f700b59df27ed70baa3183156"
+    }
+  ],
+  "signed_UUID_source": "actual read-only Mac CI APFS verification, bound to identical complete local raw hashes",
+  "owner_anchor_sha256": "e9d4304b8ec7253ade83bcc06e9e5c08c3df4312133f1ed037ad7a2397524886",
+  "policy_signatures_verified_by": "real OpenSSL RSA3072-PKCS1v1.5-SHA256",
+  "all_local_raw_blocks_verified": true,
+  "boot_policy_headers_match_verified": false,
+  "live_partition_geometry_verified": false,
+  "requires_final_boot_package_and_live_device_checks": true,
+  "logical_full_partition_SHA256_not_computed": true,
+  "evidence_kind": "actual Windows host build, not a device operation"
+}
