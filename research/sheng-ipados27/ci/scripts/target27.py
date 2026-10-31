@@ -179,19 +179,20 @@ def prepare_reference_builder(main, ctx, output):
     if text.count("version-min=26.0") != 2 or text.count("-ios_version_min,26.0") != 1:
         raise ValueError("Reference deployment options changed; review all target flags")
     text = text.replace("version-min=26.0", "version-min=27.0").replace("-ios_version_min,26.0", "-ios_version_min,27.0")
-    # The 27 exception diagnostics also run in RELEASE; upstream exception.c
-    # used proc_pid only in DEVELOPMENT/DEBUG and did not include its header.
+    # The 27 exception diagnostics also run in RELEASE. Keep this OSFMK
+    # translation unit's existing BSD forward-declaration boundary.
     # Repair only the isolated reference copy, before its source manifest.
     manifest_marker = "    manifest = {str(p.relative_to(source)): hashlib.sha256(p.read_bytes()).hexdigest()\n"
     if text.count(manifest_marker) != 1:
         raise ValueError("Reference source-manifest step changed; review header adaptation")
     header_fix = '''    exception = source / 'osfmk/kern/exception.c'
     exception_text = exception.read_text(encoding='utf-8')
-    marker = '#include <sys/code_signing.h> /* for developer mode state */\\n'
-    if (exception_text.count(marker) != 1 or '#include <sys/proc.h>' in exception_text or
+    marker = 'extern int      proc_selfpid(void);\\n'
+    declaration = 'extern int      proc_pid(struct proc *p);\\n'
+    if (exception_text.count(marker) != 1 or declaration in exception_text or
             'proc_pid(get_bsdtask_info(task))' not in exception_text):
-        raise ValueError('Review changed RELEASE exception diagnostic includes')
-    exception_text = exception_text.replace(marker, marker + '#ifdef MACH_BSD\\n#include <sys/types.h>\\n#include <sys/proc.h>\\n#endif\\n', 1)
+        raise ValueError('Review changed RELEASE exception diagnostic declarations')
+    exception_text = exception_text.replace(marker, marker + declaration, 1)
     exception.write_text(exception_text, encoding='utf-8', newline='\\n')
     # This comparison links no SourceStorage archive. Respect the existing
     # feature switch for its optional startup hook; full native is unchanged.

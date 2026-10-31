@@ -69,7 +69,8 @@ class NativeRecipeTests(unittest.TestCase):
             self.assertNotIn("version-min=26.0", text)
             self.assertNotIn("-ios_version_min,26.0", text)
             self.assertNotIn("root = repo /", text)
-            self.assertIn("#ifdef MACH_BSD\\n#include <sys/types.h>\\n#include <sys/proc.h>\\n#endif\\n", text)
+            self.assertIn("extern int      proc_pid(struct proc *p);", text)
+            self.assertNotIn("#include <sys/proc.h>", text)
             self.assertLess(text.index("exception.write_text"), text.index("    manifest ="))
             self.assertTrue(first.is_relative_to(tree / "build/xnu/fileset-reference"))
             self.assertEqual(first, target.prepare_reference_builder(MAIN, ctx, output)[1])
@@ -81,13 +82,13 @@ class NativeRecipeTests(unittest.TestCase):
             (source / "restored-header.h").write_text("#define RESTORED 1\n")
             self.assertEqual(target.source_identity(source)[1], 2)
 
-    def test_reference_header_adaptation_keeps_diagnostics_and_is_fail_closed(self):
+    def test_reference_declaration_keeps_diagnostics_and_is_fail_closed(self):
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)
             source, output = root / "tree/.cache/xnu-work", root / "result"
             source.mkdir(parents=True)
             output.mkdir()
-            fixture = '#include <sys/code_signing.h> /* for developer mode state */\n/* proc_pid(get_bsdtask_info(task)) remains in the real diagnostic body */\n'
+            fixture = '#ifdef MACH_BSD\nextern int      proc_selfpid(void);\nextern char *proc_name_address(struct proc *p);\n#endif\n/* proc_pid(get_bsdtask_info(task)) remains in the real diagnostic body */\n'
             exception = source / "osfmk/kern/exception.c"
             exception.parent.mkdir(parents=True)
             exception.write_text(fixture, encoding="utf-8")
@@ -105,7 +106,7 @@ class NativeRecipeTests(unittest.TestCase):
             code = compile(ast.Module(body=snapshot.body[start:end], type_ignores=[]), str(local), "exec")
             exec(code, {"source": source})
             result = exception.read_text(encoding="utf-8")
-            added = '#ifdef MACH_BSD\n#include <sys/types.h>\n#include <sys/proc.h>\n#endif\n'
+            added = 'extern int      proc_pid(struct proc *p);\n'
             self.assertEqual(result.replace(added, ""), fixture)
             self.assertEqual(storage.read_text(encoding="utf-8"), "\tvfsinit();\n#if defined(XNU_SOURCE_STORAGE) && XNU_SOURCE_STORAGE\n" + hook + "#endif\n")
             with self.assertRaisesRegex(ValueError, "Review changed"):

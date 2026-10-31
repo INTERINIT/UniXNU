@@ -1,0 +1,58 @@
+{
+  "run_id": 41181490063,
+  "repo": "INTERINIT/UniXNU",
+  "url": "https://github.com/INTERINIT/UniXNU/actions/runs/41181490063",
+  "source_commit": "776f11afde4dac9350ac9b47e38ce6408345193d",
+  "conclusion": "failure",
+  "actual_error": "EXPORT_HDRS/bsd/bsm/audit.h:194:9 unknown type name 'uid_t'",
+  "phases": {
+    "data": {
+      "status": "passed",
+      "elapsed_seconds": 0.274,
+      "reused": true,
+      "fresh_build": false,
+      "source_run": 41173083070
+    },
+    "native": {
+      "status": "failed",
+      "error_type": "CalledProcessError",
+      "traceback": "package-native-failure.log",
+      "elapsed_seconds": 601.034,
+      "reused": false,
+      "fresh_build": true
+    },
+    "gpu": {
+      "status": "passed",
+      "elapsed_seconds": 0.114,
+      "reused": true,
+      "fresh_build": false,
+      "source_run": 41173083070
+    },
+    "firmware": {
+      "status": "passed",
+      "elapsed_seconds": 40.4,
+      "reused": true,
+      "fresh_build": false,
+      "source_run": 41173083070,
+      "fresh_source_preparation": true
+    },
+    "payload": {
+      "status": "blocked",
+      "dependencies": [
+        "native"
+      ],
+      "reused": false,
+      "fresh_build": true
+    }
+  },
+  "complete_boot_built": false,
+  "device_operations": false,
+  "repair": "Remove added BSD includes; add the exact proc_pid(struct proc*) declaration in the existing MACH_BSD forward-declaration block",
+  "interface_sources": {
+    "xnu": "ac9718fb1af618d5ce8678d0dc6e8a58f252216f",
+    "bsd/sys/proc.h:300": "extern int proc_pid(proc_t);",
+    "bsd/sys/kernel_types.h:68": "typedef struct proc * proc_t;"
+  },
+  "new_function_implementation_added": false,
+  "extra_build_gate_added": false
+}
