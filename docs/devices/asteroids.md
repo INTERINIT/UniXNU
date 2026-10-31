@@ -6,7 +6,7 @@
 
 Nothing Phone \(3a\) runs the unchanged iPad7,1 iPadOS 17.7.11 image from its UFS userdata partition, with shared SM7635 support and board-owned storage, GPU, input and power integration. Bring-up runs as numbered staged tests; their results are in docs/asteroids-gpu-gen8.md and docs/asteroids-touch.md of rootstockos/iosonandng.
 
-Source record: [porting.toml](https://github.com/rootstockos/UniXNU-asteroids/blob/94e78dcdc7a8ad81038ba17decfc333d1d92e6ba/porting.toml), `94e78dcdc7a8ad81038ba17decfc333d1d92e6ba`.
+Source record: [porting.toml](https://github.com/rootstockos/UniXNU-asteroids/blob/541674cc36bca3d8caa91f616cbccebba9f3aba7/porting.toml), `541674cc36bca3d8caa91f616cbccebba9f3aba7`.
 
 This page is generated from the device record.
 
@@ -59,6 +59,7 @@ Components: `ArmDTPlatform`, `XnuPrelink`.
 - T50: board.toml kernel\_args gain sheng-dpu-scanout=2, sheng-dpu-linux=1 and sheng-audio=1.
 - T64 \(2026-10-29\): \[payload\] dram\_size 0x23FE00000 and \[payload.adt\] owned\_memory\_size 0x1F0000000 \(7.75 GiB\) over the whole high bank, which the uefi-asteroids map now declares as one run without GPU\_Pool; \[gpu\] gpu\_pool\_base and gpu\_pool\_bytes are gone with the BO pool \(memory area\).
 - T64: owned\_memory\_size is 0x180000000 \(6 GiB\) instead of 7.75 GiB until the kernel carries UniXNU 2867796's larger bootstrap table pool \(memory area\).
+- T76 \(2026-10-30\): gpu-addon.yml's encrypted artifact also carries NativeAdrenoMetal.unstripped and libvulkan\_freedreno.unstripped \(build-asteroids-metal-plugin.py keeps Turnip unstripped\), for symbolizing the encode thread's CPU profile; the phone gets neither.
 
 ### Completion criteria
 
@@ -74,7 +75,7 @@ Components: `ArmDTPlatform`, `XnuPrelink`.
 
 ### Evidence
 
-- `source`: [Format 2 board configuration with the SM7635 SoC and 21H461 OS profiles.](https://github.com/rootstockos/UniXNU-asteroids/blob/94e78dcdc7a8ad81038ba17decfc333d1d92e6ba/board.toml)
+- `source`: [Format 2 board configuration with the SM7635 SoC and 21H461 OS profiles.](https://github.com/rootstockos/UniXNU-asteroids/blob/541674cc36bca3d8caa91f616cbccebba9f3aba7/board.toml)
 
 ## Firmware and boot {#firmware}
 
@@ -114,7 +115,7 @@ Components: `DarwinBoot`.
 
 ### Evidence
 
-- `source`: [\[bootimg\] and \[firmware\] select uefi-asteroids and the payload in the kernel image.](https://github.com/rootstockos/UniXNU-asteroids/blob/94e78dcdc7a8ad81038ba17decfc333d1d92e6ba/board.toml)
+- `source`: [\[bootimg\] and \[firmware\] select uefi-asteroids and the payload in the kernel image.](https://github.com/rootstockos/UniXNU-asteroids/blob/541674cc36bca3d8caa91f616cbccebba9f3aba7/board.toml)
 
 ## CPU and interrupts {#cpu}
 
@@ -141,6 +142,8 @@ Components: `ArmCpu`.
 - The E/P Edge scheduler and the idle-time helper are sheng's zzyf and zzye patches \(patches/xnu\).
 - T40c \(2026-10-27\): the cpu0 park thread is off by default \(sheng-cpu0-park=0, as UniXNU-sheng d361b53\): the E/P Edge scheduler places work by cluster, and T39b found the park thread holding cpu0 at 100 %. The governor and the AMP and idle patches already match sheng's latest.
 - T64 \(2026-10-29\): dts/asteroids.dts's memory node covers the whole high bank \(0x8C0000000 + 0x23FE00000\), equal to board.toml dram\_size, since the GPU pool at its top is gone \(memory area\).
+- T76 \(2026-10-30\): the board classes here register through OSKextRegisterBoardClasses \(zzyg-board-class-registration.patch\), under the kext lock, in place of preModLoad/postModLoad alone, which deadlocked T75f's boot \(storage area\).
+- T76's first kernel build \(run 41109301209\) failed: XNU has no kOSReturnNoMemory; OSKextRegisterBoardClasses and its callers use kOSKextReturnNoMemory \(libkern/OSKextLib.h\), and the helper has a prototype before its definition.
 
 ### Completion criteria
 
@@ -156,7 +159,7 @@ Components: `ArmCpu`.
 
 ### Evidence
 
-- `source`: [EPSS CPU governor with touch boost and frame floor.](https://github.com/rootstockos/UniXNU-asteroids/blob/94e78dcdc7a8ad81038ba17decfc333d1d92e6ba/package/CpuFreqProbe.cpp)
+- `source`: [EPSS CPU governor with touch boost and frame floor.](https://github.com/rootstockos/UniXNU-asteroids/blob/541674cc36bca3d8caa91f616cbccebba9f3aba7/package/CpuFreqProbe.cpp)
 
 ## Memory and DMA {#memory}
 
@@ -195,7 +198,7 @@ Components: `ArmCpu`.
 
 ### Evidence
 
-- `source`: [Memory node for the XNU window's DRAM bank.](https://github.com/rootstockos/UniXNU-asteroids/blob/94e78dcdc7a8ad81038ba17decfc333d1d92e6ba/dts/asteroids.dts)
+- `source`: [Memory node for the XNU window's DRAM bank.](https://github.com/rootstockos/UniXNU-asteroids/blob/541674cc36bca3d8caa91f616cbccebba9f3aba7/dts/asteroids.dts)
 
 ## Storage and root {#storage}
 
@@ -221,6 +224,7 @@ Components: `ShengUfs`, `RamBlock`, `SoftwareAES`, `VirtioMmioBlock`, `VerifiedR
 - NativeUfs \(the ShengUfs fork\) is built without the verified-root check until signed volume policies exist.
 - Its IOBlockStorageDevice imports bind against the original class in a bootstrap kernel candidate built first in CI.
 - T67, T72 and T72 again \(2026-10-29/30\) hung before the root mount: NativeUfs published SystemOS and never saw IOMedia under it \(no block request, "SystemOS volume  not ready" after 30 s\), while the UFS transport kept writing the log and every processor sat idle. bsd\_init's stage markers stopped at bsd\_autoconf, whose late probes had not reached the CPU clock row \(\[clocks\] absent, \[gpu uc\] stage 0, B st=0\); T71 on the same kernel booted. Both stalled together, so a race between the probes and IOKit matching; T73 logs where each thread waits.
+- T75f \(2026-10-30\) hung before the root mount and T73's \[kernel threads\] rows caught it: a lock-order deadlock. The boot thread, in native\_keystore\_probe \(late probe step 1, key events stage 1\), held OSMetaClass's class lock from preModLoad and waited in postModLoad for sKextLock \(OSKext::lookupKextWithIdentifier\); IOConfigThread\_'IOResources' held sKextLock loading a kext \(OSKext::load, OSRuntimeInitializeCPP\) and waited for the class lock in preModLoad; IOConfigThread\_'NativeUfsBlock' waited for sKextLock in IOCatalogue::personalityIsBoot, so the SystemOS disk never got a driver. XNU takes sKextLock first; the board's probes took only the class lock. Intermittent because it needs a kext load during the probe's registration, right after bsd\_autoconf publishes IOBSD. T76: OSKextRegisterBoardClasses \(patches/xnu/zzyg-board-class-registration.patch\) registers board classes under sKextLock, and all eight probes that called preModLoad/postModLoad use it.
 
 ### Completion criteria
 
@@ -236,7 +240,7 @@ Components: `ShengUfs`, `RamBlock`, `SoftwareAES`, `VirtioMmioBlock`, `VerifiedR
 
 ### Evidence
 
-- `device`: [T29 booted iPadOS 17.7.11 from the UFS root with persistent Data to the first picture.](https://github.com/rootstockos/UniXNU-asteroids/blob/94e78dcdc7a8ad81038ba17decfc333d1d92e6ba/board.toml)
+- `device`: [T29 booted iPadOS 17.7.11 from the UFS root with persistent Data to the first picture.](https://github.com/rootstockos/UniXNU-asteroids/blob/541674cc36bca3d8caa91f616cbccebba9f3aba7/board.toml)
   Command: <code>fastboot boot local/unixnu-asteroids-t29-boot.img</code>. Revision: `adf900cf453a6b318864913757f588c9f661596f`.
 
 ## Display {#display}
@@ -283,6 +287,9 @@ Components: `GopFramebuffer`.
 - T64: BootLog.c adds the \[gpu uc\] rows \(diagnostics area\).
 - T65: the boot log adds a \[bo pool\] row \(native\_adreno\_pool\_stats\): pool MiB and chunks, the reservation's and write-combine's IOReturn, BOs from the pool, BOs sent to the system, MiB in use and peak.
 - T73 \(2026-10-30\): native\_legacy\_display\_late\_probe records which probe bsd\_autoconf's thread is in \(native\_late\_probe\_step\) and the thread itself, for the boot log's \[late probe\] and \[kernel threads\] rows \(T67 and T72 hung inside it\).
+- T76 \(2026-10-30\): the board classes here register through OSKextRegisterBoardClasses \(zzyg-board-class-registration.patch\), under the kext lock, in place of preModLoad/postModLoad alone, which deadlocked T75f's boot \(storage area\).
+- T76's first kernel build \(run 41109301209\) failed: XNU has no kOSReturnNoMemory; OSKextRegisterBoardClasses and its callers use kOSKextReturnNoMemory \(libkern/OSKextLib.h\), and the helper has a prototype before its definition.
+- T76's second kernel build \(run 41111730079\) failed in ShengPlatformPower.cpp: BoardClasses.h had been included after the file's last \#include, which there sits inside the ShengPlatformPower class; every probe now includes it after its first \#include.
 
 ### Completion criteria
 
@@ -298,7 +305,7 @@ Components: `GopFramebuffer`.
 
 ### Evidence
 
-- `device`: [T34b: GPU copy to the panel, no tearing or stale patches, stable.](https://github.com/rootstockos/UniXNU-asteroids/blob/94e78dcdc7a8ad81038ba17decfc333d1d92e6ba/board.toml)
+- `device`: [T34b: GPU copy to the panel, no tearing or stale patches, stable.](https://github.com/rootstockos/UniXNU-asteroids/blob/541674cc36bca3d8caa91f616cbccebba9f3aba7/board.toml)
   Command: <code>fastboot boot local/unixnu-asteroids-t34b-boot.img</code>. Revision: `e022e84a9721ea6408ea12665b5a23e9b89fc5f6`.
 
 ## Input {#input}
@@ -327,6 +334,9 @@ Components: `ShengHidInput`, `ShengNovatekTouch`, `QcomGeniSpi`.
 - T47 \(2026-10-28\): quick button clicks did not register, a slightly longer hold did: the thread reads the levels when it wakes, and a short press is up again by then. T49: with sheng-buttons-taps=1 the interrupt handler records which buttons fired, and one that is up again without a reported press is reported as a 30 ms tap; BTN taps= counts them.
 - T49-gpuwait: quick taps still did not register although every edge raised an interrupt and a report \(45 of 45, taps=0\): the driver saw them and iOS ignored them. T50: sheng-buttons-hold-ms=&lt;ms&gt; delays a release until the press has lasted that long.
 - T51: 4 button interrupts, 4 reports, with sheng-buttons-hold-ms=80; whether quick taps were tried is unknown.
+- T76 \(2026-10-30\): the board classes here register through OSKextRegisterBoardClasses \(zzyg-board-class-registration.patch\), under the kext lock, in place of preModLoad/postModLoad alone, which deadlocked T75f's boot \(storage area\).
+- T76's first kernel build \(run 41109301209\) failed: XNU has no kOSReturnNoMemory; OSKextRegisterBoardClasses and its callers use kOSKextReturnNoMemory \(libkern/OSKextLib.h\), and the helper has a prototype before its definition.
+- T76's second kernel build \(run 41111730079\) failed in ShengPlatformPower.cpp: BoardClasses.h had been included after the file's last \#include, which there sits inside the ShengPlatformPower class; every probe now includes it after its first \#include.
 
 ### Completion criteria
 
@@ -342,7 +352,7 @@ Components: `ShengHidInput`, `ShengNovatekTouch`, `QcomGeniSpi`.
 
 ### Evidence
 
-- `device`: [Touch input works on the desktop \(stage 6\).](https://github.com/rootstockos/UniXNU-asteroids/blob/94e78dcdc7a8ad81038ba17decfc333d1d92e6ba/package/AsteroidsTouchProbe.cpp)
+- `device`: [Touch input works on the desktop \(stage 6\).](https://github.com/rootstockos/UniXNU-asteroids/blob/541674cc36bca3d8caa91f616cbccebba9f3aba7/package/AsteroidsTouchProbe.cpp)
   Command: <code>fastboot boot local/unixnu-asteroids-t34b-boot.img</code>. Revision: `e022e84a9721ea6408ea12665b5a23e9b89fc5f6`.
 
 ## GPU {#gpu}
@@ -421,6 +431,23 @@ Components: `Adreno740`, `AdrenoFirmware`, `AdrenoPM4`, `ArmSmmu4K`, `Sm7635Plat
 - The extra Vulkan passes \(2026-10-30, metal2vulkan 624bab39 with the bridge patches, render/inline\_first.rs\): a compositor pass opens inline with its memoryless color in a transient image; a later draw that writes that color splits the pass \(WorkCounts::inline\_memoryless\_write\_splits\), and the new instance loads and stores both attachments. The traces show it as back-to-back full-screen pairs in one command buffer, the first clearing the second attachment and the second loading and storing it: 2002 in T65 \(against about 1700 full-screen passes more than Metal\) and 343 in T71. The split itself costs little: the gap between the halves is a median 13-48 us \(T73: 221 splits, 11 ms in 55 s\), and most second halves render in system memory, where their loads and stores cost almost nothing; their own time \(T71 516 ms, median 1.6 ms\) is draws that run either way. Not worth changing for frame time. metal2vulkan also stores Metal's DontCare attachments on Turnip \(no measured DriverFact\) and always renders over the whole attachment.
 - T74s \(2026-10-30, T71's Turnip with asteroids-tu-debug=sysmem, every pass in system memory\): no red/blue colour flips, which T70 to T74 showed from time to time. So the flips come from GMEM rendering of the screen surface, a linear 1080x2392 IOSurface whose height is not whole GMEM blocks, which sheng's turnip-render-mode-for-attachment-memory.patch \(UniXNU ca59120\) loads with a 3D blit and stores with the unaligned CP blit \(store\_cp\_blit, its swap chosen as if GMEM ignored the attachment's swap\). Not yet narrowed to the load or the store.
 - T75 \(2026-10-30, UniXNU e0f3223, add-on only\): three changes from the open/close analysis. \(1\) The compositor's surface renders in SYSMEM \(Turnip: a linear attachment over unpadded owner memory never takes GMEM\), the fix for T70-T74's colour flips. \(2\) Priming in list order with scripts/data/prime-list.txt led by QuartzCore and CoreImage, the other system frameworks next, applications last, MTLReplayer dropped: T74's priming read the list as a sorted set, spent 88 s on MTLReplayer's ray-tracing kernels \(201 of 264 refused\) and never reached QuartzCore. \(3\) Frame traces per process in m2v/gpu \(frames-&lt;pid&gt;.trace\), exported with the GPU trace: the shared frames.trace was truncated by every process's writer. From T74b's telemetry: commit to scheduled about 3 ms per command buffer \(2578 waits for it, 7.3 s\), commit to completion callback 23 ms mean against about 5 ms of GPU work, and the render server starts each frame from the previous one's completion \(the bridge's earlyOn, reverted by sheng for blur reading unfinished frames\). Ruled out by counters: write-combined reassertion \(0 ms\), surface cache flushes \(1.7 ms in all\).
+- T76 \(2026-10-30\): the board classes here register through OSKextRegisterBoardClasses \(zzyg-board-class-registration.patch\), under the kext lock, in place of preModLoad/postModLoad alone, which deadlocked T75f's boot \(storage area\).
+- T75 \(2026-10-30, add-on 23 on the T73 kernel\): no colour flips; open and close felt no faster, so priming \(which reached QuartzCore first\) was not the stutter. Its per-process frame trace \(frames-56.trace, backboardd, 1960 command buffers in 76 s\): heavy command buffers \(120 draws or more, n=1126\) took 2.8 ms from creation to commit on the render thread, then 8.1 ms median from commit to scheduled and 20 ms to completion \(p90 38 ms\); light ones \(under 60 draws\) waited 11.2 ms to be scheduled, queued behind heavy ones on the bridge's serial encode thread. The render server waited for scheduled 867 times \(2.2 s\). Big cores averaged 2.1-2.3 GHz during the animations \(\[cpu gov\]\), so the encode thread's Vulkan recording and submission, about 40 us a draw, is the gap before each heavy frame's GPU work.
+- T75f \(2026-10-30, T75 with sheng-cpufreq-min=3000, every CPU at its highest level\): heavy command buffers took 2.9 ms to commit and 8.5 ms from commit to scheduled, as in T75 \(2.8 and 8.1 ms\): the governor already held the big cores at 2.4-2.5 GHz, 88-96 % busy, during the animations. Light ones fell from 11.2 to 1.6 ms \(the floor only helps between animations\). The 8 ms is CPU work on the bridge's encode thread at full clock. T76: the bridge samples that thread with asteroids-sample=1 \(AdrenoMetal 9db50e8, m2v/gpu/cpu-&lt;pid&gt;.profile\), and the add-on artifact carries NativeAdrenoMetal.unstripped and libvulkan\_freedreno.unstripped to symbolize it.
+- T76's first kernel build \(run 41109301209\) failed: XNU has no kOSReturnNoMemory; OSKextRegisterBoardClasses and its callers use kOSKextReturnNoMemory \(libkern/OSKextLib.h\), and the helper has a prototype before its definition.
+- T76's second kernel build \(run 41111730079\) failed in ShengPlatformPower.cpp: BoardClasses.h had been included after the file's last \#include, which there sits inside the ShengPlatformPower class; every probe now includes it after its first \#include.
+- T76's third kernel build \(run 41114667427\) hung for 25 minutes in the CI bootstrap's GitHub fetch of the pinned Linux sources for the GMU header, which had no time limit, so kernel.org's fallback never ran \(cancelled\). prepare-asteroids-gmu.py now gives a source up when it sends under 1 KiB/s for a minute or takes 15 minutes, and falls back as on a refusal.
+- T76 \(2026-10-30, kernel with the class registration fix, which booted; add-on 24 with asteroids-sample=1\): the encode thread's profile \(cpu-56.profile, 34064 samples\) found it idle in condition\_variable::wait for 88 % of samples and in kernel calls for 6.5 %, so the 8 ms from commit to scheduled \(T75\) is not its work: metal2vulkan holds a submission while two of its queue's run \(command\_buffer/group.rs\), and the GPU is the busy one. \[gpu work\]: single-pass submissions averaged 8.8 ms of GPU time \(1142, 10062 ms\) against about 2 ms for a traced full-screen pass; 38967 blits in 2237 submissions; \[gpu load\] 492 windows at 85 % or more at the ceiling level. The pass trace times render passes only, so the earlier finding that late frames left the GPU idle was wrong. Most blits are copies into shadowed textures \(L row: 568 shadowed, 32701 copies in\): metal2vulkan copies every byte of a host-page texture each time it is used unless the platform gives it a dirty-page log \(dirty\_pages.rs, HostMemory::with\_dirty\_pages\), and the bridge gives none.
+- T77 \(2026-10-30, T76 kernel, add-on 25 with the SR/SC rows from AdrenoMetal 517b87c, asteroids-tu-trace=pdba, which times every copy, blit and clear\): the class registration fix booted again. 112 host-page textures were shadowed, 53 for their pitch and 59 for their placement \(no other reason, no in-place check ran\), and their copies in moved 3518 Mi texels, nearly all from host pages \(about 14.7 GB\). In the trace \(76 s\), copies took 1223 ms of 3938 ms of timed GPU work \(31 %, 7905 copies, median 144 us\), system-memory passes 2344 ms, GMEM passes 365 ms. \[gpu time\] \(7642 ms, n=933\) is not GPU execution: GpuPowerProbe measures from submission until the CPU notices the fence \(GPU interrupt with sheng-gpu-irq=1, flip wait or governor tick\), so it includes late wakes \(T39b: 72 % late\); T76's reading of the GPU as busy was overstated. backboardd's heavy command buffers took 24.7 ms median from commit to completion \(13.4 ms to scheduled\) against about 6 ms of traced GPU work; light ones 3.7 ms. Next, T77i \(packed, not booted\): the same image with the board default sheng-gpu-irq=0 \(spinning fence waits\), to see whether completions noticed late hold back metal2vulkan, which submits only once fewer than two of its queue's submissions are outstanding.
+- T77i \(2026-10-30, T77 with the board default sheng-gpu-irq=0\): completion detection is not the open/close bottleneck. With the GPU line detached, a caller's fence wait \(NativeAdrenoPublish.cpp runCore\) polls with 20 us IODelay pauses \(314600 pauses for 10898 waits\), so completions are seen within tens of microseconds; the mean wait barely changed \(1.86 ms in T77, 1.94 ms\). backboardd's heavy command buffers \(2073, about 7x T77's 294: 42 open/close bursts against 6\) still took 24.15 ms median from commit to completion \(T77 24.73\) and 10.88 ms to scheduled \(13.38\); light ones 5.32 ms \(3.73\). Per burst, heavy command buffers ran at a median 66.5/s \(T77 56.2, from 6 bursts only\), with 15 % of their commit intervals over 33 ms \(21 %\). \[gpu time\] does not get more accurate with the line off: gpuTimeFences runs only from the interrupt, flip wait, governor tick and native\_gpu\_fences, not from the ring's polls \(191 batched detections against 1\). The 24 ms is not a late wake.
+- Review of T77/T77i \(2026-10-31, local/tools/gpubusy.py and passes.py on trace.bin\): T77's 'about 6 ms of traced GPU work' per heavy command buffer and its reading of T76's busy GPU as overstated were wrong. Merging the trace's GPU start and end stamps of every pass, copy, blit and clear, backboardd's own work kept the GPU busy 65 % of the animation bursts' wall time in T77 \(3757 of 5814 ms\) and 75 % in T77i \(24544 of 32761 ms\), about 12 ms per heavy command buffer: render passes in system memory 62 %, copies into shadows 32 % \(T77i: 52261 copies, SR pitch 263 and placement 419, 22697 Mi texels in\). The commit-to-scheduled wait is metal2vulkan's CompletionPolicy::Grouped \(the bridge keeps the UNTRUSTED default\) holding a group while two submissions of its VkQueue are outstanding, so it is queueing on the GPU too; nothing between the commit and the ring makes the CPU wait for the GPU \(Turnip's Darwin backend emulates timelines in DEFERRED submit mode and resolves waits to ring fences\), and the completion waiter reaches the kernel's fence wait. The GPU's work per frame stays the limit, as T52 and T65-early found: the levers are the copies \(T76's dirty-page log\) and the occluded samples \(T65-samples\). Untested: turnip-a810-sysmem-ccu.patch halves the system-memory colour cache for every pass, those without depth included. The trace's binning flag is set only in staged mode \(TU\_DW\_TIME=tiles\), so pdba runs read 0 for every pass.
+- T78 \(2026-10-31, add-on only, measurements behind letters of asteroids-tu-trace since the command line is at 976 of 1000 bytes\): q \(UniXNU patches/mesa/turnip-asteroids-submit-trace.patch\) records each kernel submission in trace.bin, CLOCK\_UPTIME\_RAW ns before and after it \(the frames trace's clock\) and its command buffers' serials, so local/tools/gaps.py can fit the always-on counter to the CPU clock and file every GPU idle gap of 1 ms or more in the bursts as kernel \(submitted before the gap\), held \(a commit before the gap not yet scheduled\) or late \(nothing committed\); h \(AdrenoMetal NativeMetalObjects.rs DirtyMeasure\) gives every no-copy memory a dirty-page source that never answers, so the runtime still copies every byte but counts the copies a log would decide, while a utility thread hashes the watched pages at most four times a second and counts the unchanged ones weighted by stamps, and each watch notes whether its pages are private or shared \(boot log rows DP, DW, DH\); c \(patches/mesa/turnip-a810-sysmem-ccu-color.patch\) gives system-memory passes the whole 128 KiB colour cache and half the depth cache in place of half colour and whole depth \(480 of 576 KiB with the VPC buffers\), an A/B against the halved colour cache. Planned boots: pdbaq \(the gaps, and the cache A/B's base\), pdbaqc \(its other side, compared per pass of each kind\), pdbaqh \(the copies; h moves the gated copies' recording to submission and adds a hashing thread, so its timing is not compared\), pdbsa \(occluded samples on today's stack\).
+- T78q \(2026-10-31, asteroids-tu-trace=pdbaq, 104 s\): the GPU waits for work, not only the reverse. local/tools/gaps.py fits the always-on counter to the CPU clock by the GPU's idle periods \(offset 1.40 ms, drift -2.1 ppm; 424 of 446 idle periods of 5 ms or more ended 0-1 ms after a submission returned; the traced serials can't be used, since each submission starts with untraced shadow copies, serial 0\). In 18 bursts \(24380 ms\) backboardd's work kept the GPU busy 76 % \(system-memory passes 12220 ms, copies 5713, GMEM 523\); gaps of 1 ms or more took 5704 ms \(23 %\): the GPU idle with work already in the kernel 173 ms \(29\), held 3126 ms \(723, median 3.0 ms: a command buffer committed before the gap not yet scheduled\), late 2405 ms \(352, median 6.1 ms: nothing committed\). Completion is seen on time \(completion callbacks a median 0.3 ms from the GPU end of their traced work\), and the Grouped hold is not what holds: only 81 of 1223 command buffers queued behind another were scheduled within 0.5 ms of a completion, and at their scheduling 0 \(423\) or 1 \(687\) of the queue's submissions were outstanding. Commit to scheduled grows with the command buffers committed earlier and not yet scheduled, whether the GPU is busy or idle: none 2.8 ms median with the GPU idle, one 12.7 ms, two 21.9 ms; a queued command buffer is scheduled a median 9 ms after the one before it, in two modes \(under 0.5 ms or about 10-13 ms\), with no relation to its copies or draws. So a serial stage on the CPU between commit and the kernel submission holds the work: the encode thread \(it runs every encoder call's runtime half and then the commit, NativeBridgeMetalFrontend.mm submit\) or metal2vulkan's scheduler thread; the trace has no stamp between them. The review's 'the GPU's work per frame stays the limit' holds for 76 % of the bursts, not for the idle 23 %. CoreAnimation waited for scheduling 933 times \(2631 ms\) and for completion 41 times \(508 ms\), counted only after encodeDrain, so its time waiting for the encode thread to catch up is not in either.
+- T78c \(2026-10-31, asteroids-tu-trace=pdbaqc, 86 s\): the whole colour cache for system-memory passes \(turnip-a810-sysmem-ccu-color.patch: colour full, depth half\) does not help. Matched against T78q by mode, the colour attachment's load and store, area and draws \(local/tools/t78/ab.py\), the cells with the same work ran 1-5 % slower \(full-screen SCut with 64 or more draws 4354 to 4528 us, LSut 5021 to 5189, LS 9998 to 10253\); the cells that moved more \(+352 %, -54 %\) differ in their work between the runs, since draws are capped at 64 in the match and the apps opened were not the same. The bursts were the same as T78q: GPU busy 76 % of 19847 ms, gaps of 1 ms or more 23 % \(kernel 181 ms, held 2492, late 1814\). The patch only acts behind letter c and goes with the next build.
+- T78h \(2026-10-31, asteroids-tu-trace=pdbaqh, booted twice\): the measurement crashes the render server. The first boot was left untouched \(its static stacks and idle CPU were an idle phone, not a freeze\); in the second \(112 s, used from the start\) backboardd died with SIGSEGV four times \(pids 56, 262, 270, 279, each after 10-20 s of use\), every time at the same instruction with ESR 0x92000007 \(a read, translation fault at level 3\) at a page-aligned address, on a Rust-spawned thread: the bridge's hashing thread read the first word of a watched page that was no longer mapped. A watch lives until metal2vulkan drops its shadow log, and the watched memory \(all of it shared with other tasks: 74 sources, 37 watches, 52 MB, no private pages\) can be unmapped before that, so the thread's alive flag does not keep the pages. What the counters had in one render server's life: 72 shadow copies in \(L row cp 73\) of which 72 gated and copied whole as designed \(94 MB\), so the gate does cover the shadow copies in; the hashing gave no share of unchanged pages \(2 rounds, nearly every page first seen\). The fix is in the measurement: read the pages with mach\_vm\_read\_overwrite, which fails on an unmapped page, instead of loading them.
+- T78s \(2026-10-31, asteroids-tu-trace=pdbsa, 90 s, no render server crash\): the occlusion T65-samples measured is unchanged on today's stack \(local/triage/occlusion-from-trace.py, the same script\): 2751 large passes with per-draw samples \(46 without\), 18.05 G samples, 70 % from opaque draws; at least 7.87 G \(43.6 %\) were shaded under a later opaque draw covering 95 % or more of the pass \(1290 passes have one; T65-samples 43.8 %\), and about 56.1 % counting partly covering opaque draws as independently placed \(T65 about 56 %\). Opaque draws are nearly all either tiny \(43711 under a tenth of the pass\) or full-screen \(4332 at nine tenths or more\), so the lower bound is the part a whole-draw rule could take: drawing nothing before a later full-screen opaque draw in the same pass.
+- T78s, what the hidden pixels cost \(local/tools/t78/pxcost\_s.py, hidcost\_strict.py\): large system-memory passes that load and store the screen \(LS, 2412\) follow their pixels, time = 342 us + 340 us per million opaque samples + 473 per million blended \(R2 0.90; the s letter's wait after each draw goes into the per-draw term\), opaque pixels about 61 % of their time: 0.34 ns a pixel is about 11.7 GB/s of 4-byte writes, T61's DRAM rate, so in system memory every shaded pixel is a DRAM write. That is why T69's depth prepass lost \(it added a full-screen depth buffer's traffic to every pass\). But what a draw-skipping rule could drop safely is small: of the opaque draws over 95 % of a pass, 1694 cover all of it and 2572 cover 97-98 % \(the rest of the screen still shows earlier draws\), and before a cover of the whole pass with all four channels written there are 2.62 G opaque samples in LS passes \(30 % of theirs, about 0.9 s at that rate\) and almost none in SC passes. On T78q's bursts that is about 1.1 of 18.5 s of GPU work, near 5 %, and the translator cannot know a draw covers the pass when it records it \(its positions come from the vertex shader\). The 43.6 % share counted the 97-98 % covers as hiding everything before them; hidden pixels are not a large lever by any rule known to be safe.
+- T79 \(2026-10-31, add-on 27, UniXNU 03a1d0c, AdrenoMetal 4ea92e4\): the shadows' cause, not their cost. metal2vulkan answers Metal's 16 bytes for a linear texture's offset and rows in a buffer \(deviceLinearTextureAlignmentBytes, minimumLinearTextureAlignmentForPixelFormat:\), while Turnip's linear images on the A810 start and step their rows at 64; QuartzCore lays out its textures over buffers by the device's answer, so the runtime bound none in place and shadowed each, copying every byte in before every use \(every shadow in T76-T78 was for pitch or placement\). The bridge now answers 64 for those queries and the linear private counts \(NativeMetalObjects.rs LINEAR\_IN\_PLACE\); the runtime still takes 16, so a texture placed by the old rule is shadowed as before; the IOSurface answers stay 16 \(no IOSurface texture was shadowed\) and the frontend's iosurfaceReadOnlyTextureAlignmentBytes asks for that answer instead of the linear one. Whether QuartzCore asks the device for each of these textures is what the boot shows: the SR row's pitch and placement counts and the trace's copy time against T78q. The same add-on carries the dirty-page measurement's fix \(pages read with mach\_vm\_read\_overwrite, DH gone counts the unmapped ones\), frame trace types 6 \(a commit's runtime half on the encoding thread, with the thread's CPU time\) and 7 \(encodeDrain waits\), to split T78q's commit-to-scheduled delay, and drops the colour-cache A/B. Planned boots: pdbaq, then pdbaqh if shadows remain.
 
 ### Completion criteria
 
@@ -436,7 +463,7 @@ Components: `Adreno740`, `AdrenoFirmware`, `AdrenoPM4`, `ArmSmmu4K`, `Sm7635Plat
 
 ### Evidence
 
-- `device`: [GPU compositing and the GPU panel copy run stable.](https://github.com/rootstockos/UniXNU-asteroids/blob/94e78dcdc7a8ad81038ba17decfc333d1d92e6ba/package/GpuPowerProbe.cpp)
+- `device`: [GPU compositing and the GPU panel copy run stable.](https://github.com/rootstockos/UniXNU-asteroids/blob/541674cc36bca3d8caa91f616cbccebba9f3aba7/package/GpuPowerProbe.cpp)
   Command: <code>fastboot boot local/unixnu-asteroids-t34b-boot.img</code>. Revision: `e022e84a9721ea6408ea12665b5a23e9b89fc5f6`.
 
 ## clock {#clock}
@@ -477,7 +504,7 @@ Components: `QcomPmicRtc`.
 
 ### Evidence
 
-- `device`: [T39e: the time set in Settings survived a restart; Settings &gt; Date &amp; Time opens.](https://github.com/rootstockos/UniXNU-asteroids/blob/94e78dcdc7a8ad81038ba17decfc333d1d92e6ba/board.toml)
+- `device`: [T39e: the time set in Settings survived a restart; Settings &gt; Date &amp; Time opens.](https://github.com/rootstockos/UniXNU-asteroids/blob/541674cc36bca3d8caa91f616cbccebba9f3aba7/board.toml)
   Command: <code>fastboot boot local/unixnu-asteroids-t39e-boot.img</code>. Revision: `e4d1092cc3d051617ee88858b153ed2ba0d456fd`.
 
 ## Network {#network}
@@ -553,6 +580,8 @@ Collect evidence using the next action.
 - T47-mic7 \(2026-10-28\): every mic stage ran \(st=70\): bus up \(COMP\_STATUS 0x100001\), the WCD9378 TX device enumerated as device 1 \(id 0x01170223, the DT's wcd9378-tx-slave\), the codec set up, the SmartMIC0 sequencer at PS0, TX decimator 0, the DSP's capture graphs; 200 of 200 periods came back. The level was near silence: peak 34 of 32767, mean under 1, 18559 non-zero samples. The vendor's handset-mic path records AMIC1 \(ADC1, SWR\_MIC0\) and AMIC3 \(ADC2, SWR\_MIC4\) at ADC volume 6; the probe takes AMIC1 only. T49: asteroids-mic-capture-s=&lt;s&gt; \(up to 30\) and a \[mic peaks\] row with the peak of each second.
 - T50: sheng-audio=1 \(speakers for iOS, no boot test tone\) is a board default.
 - T51: the 20-second capture came back complete \(2000 of 2000 periods\) but silent: peak 33 in the first second, exactly 0 in the next 19. The mic path delivers no codec data.
+- T76 \(2026-10-30\): the board classes here register through OSKextRegisterBoardClasses \(zzyg-board-class-registration.patch\), under the kext lock, in place of preModLoad/postModLoad alone, which deadlocked T75f's boot \(storage area\).
+- T76's second kernel build \(run 41111730079\) failed in ShengPlatformPower.cpp: BoardClasses.h had been included after the file's last \#include, which there sits inside the ShengPlatformPower class; every probe now includes it after its first \#include.
 
 ### Completion criteria
 
@@ -569,7 +598,7 @@ Collect evidence using the next action.
 
 ### Evidence
 
-- `host`: [PASS: 207 AudioReach packet checks, including the 3a's primary MI2S port and the 32-bit speaker device format.](https://github.com/rootstockos/UniXNU-asteroids/blob/94e78dcdc7a8ad81038ba17decfc333d1d92e6ba/scripts/check-audioreach-host.py)
+- `host`: [PASS: 207 AudioReach packet checks, including the 3a's primary MI2S port and the 32-bit speaker device format.](https://github.com/rootstockos/UniXNU-asteroids/blob/541674cc36bca3d8caa91f616cbccebba9f3aba7/scripts/check-audioreach-host.py)
   Command: <code>python3 scripts/check-audioreach-host.py</code>. Revision: `b1621b32a2513ba8e2c4c599d4f4baf602a7369a`.
 - `device`: [T40k-spk-sd1: the boot tone and iOS sounds played through both speakers; \[amps\] showed the boost converters active and \[audio-io\] 8.3 M frames without gaps in 494 s.](https://github.com/rootstockos/UniXNU-asteroids/commit/b1621b32a2513ba8e2c4c599d4f4baf602a7369a)
   Command: <code>fastboot boot with boot args sheng-audio=3 asteroids-audio-i2s=0x200200 sheng-audio-tone-ms=4000</code>. Revision: `49ec1ccb18fd6b7ddd23b25b2c4ae96cd084ad1a`.
@@ -596,6 +625,9 @@ Components: `AppleKeyStoreState`.
 
 - Without the AppleKeyStore stand-in on persistent Data, SpringBoard never finished booting \(T20-T28\).
 - T38: sheng's battery manager client and iOS power source \(ShengBattmgr.c, ShengBattery.cpp, sheng-battery\) with the 3a's standard property numbering \(temperature 12, charge counter 14, cycles 15, design 16, full 17\); sheng's board fields \(opcode 0x50, OEM\_GET\_LOG\_BUFFER on the 3a\) and charge current are skipped.
+- T76 \(2026-10-30\): the board classes here register through OSKextRegisterBoardClasses \(zzyg-board-class-registration.patch\), under the kext lock, in place of preModLoad/postModLoad alone, which deadlocked T75f's boot \(storage area\).
+- T76's first kernel build \(run 41109301209\) failed: XNU has no kOSReturnNoMemory; OSKextRegisterBoardClasses and its callers use kOSKextReturnNoMemory \(libkern/OSKextLib.h\), and the helper has a prototype before its definition.
+- T76's second kernel build \(run 41111730079\) failed in ShengPlatformPower.cpp: BoardClasses.h had been included after the file's last \#include, which there sits inside the ShengPlatformPower class; every probe now includes it after its first \#include.
 
 ### Completion criteria
 
@@ -611,7 +643,7 @@ Components: `AppleKeyStoreState`.
 
 ### Evidence
 
-- `device`: [T29: with the stand-in, SpringBoard boots to the first picture.](https://github.com/rootstockos/UniXNU-asteroids/blob/94e78dcdc7a8ad81038ba17decfc333d1d92e6ba/package/KeyStoreProbe.cpp)
+- `device`: [T29: with the stand-in, SpringBoard boots to the first picture.](https://github.com/rootstockos/UniXNU-asteroids/blob/541674cc36bca3d8caa91f616cbccebba9f3aba7/package/KeyStoreProbe.cpp)
   Command: <code>fastboot boot local/unixnu-asteroids-t29-boot.img</code>. Revision: `adf900cf453a6b318864913757f588c9f661596f`.
 
 ## Image assembly {#packaging}
@@ -634,6 +666,8 @@ Components: `AppleKeyStoreState`.
 
 - Format 2 applies only the patches its series list; the fork's bring-up patches are listed in the device series with the arch: prefix.
 - T64 \(2026-10-29\): the DTS memory node grows to the whole high bank \(0x8C0000000 + 0x23FE00000\) with board.toml dram\_size; the uefi-asteroids map declares it as one run without GPU\_Pool \(memory area\).
+- T76 \(2026-10-30\): the board classes here register through OSKextRegisterBoardClasses \(zzyg-board-class-registration.patch\), under the kext lock, in place of preModLoad/postModLoad alone, which deadlocked T75f's boot \(storage area\).
+- T76's first kernel build \(run 41109301209\) failed: XNU has no kOSReturnNoMemory; OSKextRegisterBoardClasses and its callers use kOSKextReturnNoMemory \(libkern/OSKextLib.h\), and the helper has a prototype before its definition.
 
 ### Completion criteria
 
@@ -649,7 +683,7 @@ Components: `AppleKeyStoreState`.
 
 ### Evidence
 
-- `source`: [Board patch series after the arch, SoC and OS series.](https://github.com/rootstockos/UniXNU-asteroids/blob/94e78dcdc7a8ad81038ba17decfc333d1d92e6ba/patches/xnu/series)
+- `source`: [Board patch series after the arch, SoC and OS series.](https://github.com/rootstockos/UniXNU-asteroids/blob/541674cc36bca3d8caa91f616cbccebba9f3aba7/patches/xnu/series)
 
 ## Diagnostics {#diagnostics}
 
@@ -702,6 +736,6 @@ Components: `AppleKeyStoreState`.
 
 ### Evidence
 
-- `source`: [Live page and banner rows.](https://github.com/rootstockos/UniXNU-asteroids/blob/94e78dcdc7a8ad81038ba17decfc333d1d92e6ba/package/BootProgress.c)
+- `source`: [Live page and banner rows.](https://github.com/rootstockos/UniXNU-asteroids/blob/541674cc36bca3d8caa91f616cbccebba9f3aba7/package/BootProgress.c)
 
 </div>
