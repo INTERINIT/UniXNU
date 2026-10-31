@@ -34,7 +34,7 @@ jobs:
           curl --fail --location --retry 2 'https://github.com/INTERINIT/UniXNU/releases/download/sheng27-inputs-41173083070/inputs27-run41173083070.enc' --output "$RUNNER_TEMP/inputs27.enc"
           python research/sheng-ipados27/ci/scripts/load_inputs27.py --bundle "$RUNNER_TEMP/inputs27.enc" --root "$GITHUB_WORKSPACE" --expected-sha256 f905fe8118680b3bc72cc7aa8da52af869610a379e27e48d6d77f66d81abebff
       - name: Install host build dependencies
-        run: brew install cmake ninja unifdef llvm lld mtools dtc openssl@3 blacktop/tap/ipsw
+        run: brew install cmake ninja unifdef llvm lld mtools dtc openssl@3
       - name: Select build tools and mask platform identity
         run: |
           python - <<'PY'

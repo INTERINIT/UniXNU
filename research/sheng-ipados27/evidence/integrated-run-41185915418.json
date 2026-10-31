@@ -1,0 +1,12 @@
+{
+  "run_id": 41185915418,
+  "repo": "INTERINIT/UniXNU",
+  "source_commit": "d1ca04c335fa49a54f2011a47e464c01f7879d8c",
+  "conclusion": "failure",
+  "actual_error": "Homebrew refuses to load blacktop/tap/ipsw-frida from untrusted blacktop/tap while installing ipsw",
+  "complete_boot_built": false,
+  "device_operations": false,
+  "repair": "Drop unnecessary third-party ipsw CLI from reused-data native/payload build dependencies",
+  "scope": "ipsw.py calls the CLI only for AEA decryption; this stage restores the completed seed and uses macOS compression_tool for kernelcache",
+  "new_gate_added": false
+}
