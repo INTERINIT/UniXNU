@@ -1,0 +1,64 @@
+{
+  "run_id": 41177759463,
+  "repo": "INTERINIT/UniXNU",
+  "url": "https://github.com/INTERINIT/UniXNU/actions/runs/41177759463",
+  "source_commit": "280774a29f8b4ea8110c5865e9c23c26a339df49",
+  "conclusion": "failure",
+  "phases": {
+    "data": {
+      "status": "passed",
+      "elapsed_seconds": 0.256,
+      "reused": true,
+      "fresh_build": false,
+      "source_run": 41173083070
+    },
+    "native": {
+      "status": "failed",
+      "error_type": "CalledProcessError",
+      "traceback": "package-native-failure.log",
+      "elapsed_seconds": 423.185,
+      "reused": false,
+      "fresh_build": true
+    },
+    "gpu": {
+      "status": "passed",
+      "elapsed_seconds": 0.098,
+      "reused": true,
+      "fresh_build": false,
+      "source_run": 41173083070
+    },
+    "firmware": {
+      "status": "passed",
+      "elapsed_seconds": 41.361,
+      "reused": true,
+      "fresh_build": false,
+      "source_run": 41173083070,
+      "fresh_source_preparation": true
+    },
+    "payload": {
+      "status": "blocked",
+      "dependencies": [
+        "native"
+      ],
+      "reused": false,
+      "fresh_build": true
+    }
+  },
+  "actual_error": "osfmk/kern/exception.c:984:33: call to undeclared function 'proc_pid'; C99 implicit declaration is an error",
+  "error_log_line": 2288,
+  "native_bootstrap_built": true,
+  "native_bootstrap_sha256": "3143d6f908253e5edeb64b7b29ba169847aaa5e6c854c7291b2c88bf2556be80",
+  "native_bootstrap_bytes": 24951008,
+  "native_bootstrap_purpose": "source-driver export audit only; not a runnable final iPadOS kernel",
+  "complete_boot_built": false,
+  "package_assembled": false,
+  "encrypted_artifact_authenticated": true,
+  "unpacked_file_count": 101,
+  "device_operations": false,
+  "hardware_tested": false,
+  "actions_retry_dispatched": false,
+  "existing_userdata_rebuilt_or_copied": false,
+  "evidence_log": "release-reference-build.log:2288 in the authenticated local run artifact",
+  "public_runner_billing_gate_passed": true,
+  "runtime_driver_qualification": false
+}

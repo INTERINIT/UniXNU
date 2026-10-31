@@ -1,5 +1,6 @@
 """Offline native dependency and comparison-recipe checks; never compiles XNU."""
 import importlib.util
+import ast
 import json
 from pathlib import Path
 import sys
@@ -68,6 +69,8 @@ class NativeRecipeTests(unittest.TestCase):
             self.assertNotIn("version-min=26.0", text)
             self.assertNotIn("-ios_version_min,26.0", text)
             self.assertNotIn("root = repo /", text)
+            self.assertIn("#ifdef MACH_BSD\\n#include <sys/proc.h>\\n#endif\\n", text)
+            self.assertLess(text.index("exception.write_text"), text.index("    manifest ="))
             self.assertTrue(first.is_relative_to(tree / "build/xnu/fileset-reference"))
             self.assertEqual(first, target.prepare_reference_builder(MAIN, ctx, output)[1])
             (source / ".git").mkdir()
@@ -77,6 +80,30 @@ class NativeRecipeTests(unittest.TestCase):
             self.assertNotEqual(first, target.prepare_reference_builder(MAIN, ctx, output)[1])
             (source / "restored-header.h").write_text("#define RESTORED 1\n")
             self.assertEqual(target.source_identity(source)[1], 2)
+
+    def test_reference_header_adaptation_keeps_diagnostics_and_is_fail_closed(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            source, output = root / "tree/.cache/xnu-work", root / "result"
+            source.mkdir(parents=True)
+            output.mkdir()
+            fixture = '#include <sys/code_signing.h> /* for developer mode state */\n/* proc_pid(get_bsdtask_info(task)) remains in the real diagnostic body */\n'
+            exception = source / "osfmk/kern/exception.c"
+            exception.parent.mkdir(parents=True)
+            exception.write_text(fixture, encoding="utf-8")
+            local, _, _ = target.prepare_reference_builder(MAIN, SimpleNamespace(tree=root / "tree"), output)
+            snapshot = next(node for node in ast.parse(local.read_text()).body if isinstance(node, ast.If))
+            start = next(i for i, node in enumerate(snapshot.body) if isinstance(node, ast.Assign)
+                         and any(isinstance(name, ast.Name) and name.id == "exception" for name in node.targets))
+            end = next(i for i, node in enumerate(snapshot.body) if isinstance(node, ast.Assign)
+                       and any(isinstance(name, ast.Name) and name.id == "manifest" for name in node.targets))
+            code = compile(ast.Module(body=snapshot.body[start:end], type_ignores=[]), str(local), "exec")
+            exec(code, {"source": source})
+            result = exception.read_text(encoding="utf-8")
+            added = '#ifdef MACH_BSD\n#include <sys/proc.h>\n#endif\n'
+            self.assertEqual(result.replace(added, ""), fixture)
+            with self.assertRaisesRegex(ValueError, "Review changed"):
+                exec(code, {"source": source})
 
     def test_empty_reference_source_refused(self):
         with tempfile.TemporaryDirectory() as temporary:

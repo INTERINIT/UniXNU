@@ -1,0 +1,27 @@
+{
+  "actual_failed_run": 41177759463,
+  "actual_error": "RELEASE exception.c:984 proc_pid undeclared",
+  "xnu_revision": "ac9718fb1af618d5ce8678d0dc6e8a58f252216f",
+  "device_revision": "f47b27ad97e97bee945f8af34a8430e3abcf918c",
+  "root_cause": "The pinned 27 bringup patch calls proc_pid outside the original DEVELOPMENT/DEBUG blocks; exception.c did not directly include its declaration header.",
+  "real_declaration": "bsd/sys/proc.h:280 extern int proc_pid(proc_t), under KERNEL, independent of DEVELOPMENT/DEBUG",
+  "source_references": [
+    "https://github.com/apple-oss-distributions/xnu/blob/ac9718fb1af618d5ce8678d0dc6e8a58f252216f/osfmk/kern/exception.c",
+    "https://github.com/apple-oss-distributions/xnu/blob/ac9718fb1af618d5ce8678d0dc6e8a58f252216f/bsd/sys/proc.h"
+  ],
+  "repair": "Add guarded sys/proc.h include only to isolated RELEASE reference copy before source-sha256 manifest generation",
+  "reference_recipe_identity_covers_fix": true,
+  "diagnostic_body_preserved": true,
+  "manual_prototypes_added": false,
+  "compiler_errors_suppressed": false,
+  "pinned_upstream_source_modified": false,
+  "offline_controls_passed": 4,
+  "real_Mac_compile_after_fix": false,
+  "complete_boot_built": false,
+  "Actions_started_after_fix": false,
+  "device_operations": false,
+  "files": {
+    "ci/scripts/target27.py": "e2db73da42f54009c8f4f3bfce3ec3fa5991377b8d6887540296ed8dbb9da81e",
+    "scripts/test_target27_native.py": "734157960bf95a42936bf03a95910ebfaf1f821b01e4bb3307966839fa999faa"
+  }
+}
