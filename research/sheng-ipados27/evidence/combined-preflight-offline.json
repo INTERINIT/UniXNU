@@ -1,0 +1,24 @@
+{
+  "status": "passed",
+  "mode": "offline",
+  "device_operations": false,
+  "hardware_tested": false,
+  "inputs": {
+    "code_sha256": {
+      "ci/scripts/cloud27.py": "0a7c0311550c2e334abbe6a3bbb5445fd5e46e7fed8203463b7e23b6872dedd4",
+      "ci/scripts/data_stage27.py": "55b066368248c81ff367e1adc97d489d199fff9c9e73469d068a04c81cb98df7",
+      "ci/scripts/seed27.py": "1b3a13cc29af8f94d966710a9073ca4d6b1e59cc7086240ae1527bb4fbf6cd91",
+      "ci/scripts/policy27.py": "7f6e99991b86e6e2df893a80fe2e1c8636fb0cccf5f7828afe010c135c74495e",
+      "ci/scripts/target27.py": "a4712756e3340a09047d69c4eb240daaf166f03c4765cc0c893f9136bd4d0502",
+      "ci/scripts/gpu_watchdog27.py": "a233de26cb5cd76ff04336883f55c163f875fd0b5a015ede5a83d58103e76846",
+      "ci/scripts/firmware_stage27.py": "ee17887f18d710e6de31a323f0f1836ed51663cdceb91206e4b0de225cd1eb13",
+      "ci/scripts/payload_stage27.py": "b9872ebf7148857326974439ff1ffb76c3684725bd0b564a33e0b607fab12c61",
+      "ci/scripts/host_preflight27.py": "4b7ef974590b6b77a982afed748585d7be55049a3a5e788a240ad8c1f80cf929",
+      "patches/firmware/ramdisk-fat-window27.patch": "667e38c3637da5ab6c08d27881132acfd7f4f6a2163582972d0bb6d97e2d8d0c",
+      "patches/firmware/logger-ram27.patch": "9aee04f08645c13f74f6ed1b4a851c9e8ea6f8bbe38c4d9f84a8b22d5b441cc7",
+      "patches/gpu/watchdog-monotonic.patch": "b362dd5ed3d5e3b204fa9227127abc0608672b98d20a36250c1b3229f77f547e"
+    },
+    "vendor_sha256": "a846d86dc6fc471a879ec02f8c8d87ee28dc1329e819f03629662fe0409ff520",
+    "policy_source_run": 41166392969
+  }
+}

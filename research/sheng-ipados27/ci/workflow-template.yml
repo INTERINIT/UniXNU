@@ -1,11 +1,12 @@
 name: sheng iPadOS27 pinned bring-up
+run-name: sheng iPadOS27 ${{ inputs.stage }}
 on:
   workflow_dispatch:
     inputs:
       stage:
         description: Host build stage (never deploys to hardware)
         type: choice
-        default: prepare
+        default: package
         options:
           - prepare
           - policies
@@ -52,6 +53,7 @@ jobs:
       - name: Install host dependencies
         run: brew install acpica qemu cmake ninja unifdef llvm lld mtools dtc openssl@3 glslang shaderc spirv-tools vulkan-headers rustup blacktop/tap/ipsw
       - uses: actions/cache/restore@v4
+        continue-on-error: true
         with:
           path: |
             work27/UniXNU/
@@ -63,6 +65,8 @@ jobs:
           key: ipados27-r1-${{ runner.arch }}-${{ github.run_id }}
           restore-keys: |
             ipados27-r1-${{ runner.arch }}-
+      - name: Validate fixed inputs and actual Mac tools
+        run: python research-source/research/sheng-ipados27/ci/scripts/host_preflight27.py --root . --output result27/host-preflight27.json
       - name: Build requested host phase
         run: python research-source/research/sheng-ipados27/ci/scripts/cloud27.py '${{ inputs.stage }}'
       - uses: actions/upload-artifact@v4
@@ -77,6 +81,7 @@ jobs:
           retention-days: 14
           if-no-files-found: warn
       - uses: actions/cache/save@v4
+        continue-on-error: true
         if: always()
         with:
           path: |

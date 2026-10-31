@@ -40,6 +40,9 @@ jobs:
           python research/sheng-ipados27/ci/scripts/test_gpu_watchdog27.py --source drivers/AdrenoMetal/NativeTurnipSmoke.h
       - name: Payload pairing and offline deployment guards
         run: |
+          git submodule update --init --depth=1 -- drivers/DarwinBoot
+          python research/sheng-ipados27/ci/scripts/test_data_stage27.py
+          python research/sheng-ipados27/ci/scripts/test_cloud27.py
           python research/sheng-ipados27/ci/scripts/test_payload_stage27.py
           python research/sheng-ipados27/scripts/test_flash27.py
           python research/sheng-ipados27/scripts/test_assemble_package27.py

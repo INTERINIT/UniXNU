@@ -2,7 +2,8 @@
 
 Entry point: data(main_checkout, ctx, result_directory, desired_gib=8).
 No device client or flashing command is used. No 16 GB raw root is copied.
-The APFS creation/mount path has not yet been exercised on a macOS runner.
+Fresh APFS creation and post-pack UUID verification have not yet completed on
+a macOS runner; source attachment reached the guard before that phase.
 """
 import hashlib
 import hmac
@@ -184,15 +185,31 @@ def write_config_uuid(ctx, identity):
 
 
 def checked_seed(path, metadata, packed, request_key, logical):
-    require(metadata.get("data_stage_request_sha256") == request_key and metadata.get("os_build") == BUILD,
+    require(metadata.get("data_stage_request_sha256") == request_key and metadata.get("os_build") == BUILD
+            and metadata.get("os_version") == "27.0.1",
             "Preserve cached Data from another recipe, source or allocation")
     require(metadata.get("seed17_reused") is False and metadata.get("original_os_inputs_modified") is False,
             "Cached Data is not the fresh reviewed recipe")
+    require(metadata.get("initial_only") is False and metadata.get("root_capacity_qualified") is True
+            and metadata.get("data_stage_host_only") is True and metadata.get("host_seed_creation_completed") is True
+            and metadata.get("device_operations") is False
+            and metadata.get("source_verification_level") == "verified raw-image policy plus mounted identity",
+            "Cached Data lacks the completed original-media and root-capacity qualification")
     require(path.is_file() and sha(path) == metadata.get("packed_sha256"), "Cached packed Data SHA-256 mismatch")
     info, header = packed.inspect(path)
     require(info["packed"] and info["bytes"] == logical and header[32:36] == b"NXSB", "Cached APFS Data extent/format differs")
-    require(info == metadata.get("packed") and str(uuid.UUID(metadata["volume_uuid"])).upper() == metadata["volume_uuid"],
+    block, blocks = int.from_bytes(header[36:40], "little"), int.from_bytes(header[40:48], "little")
+    require(block == PAGE and logical - 64 * MIB <= blocks * block <= logical, "Cached APFS container size differs")
+    identity = str(uuid.UUID(metadata["volume_uuid"])).upper()
+    require(info == metadata.get("packed") and identity == metadata["volume_uuid"]
+            and metadata.get("kernel_config_required", {}).get("XNU_OWNER_DATA_VOLUME_UUID") == identity,
             "Cached packed identity or generated VolumeUUID differs")
+    gib = metadata.get("logical_data_gib")
+    require(metadata.get("apfs_identity_verification") == {
+                "volume_uuid": identity, "logical_bytes": logical, "read_only": True, "physical_store_bound_to_seed": True}
+            and metadata.get("allocation", {}).get("logical_bytes") == logical
+            and type(gib) is int and gib * GIB == logical,
+            "Cached seed lacks its exact post-pack APFS UUID verification or allocation")
     return info
 
 

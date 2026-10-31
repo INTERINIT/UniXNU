@@ -1,0 +1,154 @@
+{
+  "status": "offline_controls_passed",
+  "tests": {
+    "count": 3,
+    "passed": 3,
+    "command": "python research/sheng-ipados27/scripts/test_target27_native.py -v"
+  },
+  "actual_resolver_and_catalog_used": true,
+  "catalog_modified": false,
+  "mock_catalog_or_mock_build_output_used": false,
+  "source_pins": {
+    "UniXNU": "793d6bddf7ea90678e3a61e2b2bd4350e5fdce16",
+    "UniXNU-sheng": "f47b27ad97e97bee945f8af34a8430e3abcf918c"
+  },
+  "catalog_sha256": "8089813f78343fadc81c2d291ca918fd99f1078cfb893f1bc73940ee4166945c",
+  "reviewed_native_function_sha256": {
+    "context": "e04ca79db5c436ae6d9d94033db6a63ffbf726cd69cb93757949d2ee38e4d2c2",
+    "bootstrap_recipe": "b87ab5d2f6db51921757aab1bc6e0c7f1f1bd112c44a4f80fee0c8ae7d451ab7",
+    "native_bootstrap": "5de71a4b920762104765ee5a3e6fc6df028a35130a45fac460dfc9d6e9ab51e9",
+    "source_identity": "abdb2b279bda690a9424874742196882916bbc0b2e104359c027a9ac384ca2ed",
+    "prepare_reference_builder": "b75ff9bb4323a040718509fd8bdec2a21587600c58bd3e0c0cb7e6d8de7604bf",
+    "release_reference": "125bddc4487e207c3eaba2901133266ca4bf7c21cd4cda95bc55b01d59aa0e13",
+    "full_kernel": "7e4f17decd8db391ebfd745cbd8fc4435ad7fe2a17f3abbffbde5e703f8209f0"
+  },
+  "test_script_sha256": "6081375123c8ca3e784675d083d951386a8aef7fa442507bfa1ba4ed7447636e",
+  "actual_full_archive_plan": [
+    {
+      "kind": "script",
+      "entry": "build-corecrypto-14.py"
+    },
+    {
+      "kind": "script",
+      "entry": "build-corecrypto-14.py --namespace"
+    },
+    {
+      "kind": "component",
+      "entry": "ArmDTPlatform"
+    },
+    {
+      "kind": "component",
+      "entry": "ArmCpu"
+    },
+    {
+      "kind": "script",
+      "entry": "build-libpthread-kernel.py"
+    },
+    {
+      "kind": "component",
+      "entry": "VirtioMmioBlock"
+    },
+    {
+      "kind": "component",
+      "entry": "ShengUfs"
+    },
+    {
+      "kind": "component",
+      "entry": "RamBlock"
+    },
+    {
+      "kind": "component",
+      "entry": "Adreno740"
+    },
+    {
+      "kind": "script",
+      "entry": "build-adreno740-kits.py"
+    },
+    {
+      "kind": "script",
+      "entry": "build-adreno740-accelerator.py"
+    },
+    {
+      "kind": "component",
+      "entry": "AppleKeyStoreState"
+    },
+    {
+      "kind": "script",
+      "entry": "build-gop-legacy-display-27.py"
+    }
+  ],
+  "actual_bootstrap_archive_plan": [
+    {
+      "kind": "script",
+      "entry": "build-corecrypto-14.py"
+    },
+    {
+      "kind": "script",
+      "entry": "build-corecrypto-14.py --namespace"
+    },
+    {
+      "kind": "component",
+      "entry": "ArmDTPlatform"
+    },
+    {
+      "kind": "component",
+      "entry": "ArmCpu"
+    },
+    {
+      "kind": "script",
+      "entry": "build-libpthread-kernel.py"
+    },
+    {
+      "kind": "component",
+      "entry": "VirtioMmioBlock"
+    },
+    {
+      "kind": "component",
+      "entry": "ShengUfs"
+    },
+    {
+      "kind": "component",
+      "entry": "RamBlock"
+    }
+  ],
+  "actual_target_environment": {
+    "UNIXNU_XNU_ARCH": "arm64e",
+    "UNIXNU_IOS_VERSION": "27.0",
+    "UNIXNU_XNU_COMMIT": "ac9718fb1af618d5ce8678d0dc6e8a58f252216f",
+    "UNIXNU_XNU_VERSION": "12377.121.6",
+    "UNIXNU_XNU_DARWIN": "25.5.0",
+    "UNIXNU_IPSW_BUILD": "24A446",
+    "UNIXNU_LIBPTHREAD_COMMIT": "1f4f5265b319111142f1bf3a27d4484ef5a98314"
+  },
+  "reviewed_dependency_chain": [
+    "Data seed actual UUID persisted in resolved .config before target context",
+    "kernel compile-record bootstrap may stop at archive-less link; it writes link.filelist",
+    "corecrypto/libpthread derive native names from link.filelist objects if no checkpoint",
+    "source storage uses IOPlatformExpert/startup/kern_exec compile records, not an already linked native kernel",
+    "source-storage bootstrap links a real .unstripped.noctf before full source HID export audit",
+    "RELEASE reference copied from actual patched XNU source, isolated by content and recipe identity",
+    "full build then prelink, measure profile actual .noctf to final native display slide, max 3 passes",
+    "check-legacy27-binds.py remains mandatory after stable slide"
+  ],
+  "fixed_local_failures": [
+    "HID fetch after prepare now reassembles refer link before source-driver use",
+    "explicit 24A446/out/config/Data UUID guard prevents stale profile/config reuse",
+    "RELEASE cache source and object directories change when patched or restored source inputs change",
+    "RELEASE compiler log exported even on failure",
+    "slide measured from same native file passed to prelink"
+  ],
+  "reference_control_scope": "Actual pinned upstream builder was transformed and syntax checked with small source-change fixtures. No reference executable or XNU archive was faked or built.",
+  "receipt_interface_review": "Existing payload-stage27 fields match assemble_package27/flash27 bindings. Payload panic-screen fileset probe and current-process Homebrew PATH follow-ups reported to payload owner.",
+  "host_preflight_review": "Read-only review found no obvious path/SDK syntax-probe error. macOS commands were not executed locally.",
+  "XNU_or_archives_compiled": false,
+  "Mac_Xcode_executed": false,
+  "Actions_started": false,
+  "device_operations": false,
+  "hardware_tested": false,
+  "remaining_actual_qualification": [
+    "The restored Data OS read-only guard must pass on macOS",
+    "No successful 27 native-bootstrap/RELEASE/full-kernel compile is locally present yet",
+    "Prelink allow-missing remains experimental; build success does not imply all calls are mapped",
+    "Actual GPU, final payload and device boot remain separately qualified"
+  ]
+}

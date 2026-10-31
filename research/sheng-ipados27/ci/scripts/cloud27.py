@@ -5,13 +5,16 @@ import importlib.util
 import json
 import os
 from pathlib import Path
+import platform
 import plistlib
 import shutil
 import struct
 import subprocess
 import sys
 import tempfile
+import time
 import tomllib
+import traceback
 
 CODE = Path(__file__).resolve().parents[1]
 ROOT = Path(os.environ.get("UNIXNU_RESEARCH_BUILD_ROOT", CODE)).resolve()
@@ -21,6 +24,7 @@ DEVICE = WORK / "UniXNU-sheng"
 RESULT = ROOT / "result27"
 PINS = {"UniXNU": "793d6bddf7ea90678e3a61e2b2bd4350e5fdce16", "UniXNU-sheng": "f47b27ad97e97bee945f8af34a8430e3abcf918c"}
 CONFIG = "sheng_ipados27_defconfig"
+PROFILE = "ipados-27.0.1-24A446"
 
 
 def sha(path):
@@ -46,14 +50,15 @@ def clone(name):
 
 
 def cli(*parts):
-    run(sys.executable, MAIN / "unixnu", *parts, "-D", DEVICE, cwd=MAIN)
+    run(sys.executable, MAIN / "unixnu", *parts, "-D", DEVICE, "--out", MAIN / "out", "--os", PROFILE, cwd=MAIN)
 
 
 def context():
     sys.path.insert(0, str(MAIN / "scripts"))
     from unixnu.cli import parser
     from unixnu.config import Context
-    return Context(parser().parse_args(["build", "kernel", "-D", str(DEVICE), "-j", "4"]))
+    return Context(parser().parse_args(["build", "kernel", "-D", str(DEVICE), "--out", str(MAIN / "out"),
+                                       "--os", PROFILE, "-j", "4"]))
 
 
 def prepare():
@@ -194,8 +199,8 @@ def data(ctx):
     return json.loads((cached / "data-seed.json").read_text())
 
 
-def native(stage, ctx):
-    seed = data(ctx)
+def native(stage, ctx, seed=None):
+    seed = data(ctx) if seed is None else seed
     target = helper("target27")
     ctx, modules = target.context(MAIN, DEVICE, seed)
     target.native_bootstrap(ctx, modules, RESULT)
@@ -223,17 +228,87 @@ def native(stage, ctx):
     }, indent=2) + "\n")
 
 
+def package_phases(actions, result):
+    """Collect independent phase failures in one run; never mask its conclusion."""
+    result = Path(result)
+    result.mkdir(parents=True, exist_ok=True)
+    phases = {}
+    dependencies = {"data": (), "native": ("data",), "gpu": (), "firmware": (),
+                    "payload": ("data", "native", "gpu", "firmware")}
+    for name, required in dependencies.items():
+        blocked = [item for item in required if phases[item]["status"] != "passed"]
+        if blocked:
+            phases[name] = {"status": "blocked", "dependencies": blocked}
+        else:
+            started = time.monotonic()
+            print("PACKAGE PHASE:", name, flush=True)
+            try:
+                actions[name]()
+            except (Exception, SystemExit) as error:
+                trace = traceback.format_exc()
+                private_seed = os.environ.get("UNIXNU_UNIQUE_CHIP_ID")
+                if private_seed:
+                    trace = trace.replace(private_seed, "[private platform seed]")
+                log = "package-" + name + "-failure.log"
+                (result / log).write_text(trace, encoding="utf-8")
+                phases[name] = {"status": "failed", "error_type": type(error).__name__, "traceback": log}
+                print("PACKAGE PHASE FAILED:", name, type(error).__name__, flush=True)
+            else:
+                phases[name] = {"status": "passed"}
+            phases[name]["elapsed_seconds"] = round(time.monotonic() - started, 3)
+        report = {"status": "in_progress", "phases": phases, "device_operations": False, "hardware_tested": False}
+        (result / "package-phases27.json").write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
+    report["status"] = "host_verified" if all(item["status"] == "passed" for item in phases.values()) else "failed"
+    (result / "package-phases27.json").write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
+    summary = os.environ.get("GITHUB_STEP_SUMMARY")
+    if summary:
+        with Path(summary).open("a", encoding="utf-8") as stream:
+            stream.write("## sheng 24A446 host build\n\n| Phase | Result |\n| --- | --- |\n")
+            for name, item in phases.items():
+                stream.write("| " + name + " | " + item["status"] + " |\n")
+            stream.write("\nNo tablet operation. Hardware qualification remains untested.\n")
+    return report
+
+
 def complete_package(ctx):
-    # One runner owns the seed/config/kernel/anchor chain. Independent host
-    # phase artifacts are useful evidence, but never guessed to be interchangeable.
-    native("kernel", ctx)
-    ctx = context()
-    helper("target27").gpu(MAIN, ctx, RESULT / "ipsw-trust27.bundle", RESULT)
-    helper("firmware_stage27").run(MAIN, DEVICE, RESULT, ROOT, ctx=ctx)
-    helper("payload_stage27").run(
-        MAIN, DEVICE, RESULT, ROOT, ctx=context(), uefi=DEVICE / "uefi-sheng",
-        execute=True, unique_chip_id=os.environ.get("UNIXNU_UNIQUE_CHIP_ID"),
-    )
+    # One runner owns the seed/config/kernel/anchor chain. Independent phases
+    # still run after an unrelated failure so one workflow yields all evidence.
+    state = {}
+
+    def create_data():
+        state["seed"] = data(context())
+        # This one-use Mac download is excluded from all caches. The original
+        # encrypted/plain inputs remain on the Windows workstation. Native,
+        # GPU, firmware and payload steps use the completed seed and policies.
+        if platform.system() != "Darwin":
+            raise ValueError("Complete package execution requires the Mac host")
+        cache = (MAIN / "out/ipsw/24A446").resolve()
+        plain = cache / "043-68950-668.dmg"
+        cleanup = {"temporary_input": plain.name, "status": "not_present", "device_operations": False}
+        if plain.exists():
+            expected = "8a12cdad43f8f0d33dadcf01a800a560222baf40c05f71374c460ba57ba3a739"
+            if (plain.is_symlink() or not plain.resolve().is_relative_to(cache)
+                    or plain.stat().st_size != 9613344768
+                    or state["seed"].get("source_os_file_sha256") != expected or sha(plain) != expected):
+                raise ValueError("Preserve a temporary OS input that differs from the authenticated Data source")
+            try:
+                plain.unlink()
+                cleanup.update(status="removed_after_read_only_seed_creation", bytes_freed=9613344768, sha256=expected)
+            except OSError as error:
+                cleanup.update(status="retained", reason=type(error).__name__)
+        (RESULT / "temporary-os-cleanup.json").write_text(json.dumps(cleanup, indent=2) + "\n", encoding="utf-8")
+
+    report = package_phases({
+        "data": create_data,
+        "native": lambda: native("kernel", context(), seed=state["seed"]),
+        "gpu": lambda: helper("target27").gpu(MAIN, context(), RESULT / "ipsw-trust27.bundle", RESULT),
+        "firmware": lambda: helper("firmware_stage27").run(MAIN, DEVICE, RESULT, ROOT, ctx=context()),
+        "payload": lambda: helper("payload_stage27").run(
+            MAIN, DEVICE, RESULT, ROOT, ctx=context(), uefi=DEVICE / "uefi-sheng",
+            execute=True, unique_chip_id=os.environ.get("UNIXNU_UNIQUE_CHIP_ID")),
+    }, RESULT)
+    if report["status"] != "host_verified":
+        raise RuntimeError("Package phases failed or were blocked; inspect package-phases27.json and the saved logs")
 
 
 def main():

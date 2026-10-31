@@ -1,0 +1,78 @@
+{
+  "mode": "offline contracts and guards",
+  "checks": [
+    {
+      "check": "cloud-flow",
+      "exit_code": 0,
+      "seconds": 0.11,
+      "log": "cloud-flow.log"
+    },
+    {
+      "check": "data",
+      "exit_code": 0,
+      "seconds": 0.156,
+      "log": "data.log"
+    },
+    {
+      "check": "native",
+      "exit_code": 0,
+      "seconds": 0.109,
+      "log": "native.log"
+    },
+    {
+      "check": "gpu",
+      "exit_code": 0,
+      "seconds": 0.235,
+      "log": "gpu.log"
+    },
+    {
+      "check": "watchdog-source",
+      "exit_code": 0,
+      "seconds": 0.078,
+      "log": "watchdog-source.log"
+    },
+    {
+      "check": "payload",
+      "exit_code": 0,
+      "seconds": 0.156,
+      "log": "payload.log"
+    },
+    {
+      "check": "flash-guards",
+      "exit_code": 0,
+      "seconds": 0.453,
+      "log": "flash-guards.log"
+    },
+    {
+      "check": "package-assembly",
+      "exit_code": 0,
+      "seconds": 0.078,
+      "log": "package-assembly.log"
+    },
+    {
+      "check": "firmware-interface",
+      "exit_code": 0,
+      "seconds": 0.032,
+      "log": "firmware-interface.log"
+    },
+    {
+      "check": "fixed-inputs",
+      "exit_code": 0,
+      "seconds": 0.062,
+      "log": "fixed-inputs.log"
+    },
+    {
+      "check": "workflow-lint",
+      "exit_code": 0,
+      "seconds": 0.016,
+      "log": "workflow-lint.log"
+    }
+  ],
+  "all_passed": true,
+  "all_python_ast_parsed": true,
+  "full_15GB_sparse_not_rehashed_again": true,
+  "Mac_build_tested_by_this_suite": false,
+  "hardware_tested": false,
+  "device_operations": false,
+  "cloud_dispatches": 0
+}

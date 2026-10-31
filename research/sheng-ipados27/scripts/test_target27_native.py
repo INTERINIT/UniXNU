@@ -1,0 +1,88 @@
+"""Offline native dependency and comparison-recipe checks; never compiles XNU."""
+import importlib.util
+import json
+from pathlib import Path
+import sys
+import tempfile
+from types import SimpleNamespace
+import unittest
+
+MAIN = Path(__file__).resolve().parents[3]
+RESEARCH = Path(__file__).resolve().parents[1]
+DEVICE = MAIN.parent / "UniXNU-sheng"
+sys.path.insert(0, str(MAIN / "scripts"))
+spec = importlib.util.spec_from_file_location("reviewed_target27", RESEARCH / "ci/scripts/target27.py")
+target = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(target)
+
+
+def actual_plan():
+    from unixnu.cli import parser
+    from unixnu.config import Context
+    from unixnu import feeds, kernel
+    args = parser().parse_args(["status", "-D", str(DEVICE), "--out", str(MAIN / "out"),
+                                "--os", "ipados-27.0.1-24A446"])
+    ctx = Context(args)
+    modules = feeds.resolve(ctx)
+    original = kernel.archive_plan(ctx)
+    ctx.component_specs, ctx.board["kernel"]["archives"] = target.bootstrap_recipe(ctx)
+    bootstrap = kernel.archive_plan(ctx)
+    display_tree = ctx.tree
+    return ctx, modules, original, bootstrap, display_tree
+
+
+class NativeRecipeTests(unittest.TestCase):
+    def test_actual_catalog_full_and_bootstrap_dependency_plans(self):
+        ctx, modules, full, bootstrap, tree = actual_plan()
+        names = [item["id"] for kind, item in bootstrap if kind == "component"]
+        self.assertEqual(names, ["ArmDTPlatform", "ArmCpu", "VirtioMmioBlock", "ShengUfs", "RamBlock"])
+        self.assertNotIn("Adreno740", names)
+        self.assertTrue(any(kind == "script" and item == "build-gop-legacy-display-27.py" for kind, item in full))
+        self.assertEqual(modules[("refer", "IOHIDFamily")].source["commit"], "e31e90a24c27ad6cbe981650d12a1a4124065b03")
+        self.assertEqual(modules[("refer", "xnu")].source["commit"], "ac9718fb1af618d5ce8678d0dc6e8a58f252216f")
+        from unixnu import kernel
+        environment = kernel.version_env(modules, ctx)
+        self.assertEqual(environment["UNIXNU_XNU_ARCH"], "arm64e")
+        self.assertEqual(environment["UNIXNU_IOS_VERSION"], "27.0")
+        self.assertEqual(environment["UNIXNU_LIBPTHREAD_COMMIT"], "1f4f5265b319111142f1bf3a27d4484ef5a98314")
+        self.assertEqual(environment["UNIXNU_IPSW_BUILD"], "24A446")
+        self.assertEqual(tree.parents[4], MAIN)
+        self.assertEqual(tree.parents[5] / "UniXNU-sheng", DEVICE)
+        self.assertEqual(tree.parents[3] / "driver-sources/IOHIDFamily", MAIN / "out/driver-sources/IOHIDFamily")
+
+    def test_reference_rewrite_and_cache_identity_follow_actual_source(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            tree, output = root / "tree", root / "result"
+            source = tree / ".cache/xnu-work"
+            source.mkdir(parents=True)
+            output.mkdir()
+            (source / "test-source.c").write_text("int version = 1;\n")
+            ctx = SimpleNamespace(tree=tree)
+            local, first, receipt = target.prepare_reference_builder(MAIN, ctx, output)
+            text = local.read_text()
+            compile(text, str(local), "exec")
+            self.assertEqual(receipt["upstream_builder_sha256"], target.sha(MAIN / "scripts/build-fileset-release-reference.py"))
+            self.assertIn("-miphoneos-version-min=27.0", text)
+            self.assertIn("-Wl,-ios_version_min,27.0", text)
+            self.assertNotIn("version-min=26.0", text)
+            self.assertNotIn("-ios_version_min,26.0", text)
+            self.assertNotIn("root = repo /", text)
+            self.assertTrue(first.is_relative_to(tree / "build/xnu/fileset-reference"))
+            self.assertEqual(first, target.prepare_reference_builder(MAIN, ctx, output)[1])
+            (source / ".git").mkdir()
+            (source / ".git/config").write_text("not a source input\n")
+            self.assertEqual(first, target.prepare_reference_builder(MAIN, ctx, output)[1])
+            (source / "test-source.c").write_text("int version = 2;\n")
+            self.assertNotEqual(first, target.prepare_reference_builder(MAIN, ctx, output)[1])
+            (source / "restored-header.h").write_text("#define RESTORED 1\n")
+            self.assertEqual(target.source_identity(source)[1], 2)
+
+    def test_empty_reference_source_refused(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            with self.assertRaisesRegex(ValueError, "empty"):
+                target.source_identity(Path(temporary))
+
+
+if __name__ == "__main__":
+    unittest.main()

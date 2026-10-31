@@ -3,13 +3,16 @@
 These tests do not execute Darwin code or qualify GPU hardware.
 """
 import ast
+import argparse
 import importlib.util
 import json
+import os
 from pathlib import Path
 import shutil
 import subprocess
 import sys
 import tempfile
+from types import SimpleNamespace
 import unittest
 from unittest.mock import patch
 
@@ -19,6 +22,23 @@ spec = importlib.util.spec_from_file_location("target27_gpu_tested", SCRIPTS / "
 target = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(target)
 SOURCE = SCRIPTS.parents[3] / "scripts/check-turnip-darwin-host.py"
+MAIN = SCRIPTS.parents[3]
+DEVICE = MAIN.parent / "UniXNU-sheng"
+
+
+def actual_parser(path):
+    source = ast.parse(path.read_text(encoding="utf-8"))
+    statements = []
+    for node in source.body:
+        if isinstance(node, ast.Assign) and any(isinstance(item, ast.Name) and item.id == "parser" for item in node.targets):
+            statements.append(node)
+        elif isinstance(node, ast.Expr) and isinstance(node.value, ast.Call) and isinstance(node.value.func, ast.Attribute):
+            owner = node.value.func.value
+            if isinstance(owner, ast.Name) and owner.id == "parser" and node.value.func.attr == "add_argument":
+                statements.append(node)
+    namespace = {"argparse": argparse, "Path": Path, "__doc__": "Actual source CLI contract"}
+    exec(compile(ast.Module(body=statements, type_ignores=[]), str(path), "exec"), namespace)
+    return namespace["parser"]
 
 
 class ReplayScopeTests(unittest.TestCase):
@@ -84,6 +104,64 @@ class ReplayScopeTests(unittest.TestCase):
                        self.tree, log_path=log)
         self.assertIn("real stdout", log.read_text())
         self.assertIn("real stderr", log.read_text())
+
+    def test_real_upstream_packers_can_replace_existing_results_safely(self):
+        plugin = self.tree / "build/adreno-metal-plugin27"
+        bundle = plugin / "NativeAdrenoMetal.bundle"
+        bundle.mkdir(parents=True)
+        # These are packing-contract bytes, not signed/qualified GPU programs.
+        (bundle / "NativeAdrenoMetal").write_bytes(b"software packing fixture")
+        (bundle / "libvulkan_freedreno.dylib").write_bytes(b"software Turnip fixture")
+        (bundle / "Info.plist").write_bytes(b"packing fixture metadata")
+        (plugin / "trust.json").write_text(json.dumps({"cdhash": "01" * 20, "turnip_cdhash": "02" * 20}))
+        shutil.copy2(MAIN / "scripts/make-gpu-addon.py", self.tree / "scripts/make-gpu-addon.py")
+        trust = self.root / "original-trust.bundle"
+        import struct
+        module = struct.pack("<I16sI", 2, bytes(16), 0)
+        original = struct.pack("<III", 2, 12, 12 + len(module)) + module + module
+        trust.write_bytes(original)
+        (self.output / "gpu27.gpuaddon").write_bytes(b"earlier complete result")
+        (self.output / "owner-trust27.bundle").write_bytes(b"earlier trust result")
+        target.publish_gpu_artifacts(MAIN, self.tree, trust, self.output, os.environ)
+        first = (self.output / "gpu27.gpuaddon").read_bytes()
+        target.publish_gpu_artifacts(MAIN, self.tree, trust, self.output, os.environ)
+        self.assertEqual((self.output / "gpu27.gpuaddon").read_bytes(), first)
+        self.assertEqual(trust.read_bytes(), original)
+        report = json.loads((self.output / "gpu27-artifacts.json").read_text())
+        self.assertTrue(report["actual_packed_contents_equal_signed_bundle"])
+        self.assertFalse(report["hardware_tested"])
+        before = {name: (self.output / name).read_bytes() for name in ("gpu27.gpuaddon", "owner-trust27.bundle", "gpu27-trust.json")}
+        with patch.object(target, "run", side_effect=subprocess.CalledProcessError(1, "packer")):
+            with self.assertRaises(subprocess.CalledProcessError):
+                target.publish_gpu_artifacts(MAIN, self.tree, trust, self.output, os.environ)
+        self.assertEqual({name: (self.output / name).read_bytes() for name in before}, before)
+
+    def test_actual_ios27_cli_and_rust_paths(self):
+        for path in (MAIN / "scripts/build-turnip-darwin.py", MAIN / "scripts/build-adreno-metal-bridge.py"):
+            self.assertEqual(actual_parser(path).parse_args(["--target", "ios27"]).target, "ios27")
+        self.assertTrue(actual_parser(DEVICE / "scripts/build-adreno-compiler-host.py").parse_args(["--probe"]).probe)
+        plugin = ast.parse((MAIN / "scripts/build-adreno-metal-plugin.py").read_text())
+        namespace = {"sys": SimpleNamespace(argv=["build-adreno-metal-plugin.py", "--target", "ios27"]), "ROOT": self.tree}
+        for node in plugin.body:
+            if isinstance(node, ast.Assign) and any(isinstance(item, ast.Name) and item.id in
+                                                   ("IOS27", "OUT", "TURNIP", "BRIDGE_TARGET") for item in node.targets):
+                exec(compile(ast.Module(body=[node], type_ignores=[]), "actual-plugin-contract", "exec"), namespace)
+        self.assertTrue(namespace["IOS27"])
+        self.assertEqual(namespace["OUT"], self.tree / "build/adreno-metal-plugin27")
+        self.assertEqual(namespace["TURNIP"], self.tree / "build/mesa-tu-ios27/src/freedreno/vulkan/libvulkan_freedreno.dylib")
+        self.assertEqual(namespace["BRIDGE_TARGET"], "ios27")
+        bridge = ast.parse((MAIN / "scripts/build-adreno-metal-bridge.py").read_text())
+        namespace.update(args=SimpleNamespace(target="ios27"), os=SimpleNamespace(environ={}), runtime_id="fixture",
+                         air=Path("runtime.air"), fc_air=Path("constant.air"), scanout_air=Path("scanout.air"))
+        for node in bridge.body:
+            if isinstance(node, ast.Assign) and any(isinstance(item, ast.Name) and item.id in ("triple", "cargo", "env") for item in node.targets):
+                exec(compile(ast.Module(body=[node], type_ignores=[]), "actual-bridge-contract", "exec"), namespace)
+            elif isinstance(node, ast.If) and ast.unparse(node.test) == "args.target == 'ios27'":
+                exec(compile(ast.Module(body=[node], type_ignores=[]), "actual-bridge-contract", "exec"), namespace)
+        self.assertEqual(namespace["triple"], "arm64e-apple-ios")
+        self.assertEqual(namespace["cargo"], ["cargo", "+1.98.0", "-Z", "build-std=std,panic_unwind"])
+        self.assertEqual(namespace["env"]["RUSTC_BOOTSTRAP"], "1")
+        self.assertEqual(namespace["env"]["IPHONEOS_DEPLOYMENT_TARGET"], "27.0")
 
 
 if __name__ == "__main__":

@@ -7,11 +7,14 @@ Default execution is an input audit/plan. No device client is used here.
 The macOS assembly path has not yet been executed or hardware-qualified.
 """
 import argparse
+from contextlib import contextmanager
 import copy
 import hashlib
+import hmac
 import importlib.util
 import json
 import math
+import os
 from pathlib import Path
 import platform
 import re
@@ -35,6 +38,7 @@ FAT_WINDOW_SHA = "a970191cdb4077522f610d4c967be72eb4fcddde41cf98cb57d8c87dda0982
 APPLE_KERNEL_SHA = "38e6d9fa5f789b8228f4617ef4c6d2a3fd8ab564abdc9b62920f1db53fc1780a"
 MIB, PAGE = 1 << 20, 4096
 MAX_BOOT_BYTES = 256 * MIB
+MAX_PAYLOAD_MIB = 192
 CONFIG = "EFI/UniXNU/unixnu.toml"
 PAYLOADS = "EFI/UniXNU/Payloads/"
 
@@ -414,6 +418,73 @@ def extract_fat(image, directory):
             for path in directory.rglob("*") if path.is_file()}
 
 
+def payload_size_mib(content_bytes):
+    # Match payload.build's strict95%-content guard, with1MiB allowance for ADT,
+    # entry-probe growth, config and FAT metadata. The upstream addon recipe
+    # documents192MiB as the working tablet ramdisk size;256MiB did not boot.
+    size = max(176, math.ceil((content_bytes + MIB) / (0.95 * MIB)))
+    require(size <= MAX_PAYLOAD_MIB, "Kernel/Data/GPU cannot fit the proven192MiB FAT payload cap")
+    return size
+
+
+def check_sealed_kernel(path, report):
+    data = Path(path).read_bytes()
+    code, size, field = int(report["code_file_offset"], 16), report["code_bytes"], int(report["hmac_file_offset"], 16)
+    require(report.get("kernel_sha256") == digest(data) and report.get("runtime_selftests_executed") is False
+            and 0 < size <= len(data) and 0 <= code <= len(data) - size and 0 <= field <= len(data) - 32,
+            "The actual source-crypto seal report/extent differs")
+    expected = hmac.digest(b"\0", data[code:code + size], "sha256")
+    require(data[field:field + 32] == expected == bytes.fromhex(report["hmac_sha256"]),
+            "The actual copied kernel POST HMAC differs from its code")
+    return digest(data)
+
+
+def prepare_fileset_kernel(ctx, source, output, line, owner_anchor_sha256):
+    """Reseal an owned copy through the existing fileset-aware POST tool.
+
+    The legacy entry/panic-screen patcher assumes an MH_EXECUTE-era entry
+    padding/symbol layout. Keep it out of this experimental fileset package;
+    native27 diagnostics and the reserved UFS log remain available.
+    """
+    with Path(source).open("rb") as stream:
+        header = stream.read(32)
+    require(len(header) == 32 and struct.unpack_from("<I", header, 12)[0] == 12, "Require the reviewed27 fileset candidate")
+    from unixnu import kernel
+    version = kernel.version_env({}, ctx)
+    require(version.get("UNIXNU_XNU_ARCH") == "arm64e" and version.get("UNIXNU_IOS_VERSION") == "27.0",
+            "Fileset POST tool must run with the actual27 arm64e target")
+    source_digest = sha(source)
+    destination = Path(output) / "kernel27-sealed.macho"
+    require(not destination.exists(), "Preserve the previous sealed payload input")
+    shutil.copy2(source, destination)
+    tool = Path(ctx.tree) / "scripts/seal-source-crypto-kernel.py"
+    with (Path(output) / "kernel27-source-post-seal.log").open("w", encoding="utf-8") as log:
+        subprocess.run([sys.executable, str(tool), str(destination), "--kernel-args", line + " sheng-data-reset=1"],
+                       env=dict(os.environ, **version), check=True, stdout=log, stderr=subprocess.STDOUT)
+    report = load(destination.with_suffix(destination.suffix + ".crypto-hmac.json"))
+    sealed_digest = check_sealed_kernel(destination, report)
+    require(sha(source) == source_digest and digest(macho_symbol_bytes(destination.read_bytes(), "_verified_root_key", 395))
+            == owner_anchor_sha256, "POST packaging changed the original candidate or its trusted owner anchor")
+    return destination, {"source_candidate_sha256": source_digest, "payload_input_sha256": sealed_digest,
+                         "seal_tool_sha256": sha(tool), "actual_post_hmac_rechecked": True,
+                         "legacy_entry_probe_applied": False, "legacy_panic_screen_applied": False,
+                         "runtime_selftests_executed": False, "original_candidate_unchanged": True}
+
+
+@contextmanager
+def payload_toolchain():
+    from unixnu import kernel
+    previous = os.environ.get("PATH")
+    os.environ["PATH"] = kernel.toolchain_path(previous)
+    try:
+        yield
+    finally:
+        if previous is None:
+            os.environ.pop("PATH", None)
+        else:
+            os.environ["PATH"] = previous
+
+
 def convert_v3(legacy, payload, fd, shim):
     """Use the original gzip/FAT in v3; stock vendor_boot supplies its DTB.
 
@@ -425,7 +496,7 @@ def convert_v3(legacy, payload, fd, shim):
     kernel_size, _, ramdisk_size = struct.unpack_from("<3I", legacy, 8)
     require(struct.unpack_from("<2I", legacy, 36) == (PAGE, 0), "The intermediate must be official legacy-v0/4096")
     offset = PAGE + (kernel_size + PAGE - 1) // PAGE * PAGE
-    require(struct.unpack_from("<I", legacy, 24)[0] == 0 and ramdisk_size == len(payload)
+    require(0 < len(payload) <= MAX_PAYLOAD_MIB * MIB and struct.unpack_from("<I", legacy, 24)[0] == 0 and ramdisk_size == len(payload)
             and len(legacy) == offset + (ramdisk_size + PAGE - 1) // PAGE * PAGE
             and legacy[offset:offset + ramdisk_size] == payload, "Legacy FAT/extent differs")
     kernel = legacy[PAGE:PAGE + kernel_size]
@@ -476,6 +547,12 @@ def run(main, device, result, root, *, ctx, uefi, execute=False, unique_chip_id=
     if not execute:
         return plan
     require(platform.system() == "Darwin", "The actual payload adapter requires macOS/mtools/Xcode")
+    with payload_toolchain():
+        return assemble(inputs, plan, ctx, unique_chip_id)
+
+
+def assemble(inputs, plan, ctx, unique_chip_id):
+    """Actual Mac assembly; called only inside the reviewed toolchain scope."""
     require(unique_chip_id and re.fullmatch(r"(?:0x)?[0-9a-fA-F]{1,16}", unique_chip_id), "Provide the private platform seed separately; never publish it")
     from unixnu import payload, bootimg
     out = inputs["result"] / "payload27"
@@ -485,7 +562,7 @@ def run(main, device, result, root, *, ctx, uefi, execute=False, unique_chip_id=
     work.work, work.logs, work.uefi = out / "work", out / "logs", inputs["uefi"]
     work.logs.mkdir()
     work.board, work.args = copy.deepcopy(ctx.board), copy.copy(ctx.args)
-    work.board["payload"].update(kernel_args=inputs["args"], timeout=-1, tools=True, entry_probe_reset_delay=0,
+    work.board["payload"].update(kernel_args=inputs["args"], timeout=-1, tools=True, panic_screen=False, entry_probe_reset_delay=0,
                                  root_policies=str(inputs["result"] / "root-policies.bin"),
                                  install={"title": "First install", "confirm": "Erase iPadOS Data?",
                                           "confirm_titles": ["Erase iPadOS Data and boot"], "confirm_args": ["sheng-data-reset=1"]})
@@ -495,14 +572,14 @@ def run(main, device, result, root, *, ctx, uefi, execute=False, unique_chip_id=
                         "unique_chip_id": unique_chip_id}.items():
         setattr(work.args, name, value)
     content = sum(path.stat().st_size for path in (inputs["kernel"], inputs["data"], inputs["result"] / "gpu27.gpuaddon",
-                  inputs["result"] / "owner-trust27.bundle", inputs["result"] / "root-policies.bin")) + MIB
-    size = max(176, math.ceil(content / (0.9 * MIB)))
-    require(size <= 240, "Payload cannot fit the conservative boot buffer cap")
-    work.board["payload"]["size_mib"] = size
+                  inputs["result"] / "owner-trust27.bundle", inputs["result"] / "root-policies.bin"))
+    work.board["payload"]["size_mib"] = payload_size_mib(content)
+    prepared_kernel, seal_receipt = prepare_fileset_kernel(work, inputs["kernel"], out, plan["kernel_args"],
+                                                          inputs["owner_anchor_sha256"])
     with tempfile.TemporaryDirectory(prefix="payload27-verify-", dir=out) as temporary:
         temp = Path(temporary)
         gpu_signatures(inputs["addon_files"], inputs["gpu_trust"], temp / "gpu")
-        image = payload.build(work, kernel=inputs["kernel"])
+        image = payload.build(work, kernel=prepared_kernel)
         before = extract_fat(image, temp / "before")
         require(PAYLOADS + "kernel.macho.vroot" in before, "Official payload did not carry the actual vroot sidecar")
         config = temp / "unixnu.toml"
@@ -513,7 +590,8 @@ def run(main, device, result, root, *, ctx, uefi, execute=False, unique_chip_id=
                 "Changing the menu altered another payload file")
         payload_report = load(work.work / "payload/payload.json")
         require(after[PAYLOADS + "kernel.macho"] == payload_report["payload_kernel_sha256"]
-                and payload_report["kernel_sha256"] == plan["kernel_sha256"], "Actual staged kernel provenance differs")
+                == payload_report["kernel_sha256"] == seal_receipt["payload_input_sha256"]
+                and sha(inputs["kernel"]) == plan["kernel_sha256"], "Actual staged kernel provenance differs")
         expected = {"kernel.macho.vroot": inputs["result"] / "root-policies.bin", "kernel.macho.trustcache": inputs["result"] / "owner-trust27.bundle",
                     "kernel.macho.gpuaddon": inputs["result"] / "gpu27.gpuaddon", "scratch-data.img": inputs["data"]}
         require(all(after[PAYLOADS + name] == sha(path) for name, path in expected.items()), "Actual FAT sidecar SHA mismatch")
@@ -540,6 +618,7 @@ def run(main, device, result, root, *, ctx, uefi, execute=False, unique_chip_id=
                     boot_sha256=sha(final), boot_bytes=final.stat().st_size, payload_sha256=sha(final_fat),
                     payload_files=final_inventory, packed_boot_vroot_extracted_and_equal=True,
                     config_sha256=inputs["config_sha256"], gpu_signature_and_cdhash_verified=True)
+        plan["kernel_packaging"] = seal_receipt
         plan.update(appended_dtb=False, hardware_dtb_source="unchanged stock vendor_boot",
                     kernel_gzip_sha256=digest(raw[PAGE:PAGE + kernel_bytes]))
         (out / "payload-stage27.json").write_text(json.dumps(plan, indent=2) + "\n", encoding="utf-8")

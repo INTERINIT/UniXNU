@@ -55,7 +55,7 @@ def boot_header(path):
         kernel, ramdisk, _, header_size = struct.unpack_from("<4I", head, 8)
         require(struct.unpack_from("<I", head, 40)[0] == 3 and header_size == 1580
                 and head[24:40] == bytes(16) and 0 < kernel <= 16 * 1024 * 1024
-                and 0 < ramdisk <= 240 * 1024 * 1024 and head[44:] == bytes(4096 - 44),
+                and 0 < ramdisk <= 192 * 1024 * 1024 and head[44:] == bytes(4096 - 44),
                 "Require the reviewed nonempty v3 container")
         extent = 4096 + ((kernel + 4095) // 4096 + (ramdisk + 4095) // 4096) * 4096
         require(extent == path.stat().st_size, "Boot image is truncated or has unexpected trailing data")

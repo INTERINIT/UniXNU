@@ -1,0 +1,13 @@
+{
+  "target": "sheng / iPadOS 27.0.1 / 24A446",
+  "decision": "one combined package workflow after consolidated offline review",
+  "offline_checks_passed": 11,
+  "workflow_lint": "actionlint 1.7.12 passed",
+  "cloud_run_budget_this_request": 1,
+  "automatic_workflow_retries": false,
+  "public_checks": "manual only",
+  "device_operations_authorized_during_preparation": false,
+  "completed_package_action": "stop for user hardware testing",
+  "Mac_compilation_verified_by_offline_checks": false,
+  "hardware_tested": false
+}

@@ -4,7 +4,8 @@
 Never contacts a tablet. No ADB/fastboot commands or imported iPadOS 17 seed.
 The mounted source OS must already have passed the selected profile's image
 verification. The real generated VolumeUUID must be injected into the kernel
-configuration BEFORE compiling that kernel. This draft has not run on macOS.
+configuration BEFORE compiling that kernel. Fresh APFS creation and the
+post-pack UUID roundtrip still await a successful macOS run.
 """
 import argparse
 import hashlib
@@ -121,7 +122,7 @@ def fresh_preferences(mount, build):
     directories = ("db/dslocal/nodes/Default/users", "db/dslocal/nodes/Default/groups", "db/dslocal/nodes/Default/config",
                    "containers/Bundle", "containers/Data/System", "containers/Data/Application", "containers/Shared/SystemGroup",
                    "containers/Temp", "PersonaVolumes", "preboot", "root", "tmp", "run", "Library", "keybags/backup",
-                   "mobile", "mobile/Library/Preferences", "mobile/Library/Caches", "mobile/Library/Logs", "mobile/Containers",
+                   "mobile", "mobile/Library", "mobile/Library/Preferences", "mobile/Library/Caches", "mobile/Library/Logs", "mobile/Containers",
                    "mobile/Documents", "mobile/Media", "mobile/tmp")
     for relative in directories:
         path = within(mount, relative)
@@ -149,11 +150,44 @@ def fresh_preferences(mount, build):
                        "CAEnableIOSurfaceCompression": False}, 0o644)
 
 
-def physical_device(attachment):
+def physical_device(attachment, image, logical, *, readonly):
+    """Bind the new raw image to its APFS physical store, not enum order."""
     devices = [e.get("dev-entry", "") for e in attachment["system-entities"]]
-    candidates = [d for d in devices if re.fullmatch(r"/dev/disk[0-9]+", d)]
-    require(candidates, "hdiutil returned no whole-disk device")
-    return candidates[0]
+    stores = {part.get("DeviceIdentifier") for container in
+              plist_command("diskutil", "apfs", "list", "-plist").get("Containers", [])
+              for part in container.get("PhysicalStores", [])}
+    candidates = [d for d in devices if re.fullmatch(r"/dev/disk[0-9]+", d) and Path(d).name in stores]
+    require(len(candidates) == 1, "Cannot identify the new raw APFS image's sole physical store")
+    device = candidates[0]
+    media = plist_command("diskutil", "info", "-plist", device)
+    require(media.get("DeviceNode") == device and media.get("BusProtocol") == "Disk Image"
+            and media.get("TotalSize") == logical, "APFS physical store is not the exact-sized virtual seed")
+    matching = [entry for entry in plist_command("hdiutil", "info", "-plist").get("images", [])
+                if Path(entry.get("image-path", "")).resolve() == image.resolve()
+                and entry.get("writeable") is (not readonly)
+                and device in [part.get("dev-entry") for part in entry.get("system-entities", [])]]
+    require(len(matching) == 1, "APFS attachment is not uniquely tied to this seed image and access mode")
+    return device
+
+
+def detach_created(attachment, physical):
+    if physical is not None:
+        run("hdiutil", "detach", physical)
+        return
+    # Even a failed identity check must release only the nodes hdiutil just
+    # returned. Never derive a cleanup target from global disk enumeration.
+    devices = {entry.get("dev-entry", "") for entry in attachment.get("system-entities", [])}
+    for device in sorted(devices):
+        if re.fullmatch(r"/dev/disk[0-9]+", device):
+            subprocess.run(["hdiutil", "detach", device], check=False, capture_output=True)
+
+
+def mounted_uuid(attachment, mount):
+    info = plist_command("diskutil", "info", "-plist", mount)
+    devices = {entry.get("dev-entry") for entry in attachment.get("system-entities", [])}
+    require(info.get("DeviceNode") in devices and Path(info.get("MountPoint", "")).resolve() == mount.resolve(),
+            "Fresh Data mount does not belong to the new image attachment")
+    return str(uuid.UUID(info["VolumeUUID"])).upper()
 
 
 def inspect_packed(module, path, logical):
@@ -175,8 +209,9 @@ def verify_grown_uuid(module, packed, work, expected_uuid):
             stream.seek(offset)
             stream.write(data)
     attached = plist_command("hdiutil", "attach", "-readonly", "-nomount", "-nobrowse", "-imagekey", "diskimage-class=CRawDiskImage", "-plist", raw)
-    physical = physical_device(attached)
+    physical = None
     try:
+        physical = physical_device(attached, raw, logical, readonly=True)
         listing = plist_command("diskutil", "apfs", "list", "-plist")
         containers = [entry for entry in listing["Containers"] if any(
             store["DeviceIdentifier"] == physical.removeprefix("/dev/") for store in entry.get("PhysicalStores", []))]
@@ -184,8 +219,10 @@ def verify_grown_uuid(module, packed, work, expected_uuid):
         volumes = containers[0].get("Volumes", [])
         require(len(volumes) == 1 and str(uuid.UUID(volumes[0]["APFSVolumeUUID"])).upper() == expected_uuid,
                 "Data VolumeUUID changed while growing or the wrong image was attached")
+        return {"volume_uuid": expected_uuid, "logical_bytes": logical,
+                "read_only": True, "physical_store_bound_to_seed": True}
     finally:
-        run("hdiutil", "detach", physical)
+        detach_created(attached, physical)
 
 
 def main():
@@ -261,14 +298,14 @@ def main():
         require(raw.stat().st_size == 8 * GIB, "Unexpected initial Data image extent")
         mount.mkdir()
         attached = plist_command("hdiutil", "attach", "-nobrowse", "-owners", "on", "-mountpoint", mount, "-plist", raw)
-        physical = physical_device(attached)
+        physical = None
         try:
-            mounted = plist_command("diskutil", "info", "-plist", mount)
-            volume_uuid = str(uuid.UUID(mounted["VolumeUUID"])).upper()
+            physical = physical_device(attached, raw, 8 * GIB, readonly=False)
+            volume_uuid = mounted_uuid(attached, mount)
             copy_var(var, mount)
             fresh_preferences(mount, EXPECTED_BUILD)
         finally:
-            run("hdiutil", "detach", physical)
+            detach_created(attached, physical)
         base = out / "fresh27-base-8g.dbr"
         packed.pack(raw, base)
         base_info = inspect_packed(packed, base, 8 * GIB)
@@ -281,12 +318,13 @@ def main():
             growth_log = run(sys.executable, args.grow_tool, "--gib", allocation["gib"], "--reserve-mib", args.reserve_mib, base, final)
             (out / "grow.log").write_text(growth_log)
         final_info = inspect_packed(packed, final, allocation["logical_bytes"])
-        verify_grown_uuid(packed, final, work, volume_uuid)
+        identity_verification = verify_grown_uuid(packed, final, work, volume_uuid)
     report = {"draft_host_generator": True, "hardware_tested": False, "device_operations": False,
               "os_build": EXPECTED_BUILD, "os_version": EXPECTED_VERSION, "volume_uuid": volume_uuid,
               "logical_data_gib": allocation["gib"],
               "kernel_config_required": {"XNU_OWNER_DATA_VOLUME_UUID": volume_uuid}, "allocation": allocation,
               "base": base_info, "packed": final_info, "packed_sha256": sha(final),
+              "apfs_identity_verification": identity_verification,
               "original_launchd_sha256": launchd_hash, "os_image_sha256": expected["os_image_sha256"],
               "root_manifest_sha256": root.get("manifest_sha256"), "seed17_reused": False, "initial_only": args.initial_only,
               "source_verification_level": "verified raw-image policy plus mounted identity" if verified is not None else

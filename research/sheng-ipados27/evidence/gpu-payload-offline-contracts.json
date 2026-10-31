@@ -1,0 +1,47 @@
+{
+  "scope": "offline script/API/packing audit; no Mac build or hardware qualification",
+  "expected_upstream_pins": {
+    "UniXNU": "793d6bddf7ea90678e3a61e2b2bd4350e5fdce16",
+    "UniXNU-sheng": "f47b27ad97e97bee945f8af34a8430e3abcf918c"
+  },
+  "source_sha256": {
+    "scripts/build-adreno-metal-plugin.py": "f778be6956f3c4ce28a6f13c4a57aa326350985ace5225faf8ff9f9e809f5d33",
+    "scripts/build-adreno-metal-bridge.py": "091bd40fa71d333f7d103910c8eae9dba1a3ded963d6feb85260f04c3bf5860c",
+    "scripts/build-turnip-darwin.py": "404a9b3b773cd03c308258b171401a349f236ff987fe0ed4d970ed8fe38b9035",
+    "scripts/make-gpu-addon.py": "614ed8ec93d9eb933b460c9be25aff18d6d9b8e1b8bb72db2e1a64c0ce1113f2",
+    "scripts/trust-append-module.py": "5de6c87ea926e2c9b6eefba8ecf643dec656e693d24aa51d7c06f7fb0e57fa4d",
+    "scripts/patch-xnu-entry-probe.py": "159eb1ea8d6c1da30f26913a281f46e21d940a1ae7886656529907ec3edf96ad",
+    "scripts/seal-source-crypto-kernel.py": "b8f304c8d88ffa3f49277f407d1aa72734944cacd59c58d010609744af24c0a3",
+    "scripts/unixnu/payload.py": "7ae6c7709cba07ef0e15eb6bf6cb4d2411e6e75e6ebb37c1737956905b4be9f0",
+    "scripts/unixnu/bootimg.py": "dbf353a7c01b6b4fe36154bf41d09c79c40ee8d98fb1d58d2af32d21bc56cc7b"
+  },
+  "local_checks_passed": {
+    "target_gpu_tests": 6,
+    "payload_tests": 11,
+    "pinned_watchdog_source_tests": 3,
+    "actual_upstream_packers_executed_on_small_fixture": true,
+    "actual_upstream_post_sealer_executed_on_small_nested_fileset_fixture": true,
+    "actual_upstream_data_uuid_producer_executed_on_fixture": true
+  },
+  "fixed_interfaces": [
+    "192MiB maximum FAT ramdisk",
+    "fresh temporary addon/trust output with content verification before replacement",
+    "payload scoped LLVM/LLD PATH",
+    "fileset-aware source POST seal on a copied candidate; legacy entry/panic padding patch disabled"
+  ],
+  "preserved_requirements": [
+    "17-second stalled worker and original6004/Turnip stack assertions",
+    "source pins and exact watchdog patch SHA",
+    "original Apple trust modules unchanged",
+    "normal Boot omits Data reset; first install requires explicit reset1 choice"
+  ],
+  "remaining_unexecuted": [
+    "Mac C++ monotonic-clock fixture and real17-second stack control",
+    "arm64e Rust std-from-source and plugin PAC link/rewrite/signature",
+    "real27 fileset POST seal and complete FAT/container assembly",
+    "all27 hardware checkpoints"
+  ],
+  "device_operations": false,
+  "actions_dispatched": false,
+  "hardware_tested": false
+}

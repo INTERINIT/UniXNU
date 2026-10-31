@@ -2,6 +2,8 @@
 import gzip
 import copy
 import importlib.util
+import hashlib
+import os
 from pathlib import Path
 import struct
 import subprocess
@@ -9,6 +11,8 @@ import sys
 import tempfile
 import tomllib
 import unittest
+from types import SimpleNamespace
+from unittest.mock import patch
 import zlib
 
 
@@ -28,6 +32,76 @@ def addon(entries):
 
 
 class PayloadTests(unittest.TestCase):
+    def test_actual_fileset_post_sealer_copy_and_header_contract(self):
+        main = Path(__file__).resolve().parents[4]
+        sys.path.insert(0, str(main / "scripts"))
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            tree, output, arch = root / "tree", root / "output", root / "arch"
+            (tree / "scripts").mkdir(parents=True)
+            output.mkdir()
+            arch.mkdir()
+            (arch / "profile.toml").write_text('[arch]\nname="arm64e"\n')
+            import shutil
+            for name in ("seal-source-crypto-kernel.py", "kernel_target.py"):
+                shutil.copy2(main / "scripts" / name, tree / "scripts" / name)
+            anchor = bytes(index % 251 for index in range(395))
+            strings = b"\0_verified_root_key\0_source_corecrypto14_bootstrap\0"
+            data = bytearray(1168 + len(strings))
+            struct.pack_into("<8I", data, 0, 0xfeedfacf, 0x100000c, 2, 12, 1, 56, 0, 0)
+            struct.pack_into("<IIQQII", data, 32, 0x80000035, 56, 0x100000, 128, 32, 0)
+            data[64:81] = b"com.apple.kernel\0"
+            struct.pack_into("<8I", data, 128, 0xfeedfacf, 0x100000c, 2, 2, 3, 328, 0, 0)
+            at = 160
+            struct.pack_into("<2I16s4Q4I", data, at, 0x19, 152, b"__TEXT", 0x100000, 512, 128, 448, 5, 5, 1, 0)
+            struct.pack_into("<16s16sQQ8I", data, at + 72, b"__text", b"__TEXT", 0x100180, 64, 512, 2, 0, 0, 0, 0, 0, 0)
+            at += 152
+            struct.pack_into("<2I16s4Q4I", data, at, 0x19, 152, b"__DATA_CONST", 0x200000, 512, 640, 512, 3, 3, 1, 0)
+            struct.pack_into("<16s16sQQ8I", data, at + 72, b"__fips_hmacs", b"__DATA_CONST", 0x200000, 32, 640, 3, 0, 0, 0, 0, 0, 0)
+            at += 152
+            struct.pack_into("<6I", data, at, 2, 24, 1152, 1, 1168, len(strings))
+            data[512:576] = bytes(range(64))
+            data[704:1099] = anchor
+            struct.pack_into("<IBBHQ", data, 1152, 1, 0xf, 1, 0, 0x200040)
+            data[1168:] = strings
+            source = root / "candidate.macho"
+            source.write_bytes(data)
+            context = SimpleNamespace(tree=tree, schema_version=2, profile_roots={"arch": arch},
+                                      board={"os": {"ios_version": "27.0"}, "ipsw": {"build": "24A446"}})
+            sealed, report = payload.prepare_fileset_kernel(context, source, output, "-v sheng-data-persist=2",
+                                                            hashlib.sha256(anchor).hexdigest())
+            self.assertEqual(source.read_bytes(), bytes(data))
+            self.assertNotEqual(sealed.read_bytes()[640:672], bytes(32))
+            self.assertFalse(report["legacy_entry_probe_applied"])
+            self.assertFalse(report["runtime_selftests_executed"])
+            self.assertTrue(report["actual_post_hmac_rechecked"])
+            damaged = bytearray(sealed.read_bytes())
+            damaged[512] ^= 1
+            sealed.write_bytes(damaged)
+            actual_report = payload.load(sealed.with_suffix(sealed.suffix + ".crypto-hmac.json"))
+            actual_report["kernel_sha256"] = hashlib.sha256(damaged).hexdigest()
+            with self.assertRaisesRegex(ValueError, "POST HMAC"):
+                payload.check_sealed_kernel(sealed, actual_report)
+
+    def test_payload_toolchain_scope_restores_environment_on_failure(self):
+        main = Path(__file__).resolve().parents[4]
+        sys.path.insert(0, str(main / "scripts"))
+        from unixnu import kernel
+        previous = os.environ.get("PATH")
+        with patch.object(kernel, "toolchain_path", return_value="reviewed-toolchain"):
+            with self.assertRaisesRegex(RuntimeError, "fixture failure"):
+                with payload.payload_toolchain():
+                    self.assertEqual(os.environ["PATH"], "reviewed-toolchain")
+                    raise RuntimeError("fixture failure")
+        self.assertEqual(os.environ.get("PATH"), previous)
+
+    def test_payload_respects_proven192mib_fat_limit(self):
+        self.assertEqual(payload.payload_size_mib(150 * payload.MIB), 176)
+        largest = int(192 * payload.MIB * 0.95) - payload.MIB
+        self.assertEqual(payload.payload_size_mib(largest), 192)
+        with self.assertRaisesRegex(ValueError, "192MiB FAT"):
+            payload.payload_size_mib(largest + 1)
+
     def test_actual_data_receipt_schema_without_extra_completion_flag(self):
         identity, seed_hash, config_hash = "2A5E9027-D9E1-40F9-983C-41BD3F1994F5", "a" * 64, "b" * 64
         allocation = {"logical_bytes": 8 << 30, "root_image_bytes": 16 << 30, "tail_reserve_mib": 1024}

@@ -1,0 +1,81 @@
+{
+  "audit": "fresh27 Data host interface contracts",
+  "utc": "2026-10-31T05:19:03.362637+00:00",
+  "source_pins": {
+    "main": "793d6bddf7ea90678e3a61e2b2bd4350e5fdce16",
+    "device": "f47b27ad97e97bee945f8af34a8430e3abcf918c",
+    "DarwinBoot": "3e3a8a969e1177995984d8ed98c9dcc44e318265"
+  },
+  "files": {
+    "seed27": {
+      "path": "research/sheng-ipados27/ci/scripts/seed27.py",
+      "sha256": "1b3a13cc29af8f94d966710a9073ca4d6b1e59cc7086240ae1527bb4fbf6cd91"
+    },
+    "data_stage27": {
+      "path": "research/sheng-ipados27/ci/scripts/data_stage27.py",
+      "sha256": "55b066368248c81ff367e1adc97d489d199fff9c9e73469d068a04c81cb98df7"
+    },
+    "tests": {
+      "path": "research/sheng-ipados27/ci/scripts/test_data_stage27.py",
+      "sha256": "6920c8dbeb8eaf5303f578395ade83516db91187499aee2027964cacd64b7731"
+    },
+    "packed_ramdisk": {
+      "path": "drivers/DarwinBoot/Test/packed_ramdisk.py",
+      "sha256": "2291ff803553ee6e5431a4ce3770a36dab0a09f0d1fe036d3e1264ee5dd2a3b3"
+    },
+    "grow_helper": {
+      "path": "scripts/seed-data-grow.py",
+      "sha256": "507bce30053936608ebf4d5b7de75397d7e544934a9949a071a244cc0a3c810c"
+    }
+  },
+  "local_execution": {
+    "platform": "Windows",
+    "new_tests_passed": 15,
+    "existing_payload_tests_passed": 9,
+    "commands": [
+      "python research/sheng-ipados27/ci/scripts/test_data_stage27.py -v",
+      "python research/sheng-ipados27/ci/scripts/test_payload_stage27.py -v"
+    ],
+    "mac_commands_executed": false,
+    "device_operations": false,
+    "actions_started": false,
+    "full_raw_root_or_rsa_phase_repeated": false
+  },
+  "interfaces": {
+    "hdiutil_create": "Same 8g/layout NONE/APFS/UDTO .cdr recipe as the retained successful 17 host generator; new27 still checks exact 8GiB and NXSB.",
+    "source_readonly": "Explicit boolean Writable=False, WritableVolume=False, ReadOnlyMedia=True, ReadOnlyVolume=True or MediaReadOnly=True. Missing/numeric values fail. Source parent already authenticates exact virtual backing image and UUID.",
+    "apfs_attachment": "Select a returned whole node that is a PhysicalStore; prove exact-sized Disk Image media and matching hdiutil image-path/access mode. Do not use enumeration order.",
+    "cleanup": "Identity-validation and copy/UUID exceptions all detach only nodes returned by this attachment.",
+    "packed_schema": "Actual pinned pack/inspect/regions used. encoded_sha256 is the packed file SHA; sha256 above 2GiB is SHNGSEED2(size and nonzero indexed pages). 8/215GiB bounded fixtures never allocate/read dense images.",
+    "grow_helper": "Canonical helper has no diff from pinned main. Explicit --gib path accepts 3..1024GiB and bypasses --auto/fastboot. First integrated run requests 8GiB and skips growth.",
+    "copy_metadata": "Source POSIX uid/gid/mode retained with symlinks not followed; mobile/Library explicitly gets 501:501 even when source template lacks it. Preference content and intended chown calls tested; APFS persistence of ownership remains Mac-only.",
+    "seed_cache": "Full request SHA directories isolate failed recipes. Completed cache refuses another recipe/build/version/initial-only seed, incomplete provenance, mismatched APFS geometry, UUID/config or post-pack verification. Completed-cache test replays defconfig and writes UUID back to actual .config without any subprocess.",
+    "receipts": "Fresh producer records actual post-pack UUID/size/readonly virtual-store check. Stage adds completed host/root qualification, writes real .config UUID and hashes it. Existing payload receipt tests passed."
+  },
+  "geometry": {
+    "userdata_bytes": 249497890816,
+    "root_image_bytes": 15753805824,
+    "first_data_logical_gib": 8,
+    "log_reserve_mib": 1024,
+    "root_guard_mib": 4,
+    "additional_margin_gib": 1,
+    "growth_limit_derived_from_actual_root": true
+  },
+  "mac_only_unverified": [
+    "27 source SystemVersion/private-var/staged-app contents beyond the earlier readonly guard",
+    "fresh APFS UDTO creation and owners-on mount on the selected Mac runner",
+    "POSIX uid/gid/mode and any macOS file-flag/xattr behavior while copying original var",
+    "actual nonzero packed seed content staying within the loader 256MiB bound",
+    "post-pack hdiutil/diskutil UUID roundtrip with real fresh/grown APFS volumes"
+  ],
+  "runtime_unverified": [
+    "27 kernel boot and UI",
+    "GPU hardware operation",
+    "Data persistence across tablet reboots"
+  ],
+  "run_evidence": {
+    "41168945515": "Concrete failure: original readonly flag recognition rejected source before seed output creation; repair not yet Mac-qualified. Original log retained separately.",
+    "41170186230": "Cancelled by root after user requested fewer failure emails. Data did not run; interrupted cache step is not a new cache bug."
+  },
+  "qualification": "Offline contracts passed; not a built or hardware-ready 27 image."
+}

@@ -15,8 +15,11 @@ from pathlib import Path
 import platform
 import re
 import shutil
+import stat
 import subprocess
 import sys
+import uuid as uuidlib
+import tempfile
 
 MAIN_REV = "793d6bddf7ea90678e3a61e2b2bd4350e5fdce16"
 DEVICE_REV = "f47b27ad97e97bee945f8af34a8430e3abcf918c"
@@ -49,13 +52,23 @@ def context(main, device, seed_report):
     sys.path.insert(0, str(main / "scripts"))
     from unixnu.cli import parser, prepare
     from unixnu.config import Context
-    from unixnu import feeds
-    args = parser().parse_args(["build", "kernel", "-D", str(device), "-j", "4"])
+    from unixnu import feeds, tree
+    args = parser().parse_args(["build", "kernel", "-D", str(device), "--out", str(main / "out"),
+                                "--os", "ipados-27.0.1-24A446", "-j", "4"])
     ctx = Context(args)
+    if (ctx.config_name != "sheng_ipados27_defconfig" or
+            ctx.board.get("os", {}).get("name") != "ipados-27.0.1-24A446" or
+            ctx.board.get("ipsw", {}).get("build") != "24A446"):
+        raise ValueError("Select the reviewed sheng_ipados27_defconfig and 24A446 profile first")
+    uuid = str(uuidlib.UUID(seed_report["volume_uuid"])).upper()
+    if ctx.need_config().get("XNU_OWNER_DATA_VOLUME_UUID", "").upper() != uuid:
+        raise ValueError("Persist the actual Data seed UUID in the resolved configuration before the kernel build")
     modules = prepare(ctx, ("kernel",))
     # kernel REFERENCES does not fetch IOHIDFamily, although the 27 board uses it.
     feeds.fetch(ctx, modules, only={"IOHIDFamily"})
-    uuid = seed_report["volume_uuid"]
+    # fetch fills module.path after prepare's first assembly. A clean tree needs
+    # its new refer link before the source HID builder can inspect that path.
+    tree.assemble(ctx, modules)
     ctx.config["XNU_OWNER_DATA_VOLUME_UUID"] = uuid
     expected = (main.parent / "UniXNU-sheng").resolve()
     if device.resolve() != expected:
@@ -63,9 +76,11 @@ def context(main, device, seed_report):
     hid = ctx.tree / "refer/IOHIDFamily"
     destination = main / "out/driver-sources/IOHIDFamily"
     destination.parent.mkdir(parents=True, exist_ok=True)
-    if destination.exists() and destination.resolve() != hid.resolve():
+    if not hid.is_dir():
+        raise ValueError("Pinned IOHIDFamily source was not assembled")
+    if (destination.exists() or destination.is_symlink()) and destination.resolve() != hid.resolve():
         raise ValueError("Preserve conflicting fixed HID source directory")
-    if not destination.exists():
+    if not destination.exists() and not destination.is_symlink():
         destination.symlink_to(hid.resolve(), target_is_directory=True)
     for name in ("OS", "SystemOS"):
         directory = ctx.tree / "build/verified-root-24A446" / name
@@ -73,6 +88,33 @@ def context(main, device, seed_report):
             if not (directory / file).is_file():
                 raise ValueError("Parent policy preparation must create " + str(directory / file))
     return ctx, modules
+
+
+def bootstrap_recipe(ctx):
+    """Retain the actual catalog dependency closure before invoking a build."""
+    # ShengUfs also needs VirtioMmioBlock even when source storage does not link
+    # that archive. The planner must see the same declared dependencies.
+    by_id = {spec["id"]: spec for spec in ctx.component_specs}
+    keep = set()
+
+    def retain(identifier):
+        if identifier in keep:
+            return
+        if identifier not in by_id:
+            raise ValueError("Bootstrap dependency is not selected: " + identifier)
+        keep.add(identifier)
+        for dependency in by_id[identifier].get("dependencies", []):
+            retain(dependency)
+
+    for identifier in ("ArmDTPlatform", "ArmCpu", "ShengUfs", "RamBlock"):
+        retain(identifier)
+    specs = [s for s in ctx.component_specs if s["id"] in keep or not s.get("build") or s.get("build_stage", "kernel") != "kernel"]
+    recipe = [
+        "build-corecrypto-14.py", "build-corecrypto-14.py --namespace",
+        "component:ArmDTPlatform", "component:ArmCpu", "build-libpthread-kernel.py",
+        "component:ShengUfs", "component:RamBlock",
+    ]
+    return specs, recipe
 
 
 def native_bootstrap(ctx, modules, output):
@@ -83,29 +125,7 @@ def native_bootstrap(ctx, modules, output):
         ctx.config["XNU_NATIVE_LEGACY_DISPLAY"] = False
         ctx.config["XNU_NATIVE_ADRENO"] = False
         ctx.config["XNU_BOOT_PROGRESS"] = False
-        # archive_plan traverses each selected component's declared dependencies.
-        # Keep the real catalog closure (ShengUfs also needs VirtioMmioBlock),
-        # even when this source-storage configuration does not link that archive.
-        by_id = {spec["id"]: spec for spec in specs}
-        keep = set()
-
-        def retain(identifier):
-            if identifier in keep:
-                return
-            if identifier not in by_id:
-                raise ValueError("Bootstrap dependency is not selected: " + identifier)
-            keep.add(identifier)
-            for dependency in by_id[identifier].get("dependencies", []):
-                retain(dependency)
-
-        for identifier in ("ArmDTPlatform", "ArmCpu", "ShengUfs", "RamBlock"):
-            retain(identifier)
-        ctx.component_specs = [s for s in specs if s["id"] in keep or not s.get("build") or s.get("build_stage", "kernel") != "kernel"]
-        ctx.board["kernel"]["archives"] = [
-            "build-corecrypto-14.py", "build-corecrypto-14.py --namespace",
-            "component:ArmDTPlatform", "component:ArmCpu", "build-libpthread-kernel.py",
-            "component:ShengUfs", "component:RamBlock",
-        ]
+        ctx.component_specs, ctx.board["kernel"]["archives"] = bootstrap_recipe(ctx)
         kernel.build(ctx, modules)
         native = ctx.tree / "build/xnu/ios-obj/DEVELOPMENT_ARM64_BCM2837/mach.development.bcm2837.unstripped.noctf"
         if not native.is_file():
@@ -116,24 +136,72 @@ def native_bootstrap(ctx, modules, output):
         ctx.config, ctx.component_specs, ctx.board["kernel"]["archives"] = config, specs, recipe
 
 
-def release_reference(main, ctx, output):
-    """Parameterize the upstream comparison builder's stale 26 output path."""
+def source_identity(directory):
+    """Hash the actual patched source, including restored/untracked headers."""
+    if not directory.is_dir():
+        raise ValueError("Build the native bootstrap before the RELEASE comparison source snapshot")
+    entries = []
+    for path in sorted(directory.rglob("*")):
+        relative = path.relative_to(directory)
+        if ".git" in relative.parts:
+            continue
+        if path.is_symlink():
+            entries.append([relative.as_posix(), "symlink", os.readlink(path)])
+        elif path.is_file():
+            entries.append([relative.as_posix(), "file", stat.S_IMODE(path.stat().st_mode), sha(path)])
+    if not entries:
+        raise ValueError("The RELEASE comparison source snapshot is empty")
+    encoded = json.dumps(entries, separators=(",", ":"), ensure_ascii=True).encode()
+    return hashlib.sha256(encoded).hexdigest(), len(entries)
+
+
+def prepare_reference_builder(main, ctx, output):
+    """Use an isolated source/object cache for this exact patched source."""
     source = main / "scripts/build-fileset-release-reference.py"
     text = source.read_text()
     old = "root = repo / 'out/sheng/ipados-26.5.2-23F84/sheng_ipados26/tree'"
-    if text.count(old) != 1:
-        raise ValueError("Reference builder changed; review its input path")
+    old_output = "output = root / 'build/xnu/fileset-reference'"
+    if text.count(old) != 1 or text.count(old_output) != 1:
+        raise ValueError("Reference builder changed; review its input/output paths")
     text = text.replace(old, "root = Path(" + repr(str(ctx.tree)) + ")")
+    if text.count("version-min=26.0") != 2 or text.count("-ios_version_min,26.0") != 1:
+        raise ValueError("Reference deployment options changed; review all target flags")
     text = text.replace("version-min=26.0", "version-min=27.0").replace("-ios_version_min,26.0", "-ios_version_min,27.0")
+    fingerprint, count = source_identity(ctx.tree / ".cache/xnu-work")
+    recipe = hashlib.sha256(text.encode()).hexdigest()
+    identity = hashlib.sha256((fingerprint + ":" + recipe + ":" +
+                               os.environ.get("DEVELOPER_DIR", "")).encode()).hexdigest()
+    directory = ctx.tree / "build/xnu/fileset-reference" / ("source-" + identity)
+    text = text.replace(old_output, "output = Path(" + repr(str(directory)) + ")")
     local = output / "build-release-reference27-local.py"
-    local.write_text(text)
-    run([sys.executable, local, "--lto"], main)
-    directory = ctx.tree / "build/xnu/fileset-reference"
+    local.write_text(text, encoding="utf-8", newline="\n")
+    return local, directory, {"upstream_builder_sha256": sha(source), "local_builder_sha256": sha(local),
+                              "patched_source_sha256": fingerprint, "patched_source_entries": count,
+                              "reference_identity": identity}
+
+
+def release_reference(main, ctx, output):
+    """Build the comparison only after the actual native source/archive pass."""
+    from unixnu import kernel
+    work = ctx.tree / ".cache/xnu-work"
+    revision = subprocess.check_output(["git", "-C", str(work), "rev-parse", "HEAD"], text=True).strip()
+    if revision != ctx.board["os"]["xnu_revision"]:
+        raise ValueError("RELEASE comparison source does not have the selected Apple XNU base revision")
+    local, directory, receipt = prepare_reference_builder(main, ctx, output)
+    env = dict(os.environ, PATH=kernel.toolchain_path())
+    try:
+        run([sys.executable, local, "--lto"], main, env)
+    finally:
+        log = directory / "lto-build.log"
+        if log.is_file():
+            shutil.copy2(log, output / "release-reference-build.log")
+            print(log.read_text(encoding="utf-8", errors="replace")[-40000:], end="", flush=True)
     result = directory / "lto-obj/RELEASE_ARM64_BCM2837/mach.release.bcm2837.unstripped.noctf"
     if not result.is_file():
         raise ValueError("RELEASE comparison kernel absent")
-    shutil.copy2(result, directory / result.name)
-    (output / "release-reference.json").write_text(json.dumps({"upstream_builder_sha256": sha(source), "local_builder_sha256": sha(local), "reference_sha256": sha(result)}, indent=2))
+    shutil.copy2(result, ctx.tree / "build/xnu/fileset-reference" / result.name)
+    receipt["reference_sha256"] = sha(result)
+    (output / "release-reference.json").write_text(json.dumps(receipt, indent=2) + "\n")
 
 
 def symbols(path):
@@ -147,7 +215,8 @@ def full_kernel(device, ctx, modules):
     for iteration in range(3):
         kernel.build(ctx, modules)
         kernel.prelink(ctx)
-        native = ctx.tree / "build/xnu/ios-obj/DEVELOPMENT_ARM64_BCM2837/mach.development.bcm2837.unstripped"
+        # Measure the same native image the profile passed to emit_prelink.
+        native = ctx.tree / ctx.board["kernel"]["prelink"]["kernel"]
         linked, final = symbols(native), symbols(ctx.work / "kernel/kernel.macho")
         name = "_native_legacy_display_allocate"
         if name not in linked or name not in final:
@@ -201,6 +270,9 @@ def export_gpu_logs(tree, output):
     for directory, prefix in (("turnip-darwin-host", "host-turnip-"), ("adreno-metal-bridge", "bridge-")):
         for path in (tree / "build" / directory).glob("*.log"):
             shutil.copy2(path, output / (prefix + path.name))
+    for pattern in ("mesa-*.log", "bison-*.log"):
+        for path in (tree / ".cache").glob(pattern):
+            shutil.copy2(path, output / ("compiler-" + path.name))
 
 
 def gpu_host_check(tree, output, env):
@@ -262,25 +334,71 @@ def gpu_build(main, ctx, trust, output):
         raise ValueError("Translator source pin differs")
     run(["rustup", "toolchain", "install", "1.98.0", "--profile", "minimal"], main, env)
     run(["rustup", "component", "add", "--toolchain", "1.98.0", "rust-src"], main, env)
-    for name, extra in (
+    for index, (name, extra) in enumerate((
         ("build-adreno-compiler-host.py", ["--probe"]),
         ("build-turnip-darwin.py", ["--target", "host"]),
         ("build-adreno-metal-bridge.py", ["--target", "host"]),
         ("build-turnip-darwin.py", ["--target", "ios27"]),
-    ):
-        run([sys.executable, tree / "scripts" / name, *extra], tree, env)
+    )):
+        run([sys.executable, tree / "scripts" / name, *extra], tree, env,
+            log_path=output / (f"gpu27-build-{index}-" + name.removesuffix(".py") + ".log"))
     gpu_host_check(tree, output, env)
-    run([sys.executable, tree / "scripts/build-adreno-metal-plugin.py", "--target", "ios27"], tree, env)
-    plugin = tree / "build/adreno-metal-plugin27"
-    addon = output / "gpu27.gpuaddon"
-    env["ADRENO_PLUGIN_DIR"] = str(plugin)
-    run([sys.executable, tree / "scripts/make-gpu-addon.py", "--publish", "--no-daemon", addon], tree, env)
-    hashes = json.loads((plugin / "trust.json").read_text())
-    run([sys.executable, main / "scripts/trust-append-module.py", trust, output / "owner-trust27.bundle", hashes["cdhash"], hashes["turnip_cdhash"]], main, env)
-    shutil.copy2(plugin / "trust.json", output / "gpu27-trust.json")
+    run([sys.executable, tree / "scripts/build-adreno-metal-plugin.py", "--target", "ios27"], tree, env,
+        log_path=output / "gpu27-build-plugin-ios27.log")
+    publish_gpu_artifacts(main, tree, trust, output, env)
     bridge = tree / "build/adreno-metal-bridge"
     for name in ("Cargo.lock", "Cargo.toml", "build-ios27.log"):
         shutil.copy2(bridge / name, output / name)
+
+
+def publish_gpu_artifacts(main, tree, trust, output, env):
+    """Use the real packers with fresh files; verify before replacing results."""
+    plugin = tree / "build/adreno-metal-plugin27"
+    hashes = json.loads((plugin / "trust.json").read_text())
+    if any(not re.fullmatch(r"[0-9a-f]{40}", hashes.get(key, "")) for key in ("cdhash", "turnip_cdhash")):
+        raise ValueError("Plugin build did not record two actual CDHashes")
+    parser_spec = importlib.util.spec_from_file_location("gpu27_payload_format", Path(__file__).with_name("payload_stage27.py"))
+    parser = importlib.util.module_from_spec(parser_spec)
+    parser_spec.loader.exec_module(parser)
+    original_trust = trust.read_bytes()
+    original_modules = parser.trust_modules(original_trust)
+    env = dict(env)
+    env["ADRENO_PLUGIN_DIR"] = str(plugin)
+    with tempfile.TemporaryDirectory(prefix=".gpu27-publish-", dir=output) as temporary:
+        pending = Path(temporary)
+        addon, owner = pending / "gpu27.gpuaddon", pending / "owner-trust27.bundle"
+        run([sys.executable, tree / "scripts/make-gpu-addon.py", "--publish", "--no-daemon", addon], tree, env,
+            log_path=output / "gpu27-pack-addon.log")
+        run([sys.executable, main / "scripts/trust-append-module.py", trust, owner, hashes["cdhash"], hashes["turnip_cdhash"]], main, env,
+            log_path=output / "gpu27-pack-trust.log")
+        files = parser.addon_files(addon.read_bytes())
+        bundle = plugin / "NativeAdrenoMetal.bundle"
+        expected = {"addons/NativeAdrenoMetal.bundle/" + path.relative_to(bundle).as_posix():
+                    (0o755 if path.name in ("NativeAdrenoMetal", "libvulkan_freedreno.dylib") else 0o644, path.read_bytes())
+                    for path in bundle.rglob("*") if path.is_file()}
+        expected["addons/NativeAdrenoMetal.publish"] = (0o644, b"1\n")
+        if files != expected:
+            raise ValueError("The actual addon differs from the signed27 plugin bundle or contains extra jobs")
+        modules = parser.trust_modules(owner.read_bytes())
+        wanted = {bytes.fromhex(hashes[key]) for key in ("cdhash", "turnip_cdhash")}
+        last = modules[-1]
+        if (len(wanted) != 2 or len(modules) != len(original_modules) + 1 or modules[:-1] != original_modules
+                or len(last) != 72 or {last[index:index + 20] for index in (24, 48)} != wanted
+                or any(last[index + 20:index + 24] != b"\x02\0\0\0" for index in (24, 48))):
+            raise ValueError("Owner trust must preserve the original modules and append exactly the two signed27 CDHashes")
+        if trust.read_bytes() != original_trust:
+            raise ValueError("The original IPSW trust bundle changed during packing")
+        shutil.copy2(plugin / "trust.json", pending / "gpu27-trust.json")
+        artifact_report = {"addon_sha256": sha(addon), "owner_trust_sha256": sha(owner),
+                           "original_trust_sha256": hashlib.sha256(original_trust).hexdigest(),
+                           "plugin_cdhash": hashes["cdhash"], "turnip_cdhash": hashes["turnip_cdhash"],
+                           "files": {name: {"mode": mode, "bytes": len(data), "sha256": hashlib.sha256(data).hexdigest()}
+                                     for name, (mode, data) in files.items()},
+                           "actual_packed_contents_equal_signed_bundle": True, "probe_daemon_staged": False,
+                           "hardware_tested": False}
+        (pending / "gpu27-artifacts.json").write_text(json.dumps(artifact_report, indent=2) + "\n")
+        for path in pending.iterdir():
+            path.replace(output / path.name)
 
 
 def gpu(main, ctx, trust, output):

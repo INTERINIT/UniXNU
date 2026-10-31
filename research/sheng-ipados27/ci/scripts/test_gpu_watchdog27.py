@@ -19,6 +19,11 @@ ORIGINAL = None
 
 
 class ClockPatchTests(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        if ORIGINAL is None:
+            raise unittest.SkipTest("Supply the pinned original header with --source; no source qualification is implied by discovery")
+
     def test_actual_pinned_source_preserved_outside_exact_clock_changes(self):
         changed = watchdog.transform(ORIGINAL)
         self.assertEqual(watchdog.sha(ORIGINAL), watchdog.SOURCE_SHA256)

@@ -13,6 +13,11 @@ manual only. The 27 build runner recorded 3 successful, 8 failed and 2 cancelled
 runs, with none active. Successful phases are input preparation, full root-media
 authentication and the new firmware. See `evidence/checkpoint-20261031.json`.
 
+The next authorized run is one combined `package` workflow after consolidated
+offline script, dependency-contract and workflow-lint checks. It records
+independent phase failures in one result set and gates payload assembly on all
+prerequisites. No automatic rerun or tablet operation is part of preparation.
+
 ## Source baseline
 
 | Input | Revision |
