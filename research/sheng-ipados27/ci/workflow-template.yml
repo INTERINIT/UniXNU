@@ -1,0 +1,70 @@
+name: sheng iPadOS27 pinned bring-up
+on:
+  workflow_dispatch:
+    inputs:
+      stage:
+        description: Host build stage (never deploys to hardware)
+        type: choice
+        default: prepare
+        options:
+          - prepare
+          - policies
+          - gpu
+permissions:
+  contents: read
+concurrency:
+  group: sheng-ipados27-build
+  cancel-in-progress: false
+jobs:
+  build:
+    runs-on: macos-26
+    timeout-minutes: 180
+    env:
+      DEVELOPER_DIR: /Applications/Xcode_26.6.app/Contents/Developer
+      HOMEBREW_NO_AUTO_UPDATE: '1'
+      PYTHONUNBUFFERED: '1'
+      NOBOOT: '1'
+      UNIXNU_UNIQUE_CHIP_ID: ${{ secrets.UNIXNU_UNIQUE_CHIP_ID }}
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Install host dependencies
+        run: brew install cmake ninja unifdef llvm lld mtools dtc openssl@3 glslang shaderc spirv-tools vulkan-headers rustup blacktop/tap/ipsw
+      - uses: actions/cache/restore@v4
+        with:
+          path: |
+            work27/UniXNU/
+            work27/UniXNU-sheng/
+            !work27/UniXNU/out/ipsw/**/*.dmg*
+            !work27/**/verified-root-host/keys/**
+            !work27/**/*.pem
+            !work27/**/*.key
+          key: ipados27-r1-${{ runner.arch }}-${{ github.run_id }}
+          restore-keys: |
+            ipados27-r1-${{ runner.arch }}-
+      - name: Build requested host phase
+        run: python scripts/cloud27.py '${{ inputs.stage }}'
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: sheng-ipados27-host-result
+          path: |
+            result27/
+            work27/UniXNU/out/sheng/**/logs/*.log
+            work27/UniXNU/out/sheng/**/tree/build/verified-root-host/checks.json
+          retention-days: 14
+          if-no-files-found: warn
+      - uses: actions/cache/save@v4
+        if: always()
+        with:
+          path: |
+            work27/UniXNU/
+            work27/UniXNU-sheng/
+            !work27/UniXNU/out/ipsw/**/*.dmg*
+            !work27/**/verified-root-host/keys/**
+            !work27/**/*.pem
+            !work27/**/*.key
+          key: ipados27-r1-${{ runner.arch }}-${{ github.run_id }}

@@ -1,0 +1,107 @@
+{
+  "source": "Apple CDN URL pinned by UniXNU official iPadOS27 profile",
+  "url": "https://updates.cdn-apple.com/2026FallFCS/6074e110-d48d-40c2-b0e8-b611520941a3/iPad17,1,iPad17,2,iPad17,3,iPad17,4_27.0.1_24A446_Restore.ipsw",
+  "http": {
+    "url": "https://updates.cdn-apple.com/2026FallFCS/6074e110-d48d-40c2-b0e8-b611520941a3/iPad17,1,iPad17,2,iPad17,3,iPad17,4_27.0.1_24A446_Restore.ipsw",
+    "status": 200,
+    "headers": {
+      "Content-Type": "binary/octet-stream",
+      "Content-Length": "11654176243",
+      "Last-Modified": "Sat, 26 Sep 2026 23:41:34 GMT",
+      "x-amz-server-side-encryption": "AES256",
+      "x-amz-meta-digest-sha256": "fa93b653cc03c80ee5009302545479cb3b0f7bbaaa43f43a25e70cc328575b7a",
+      "x-amz-version-id": "GBXRI9Zeswm8LehWyajxkzB0Ef0gkVrn",
+      "Accept-Ranges": "bytes",
+      "Server": "AmazonS3",
+      "Date": "Thu, 29 Oct 2026 12:20:41 GMT",
+      "ETag": "\"f6f60b4bc51d06be4b98846529b4cce3-1389\"",
+      "X-Cache": "hit-fresh, none, hit-fresh, miss, none",
+      "Via": "http/1.1 jptyo12-3p-pfe-013.ts.apple.com (acdn/26.17695), http/1.1 jptyo12-3p-pfe-013.ts.apple.com (acdn/26.17695), http/1.1 jptyo7-edge-mx-008.ts.apple.com (acdn/26.17695), https/1.1 jptyo7-edge-fx-053.ts.apple.com (acdn/26.17695), http/1.1 jptyo7-edge-fx-053.ts.apple.com (acdn/26.17695)",
+      "X-Amz-Cf-Pop": "NRT20-P2",
+      "X-Amz-Cf-Id": "rB8dCKYYVNQfAmGlpUofL14xARW6GHunDwJmL4k3qt14A-ZiU7Lt1w==",
+      "Cache-Control": "max-age=604800, public",
+      "Age": "141212",
+      "CDNUUID": "cac61e1d-8bc9-4613-b3f5-c243ae4c78ae-361389968",
+      "Connection": "close"
+    }
+  },
+  "ipsw_bytes": 11654176243,
+  "bytes_downloaded_for_metadata": 1351155,
+  "range_requests": [
+    {
+      "start": 11653873664,
+      "end": 11654176242
+    },
+    {
+      "start": 11399069696,
+      "end": 11400118271
+    }
+  ],
+  "version": "27.0.1",
+  "build": "24A446",
+  "products": [
+    "iPad17,1",
+    "iPad17,2",
+    "iPad17,3",
+    "iPad17,4"
+  ],
+  "identity": {
+    "DeviceClass": "j820ap",
+    "RestoreBehavior": "Erase",
+    "Variant": "Customer Erase Install (IPSW)",
+    "ContentEncoding": "aea",
+    "ApChipID": "0x8142",
+    "ApBoardID": "0x0C"
+  },
+  "BuildManifest_sha256": "7655fd412eb2249724227503ee016122cf0292df7b6fc49c8caf9ba44e6ab2ac",
+  "components": {
+    "KernelCache": {
+      "path": "kernelcache.release.ipad17",
+      "bytes": 24014290,
+      "compressed_bytes": 23994596,
+      "zip_crc32": "d98e5314"
+    },
+    "DeviceTree": {
+      "path": "Firmware/all_flash/DeviceTree.j820ap.im4p",
+      "bytes": 65439,
+      "compressed_bytes": 65268,
+      "zip_crc32": "e264d768"
+    },
+    "StaticTrustCache": {
+      "path": "Firmware/043-68950-668.dmg.aea.trustcache",
+      "bytes": 85177,
+      "compressed_bytes": 77169,
+      "zip_crc32": "206149dc"
+    },
+    "Cryptex1,SystemTrustCache": {
+      "path": "Firmware/043-69086-713.dmg.aea.trustcache",
+      "bytes": 3167,
+      "compressed_bytes": 2903,
+      "zip_crc32": "2f02d91e"
+    },
+    "OS": {
+      "path": "043-68950-668.dmg.aea",
+      "bytes": 8254390272,
+      "compressed_bytes": 8254390272,
+      "zip_crc32": "9c6d76c3"
+    },
+    "Cryptex1,SystemOS": {
+      "path": "043-69086-713.dmg.aea",
+      "bytes": 2348810240,
+      "compressed_bytes": 2348810240,
+      "zip_crc32": "3929293c"
+    },
+    "Cryptex1,AppOS": {
+      "path": "043-69297-793.dmg",
+      "bytes": 16777216,
+      "compressed_bytes": 8955771,
+      "zip_crc32": "fe13ee1d"
+    },
+    "Cryptex1,AppTrustCache": {
+      "path": "Firmware/043-69297-793.dmg.trustcache",
+      "bytes": 863,
+      "compressed_bytes": 833,
+      "zip_crc32": "c6675b15"
+    }
+  }
+}

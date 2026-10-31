@@ -1,0 +1,40 @@
+Firmware integration for the fixed iPadOS27 source pair
+
+Use UniXNU793d6bddf7ea90678e3a61e2b2bd4350e5fdce16 and its resolved
+DarwinBoot3e3a8a969e1177995984d8ed98c9dcc44e318265. The old17 FD is a
+reference for the board handoff, not a substitute for this new fileset loader.
+Official uefi-sheng remains branch sheng at20ac23d5e0937106c2129303dfc931b3390ae660.
+
+Before building firmware in the new27 checkout:
+  git -C <new-UniXNU> apply --check <ramdisk-fat-window27.patch>
+  git -C <new-UniXNU> apply <ramdisk-fat-window27.patch>
+The patch includes the C change, INF source entry and full FatWindow.h.
+It checked cleanly against the fixed27 UniXNU source on2026-10-31. See the
+audit JSON for source hashes and command. It has not been firmware-compiled
+or booted as a27 firmware artifact yet.
+
+The integration location is the shared package driver:
+package/UniXNUPkg/Driver/UniXNURamDiskDxe/UniXNURamDiskDxe.c
+package/UniXNUPkg/Driver/UniXNURamDiskDxe/UniXNURamDiskDxe.inf
+package/UniXNUPkg/Driver/UniXNURamDiskDxe/FatWindow.h
+The driver finds a validated FAT subwindow in the FDT initrd range and exposes
+only that range via read-only BlockIO. Limits remain1GiB initrd and128MiB
+prefix search. It does not modify the initrd or a partition.
+
+Keep the17 experimentally proven Android v3 container route. The existing
+ABL's v4/init_boot selection and vendor prefix findings still apply to the
+boot container; neither finding establishes27 kernel execution.
+
+Carry the existing RAM-only AdvancedLogger integration into the new UEFI
+checkout if logs are needed, using the exact old recipe as a reviewed patch:
+D:\iOS6sp\uefi-initrd-fix\logger-integration.patch.json
+Its UEFI item adds AdvancedLogDxe and the corresponding DebugLib/AdvancedLogger
+library selections. Preserve SHENG_VENDOR_HW=0, which was the working panel
+handoff path on the user's tablet. Do not globally enable vendor hardware DXE
+drivers merely because the original17 package reached a desktop.
+
+Build the package/firmware with the new DarwinBoot and inspect the actual FD
+for the new loader, UniXNU, ramdisk driver, DiskIo/FAT and optional logger.
+The prior FD91c10d442a64... contains the old loader and is not the new output.
+Record fresh hashes, firmware source revisions and BootShim/FAT fixtures
+before any separate user-authorized hardware test.

@@ -1,0 +1,38 @@
+name: sheng research host checks
+on:
+  push:
+    branches: [research/sheng-ipados27]
+    paths:
+      - package/UniXNUPkg/Driver/UniXNURamDiskDxe/**
+      - research/sheng-ipados27/**
+      - .github/workflows/sheng-research-checks.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  host:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: FAT subwindow bounds with sanitizers
+        run: |
+          clang -std=c11 -Wall -Wextra -Werror -fsanitize=address,undefined \
+            -I package/UniXNUPkg/Driver/UniXNURamDiskDxe \
+            -I research/sheng-ipados27/patches/firmware/fat-tests \
+            research/sheng-ipados27/patches/firmware/fat-tests/test_fat_window.c \
+            -o /tmp/sheng-fat-window-test
+          /tmp/sheng-fat-window-test
+      - name: Python source syntax
+        run: |
+          python - <<'PY'
+          import ast
+          from pathlib import Path
+          for path in Path('research/sheng-ipados27').rglob('*.py'):
+              ast.parse(path.read_text())
+          print('Research Python syntax passed')
+          PY
+      - name: Real RSA and userdata transport controls
+        run: python research/sheng-ipados27/scripts/build_userdata27_windows.py --self-test

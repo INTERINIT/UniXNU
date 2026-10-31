@@ -1,0 +1,106 @@
+根卷布局与 Data 初始化源码审计（2026-10-31）
+当前选定目标：iPadOS 27.0.1 / 24A446。26 生成器仅保留草稿资料。
+本审计未连接设备、未写分区、未运行任何 Mac 命令。
+
+一、已失效的共存前提及结论
+
+用户后来明确：17 只保留电脑参考资源，平板可换成新版本，允许为新根卷/Data 替换 userdata。
+因此不再实施设备端 17/27 共存设计。以下是原共存问题的源码结论，防止后续误用：
+- 官方源码没有 root-base/root-offset 参数
+- board.toml [userdata] first_lba/last_lba 只用于容量计算，不是根卷偏移选择器
+- ShengUfs 从实际 GPT 中找名为 userdata 的条目，然后固定读取其首块 SHNGROOT
+- 仅把 27 raw image 写在 userdata 中间，默认驱动仍读到 17 的首块，不能选择新根卷
+- 要共存必须给 27 专用驱动添加有界 relocated-manifest/root-base 支持，并连同对象与窗口统一重定位；不是修改现有参数即可实现
+- make-userdata-full.py 明确补零到整个分区尾部，会清旧 Data/log，绝不是保留旧数据的区段写入器
+
+原共存区间算术仅作历史调查：root17_end 9382658048，4MiB guard 后取 1MiB 对齐 base=9386852352；Data17_start=239833948160；再留4MiB并向下按1MiB对齐 limit=239829254144；可用230442401792字节。该区间只表示已知布局未分配，不证明设备扇区为空。现方案不采用它。
+
+二、固定源码和正常 27 布局
+
+UniXNU-sheng：f47b27ad97e97bee945f8af34a8430e3abcf918c
+其 ShengUfs gitlink：78c93b0941896e0515c6abaad3ff0d88b50a78ca
+RamBlock gitlink：4be2d7eb05ef5a98126c91e0302c149140c0e3e1
+DarwinBoot gitlink：3e3a8a969e1177995984d8ed98c9dcc44e318265
+
+userdata 几何必须用这台设备的既有读回值重新核对：249497890816 字节，逻辑块4096。
+board 现值 first_lba=3094592，last_lba=64007162，容量计算与上述读回一致。运行时驱动仍从真实 GPT 验证条目及 CRC，不修改 GPT。
+
+官方 userdata.py 布局：
+0：4096字节 SHNGROOT manifest，零填充至1MiB
+1MiB：OS raw disk image；下一窗口/对象按1MiB对齐
+随后：SystemOS raw disk image
+随后：OS.vroot、SystemOS.vroot 数据对象（当 CONFIG_XNU_SOURCE_STORAGE_TABLES="userdata"）
+
+该 27 defconfig 正选择 tables=userdata，因此是 version2 manifest：OS/SystemOS 为512块、flags1的只读窗口；.vroot 为4096块、flags3的对象，不作为块设备发布。
+每个对象对应完整 policy manifest.bin 从544字节之后的 hash-table bytes，boot payload 只带其已签名544字节头。
+build-sheng-source-storage.py 的 root-policies.bin 会携带所选OS/SystemOS策略；kernel链接共同owner anchor；RootPolicies sidecar 在内核中复制、只读保护后认证。
+RootBinding 还要求 IOMedia 的实际provider链到达验证过的 UFS window，并核对卷 UUID；不要为换路径而绕过此检查。
+
+最少配置保持：
+- 使用 24A446 profile 的 OS/SystemOS 原始raw内容、SHA和APFS卷UUID，不能使用17输入
+- --object OS.vroot=<OS/manifest.bin>:544 --object SystemOS.vroot=<SystemOS/manifest.bin>:544
+- 27 ADT root_match_volume_uuid=2F8E6EED-68D5-4261-B8A3-12571BAA2DD4
+- 27内核 Data UUID 必须来自本次新seed实测值，替换defconfig里历史2A5E9027-D9E1-40F9-983C-41BD3F1994F5
+- Data seed、逻辑容量及 sheng-log-reserve 一旦安装，正常启动保持不变
+
+Windows上的 --object NAME=FILE[:OFFSET] 用相对路径或在Mac Actions生成；该脚本以冒号分割offset，不能直接把D:\绝对路径当作FILE传入。
+
+三、full userdata sparse 传输
+
+现有 make-userdata-full.py 不能原样用于这个 version2 布局：它只重新排列 OS/SystemOS、生成version1 header，不处理.vroot对象；与带对象root.json的image_bytes/manifest hash不会一致。
+建议从包含全部对象的规范 root image/布局生成器流式发出 Android sparse：
+- ROOT前缀所有字节完整指定（RAW或明确零FILL），保留精确SHNGROOT、窗口和对象
+- [root_total_bytes, userdata_bytes) 明确零FILL，覆盖旧Data、旧日志和其它旧userdata内容
+- 不使用DONT_CARE来表示需要清零的范围，不把压缩小当成只写小范围
+- 不建立249GB中间dense raw文件；直接补尾FILL即可
+- 限制RAW块及单个FILL的逻辑跨度，例如按1MiB拆分，避免超大FILL跨度触发目标或主机32位长度乘法问题
+- header.total_blocks = 249497890816/4096；记录所有chunk的连续覆盖、边界、类型、RAW/FILL大小和整体expanded extent
+- 独立解码器验证ROOT前缀SHA和每个对象SHA/manifest hash，并证明剩余范围全是明确零FILL
+
+这是一份有意替换 userdata 的完整传输，不是保留17设备数据的方案。既有17电脑boot/root资源与引用索引保留不动。不要额外格式化、擦除GPT、改boot/vbmeta或槽位。
+主机应继续使用 D:\platform-tools\fastboot.exe 和已经验证过的 sparse 输入路线；不能把巨大RAW直接交给旧fastboot，-S本身并不修复旧RAW处理的bad_alloc。
+新full sparse的分段/覆盖须重新做主机回环验证，不能借用17根卷的275段测试结论。
+
+四、新 Data 容量与215GiB限制
+
+Data逻辑大小D，pages=D/4096，bitmap_blocks=ceil(pages/32768)，overlay=(1+bitmap_blocks+pages)*4096。
+overlay_end=P-reserve，overlay_start=overlay_end-overlay。需 overlay_start >= ceil(rootT/4096)*4096+4MiB，另可留1GiB额外余量。
+
+P=249497890816、reserve=1GiB、D=215GiB时：
+Data logical=230854492160
+bitmap_blocks=1720
+overlay=230861541376
+overlay_start=17562607616
+overlay_end=248424148992
+rootT最高17558413312（16.35254669GiB；未计额外1GiB余量）
+故不能只凭IPSW里的AEA压缩成员长度就保证215GiB能放下。必须使用实际解密后raw OS/SystemOS尺寸以及.vroot对象得到rootT。
+--gib 215 是215GiB（约230.85GB），不是十进制215GB。首个实验用独立8GiB持久Data即可；后续按实际rootT再考虑扩大，不能承诺不重建Data。
+
+五、seed创建和一次性初始化
+
+草稿脚本：D:\iOS6sp\iPadOS27\scripts\reference_agent_seed27.py
+初始模式 --initial-only：仅从真实27只读OS挂载中的private/var建立新8GiB APFS seed；不复用17/26 seed，不依赖尚未确定的rootT。
+检查源mount只读、profile/build27.0.1/24A446、原始OS卷UUID、SystemVersion、staged_system_apps目录；记录launchd SHA。CI必须另行验证原始raw OS SHA，或传入完整verified OS policy报告。
+新APFS实际VolumeUUID写入data-seed.json；必须先取得它，再注入27配置并编译内核。
+在8GiB小影像中复制var与POSIX元数据、建立runtime目录、设置SetupDone/migration24A446和无deep framebuffer/压缩的显示prefs。staged apps不塞进seed，要求配套27 kernel提供owner-staged-apps=1只读view。
+pack后验证NXSB、logical size、encoded SHA、seed identity，再从最终packed artifact重建稀疏host影像，只读重挂载核对VolumeUUID。
+
+grow阶段才需要实际root.json和verified OS report；草稿按rootT/reserve/4MiB guard/额外余量自动选择不超过目标的GiB数。不会盲目分配215GiB。
+DarwinBoot pack支持1TiB logical，并通过SEEK_DATA/SEEK_HOLE只读大稀疏文件的有内容区域；无需215GiB RAM。但要检查packed输出有NXSB，避免宿主hole查询未工作。
+seed-data-skip-setup.py和add-gpu-plugin-data.py仍有raw.read_bytes()读取整个raw影像的路径；不要对已grow的215GiB raw直接运行它们。所有偏好编辑先在小seed进行，或把头检查修为read64等有界读取。
+
+重要：新RamBlock与17旧版本的“陌生seed自动重置”语义不同。
+4be2d7e对空白、损坏或其它seed的overlay默认 Kept，不主动初始化；只有sheng-data-reset=1/2会重建bitmap/header。
+>2GiB Data采用direct/store-backed路径，没有有效可写store时写请求返回NotReady，因此full userdata清零后必须初始化一次。
+首次选择官方 Install and boot：reset=1保持跳过Setup，reset=2显示Hello。
+正常默认Boot：sheng-data-persist=2 + 固定reserve，不带reset；否则每次启动会丢掉Data改动。
+不要把有reset的首次安装镜像永久刷入boot，或复用为日常默认入口。
+
+六、首包 GPU / UI 建议（不代表实机已验证）
+
+按用户GPU首次目标，可让正常首包携带匹配27插件、owner trust和addon，开启sheng-gpu-power=9、sheng-gpu-metal=1、sheng-gpu-addon=1。
+建议把GPU渲染与显示扫描输出分开记录：fb-gpu=0保留已知CPU显示通路，只要GPU提交/fence确实完成仍可验证GPU渲染；fb-gpu=1另测完整GPU显示输出。
+若首包必须同时使用fb-gpu=1，应保存明确的CPU显示恢复入口；不要把桌面出现当成全部GPU阶段通过。
+深色/中文/触摸的17结论不能作为27用户空间驱动ABI的资格证明。
+
+验证状态：本机只完成源码、参数、--help、语法和纯几何检查，未运行Mac APFS创建/增长，也未生成实际新seed或操作设备。

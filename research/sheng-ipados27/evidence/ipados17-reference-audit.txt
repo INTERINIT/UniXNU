@@ -1,0 +1,127 @@
+iPadOS 17 成功案例只读审计
+日期：2026-10-31（Asia/Shanghai）
+范围：本机既有文件和已归档实机记录。未连接或操作设备，未调用 Actions，未修改任何旧文件。
+本报告只写入新的 iPadOS27/research 目录。D:\AGENTS.md、D:\iOS6sp\AGENTS.md 及新目录两层 AGENTS.md 均未发现。
+
+1. 实机结论及证据优先级
+
+较新的实机证据：
+D:\iOS6sp\iPadOS17-DataGPU\reports\data-persist-hardware.json
+其明确记录：
+- 相同镜像的首次和重复 fastboot boot 均被接受
+- 用户确认可触摸的设置界面，并可回主屏幕看见 App 图标和底部 Dock
+- 改中文及深色模式后，用完全相同镜像重启，两个设置均保留
+- 当时显示加载慢、卡顿；曾误以为启动卡死，随后用户确认启动成功
+- GPU 加速未验证；长期稳定性和断电恢复未测试
+
+不要直接覆盖旧清单来“修饰”历史。以下字段是旧的阶段性状态，不能盖过较新的实机记录：
+- data-persist.json 的 hardware_result 仍写 not yet tested，hardware_qualified=false
+- iPadOS17-Start/manifest.json 的 SpringBoard_desktop 和 aspect_ratio 仍写未验证/比例异常
+后续用户已确认系统内比例正常；异常曾出现在苹果 logo 阶段。因此保全时应把这些清单视作构建时快照，并附本报告及较新实机记录。
+
+2. 两个已成功启动的主机镜像（本次重新读取实际文件并计算 SHA-256）
+
+A. CPU / RAM Data 成功对照
+路径：D:\iOS6sp\iPadOS17-Start\boot.img
+长度：202366976
+SHA256：3ce19f77bccd134ec41f30e020fb7923fae408aba20599275b50e2077b96c576
+入口：D:\iOS6sp\iPadOS17-Start\Start-iPadOS17.cmd
+Data 模式：0，RAM Data；不代表读取当前持久化设置
+
+B. CPU / 持久化 Data 成功对照
+路径：D:\iOS6sp\iPadOS17-DataGPU\images\data-persist.img
+长度：202366976
+SHA256：1fe810c7fc7aa1002a73eb9b2f966a3aa03afd868feafa02ce20430cbb82c85e
+入口：D:\iOS6sp\iPadOS17-DataGPU\Boot-Data-Persist.cmd
+Data 模式：2，已获用户授权的受限尾部持久化 overlay
+启动日志：logs/20261031-000437-399964.txt、logs/20261031-001812-756875.txt
+两者容器为 Android boot header v3，FAT payload 保持 192 MiB，默认停 Tools，timeout=-1，XNU 入口要求手动确认。
+
+共同限制：CPU 节点有 8 个，cpus=8 和 sheng-smp=1 只是请求；实际 online 核心数未测。
+共同现用 GPU 标志 metal/fb/addon=0，Wi-Fi=0。桌面可见不等于 GPU 加速生效。
+
+3. 固定构建来源（17 专用，不可重标版本）
+
+证据：D:\iOS6sp\package17\reports\kernel-build.json
+- iPadOS 17.7.11 / 21H461，XNU 10063.141.1，Darwin 23.6.0
+- CrossDarwin/macOS-ForSheng：94b109f3636e99cae16d8c24e68b4fbce8020bd0（既有编排源）
+- UniXNU：fb6aad6ab1f50199a4d99d2da1d0ca403b067633
+- UniXNU-sheng：2b7a5815110bf75713eb596612b0b33231b181f8
+- Apple XNU：d8b80295118ef25ac3a784134bcf95cd8e88109f
+- build run 41026540374
+
+本次重新计算以下实际资源哈希均与清单一致：
+D:\iOS6sp\resources\community\run41026540374-candidate\kernel.macho
+  c64efc5a8c0269fa7c6044e06caad40d1cfab8d0ee2e112d0aa1663328022001
+同目录 data.dbr
+  7f0de287002e2f838001114e5b3d547c7ca815e926c5b030c0ae5077b93a0178
+同目录 original-static-system.bundle
+  7416ca4f8377146626bb284e2133c76bee6cb4e3ee0af5d648b186235a7323a7
+
+实际启动 payload 的 kernel.macho 已加入口/诊断适配，清单哈希为：
+65b901d8c7ad85dcca7d06f494b571cc417a970afe71fb83e12f4e20916d3b31
+ADT：e2412f3baa94347c65aad55fb3cfd9a1ee266aa504e306edad284c71c65dbf95
+两者不应与未封装原始候选 kernel 的哈希混淆。
+
+kernel-build.json 里的 Xcode/SDK 版本是构建工具，不是运行系统版本。使用较新 SDK 或仓库名含 macOS 不会使此内核成为 iPadOS 27 内核。
+其中 macos27_abi_qualified=false 是 macOS 字段，不能拿它单独证明 iPadOS 27 的能力；明确的 21H461、XNU 10063 和 Darwin 23.6.0 才证明这个现有构建的目标是 17。
+
+4. 可复用的 sheng 启动经验
+
+可作为 27 第一层启动对照的内容：
+- 解锁 sheng 的主机身份检查、系统 D:\platform-tools\fastboot.exe、只做 fastboot boot 的流程
+- 已实机显示 UniXNU 菜单的 UEFI、BootShim 的 load/copy/in-place 几何和 logger 集成
+- header v4 的空载 UEFI 能显示，但完整载荷在本机采取 v3 路径才交接 generic ramdisk；这属于本机观察，不应未经新测试扩展成所有固件通则
+- vendor/generic 拼接后 initrd 前缀和尾部可能不按扇区对齐；本地 FatWindow 适配对 FAT 子窗口做只读识别
+- 已验证的触摸/背光/按钮/显示/UFS 硬件事实和 MMIO 等板级输入可作为新移植调查起点
+
+UEFI 归档：D:\iOS6sp\uefi-initrd-fix
+FD 实际文件本次校验：91c10d442a64aebb503498e95524b499f1febed41d2d9571f57959950ab19e7d
+来源：UniXNU f0721e9745c45ad2600cd69c74730f1cca55d56a；UniXNU-sheng 08cde20edc3254ed6f7df8d0f5384fb887786e8f；uefi-sheng 官方 sheng 分支 20ac23d5e0937106c2129303dfc931b3390ae660
+其中存在明确记录的本地修改：logger 集成和有界只读 FAT 子窗口适配；不能称作未改动官方发布镜像。
+FatWindow 上限：initrd <=1 GiB，前缀扫描 <=128 MiB，512-byte FAT 扇区，校验 BPB 几何/FAT 容量/边界。
+本地 sanitizers 测试记录 PASS，包含 raw FAT、未对齐前缀、bootconfig tail、截断、错误几何等。
+UEFI FV 检查 57 FFS/2 volumes/0 errors；BootShim QEMU UART 对照和 15 个 porting 结构区检查亦已归档。
+实机完整 FAT 识别日志：uefi-logger/logs/received-full-v3-fatfix-sheng-20190100-000022.log
+其中 FAT offset 0x1D8E918、bytes 0xC000000、block device 0xABFFE918 Success，并随后挂载 Fat filesystem。
+这些日志属于 UEFI 阶段，不是 XNU/GPU 运行期日志。
+
+这些硬件事实可复用，但实际 ADT 二进制、chosen/memory-map、root UUID、boot_args 布局和驱动 ABI 仍须按 27 重审，不能原样混入即视作支持新系统。
+
+5. 明确与 iPadOS 17 绑定、不能直接混入 27 的部分
+
+- 21H461 的原始 kernelcache、SystemOS/OS 镜像、dyld shared cache、trustcache、KernelCollection/prelink 输入
+- 根据该 kernelcache 推导的 storage/PMGR/IOGPU/IOSurface/HID 等原始类大小、vtable 槽位、符号与绑定地址
+- NativePrelink 对 XNU 10063 的安全初始化和 sparse-index 等补丁、原 carrier 及所有 ABI 审计结果
+- Data seed 的 APFS 内容/UUID、现有持久化格式解释、与系统/用户空间版本对应的配置和 staged apps
+- 所有 GPU Metal 插件、IOGPU/private-framework 交互和字节级 trust/module 输入必须和新目标匹配
+- 17 的 boot flags 也不是 27 适配证明；需重新核对消费者和数值含义
+
+6. 必须保留的现有 root / Data
+
+现有 17 root 文件：D:\iOS6sp\package17\images\userdata-root.img，9382658048 字节。
+本次只核对其存在和长度，没有重新计算整份 9.38 GB 文件哈希。既有记录中的 SHA256 为 fd43ee7035ce185ce4215ac93fdc006fd784a54b3b7442e21457c226cbe03093。
+它是已安装的 17 根卷资源，不是原 Android userdata 的完整备份；不能据此宣称可以恢复原 Android 数据。
+
+设备 userdata 容量：249497890816 字节。
+17 Data overlay 相对 userdata 范围（右开）：[239833948160, 248424148992)，8590200832 字节。
+最后 1 GiB 预留保持 sheng-log-reserve=1024；现用磁盘日志与导出关闭。
+Data seed 的 UUID：15ADF298-466F-419F-85F8-52850812C82F。
+本地 pinned PersistOverlay.h 明确：header 的 seed digest 或页数不同会被判为 stale；在可写模式下 bitmap/header 会重新初始化，overlay 从空开始。
+因此，即使只临时 fastboot boot，若把 27 seed 和 data-persist=2 指向同一个尾部窗口，也可能破坏现有 17 设置。不要这样测试。
+
+建议 27 初始候选一律不打开设备持久化写回，不加载或修改现有 17 根卷和 Data，不设置 sheng-data-reset，不改变 GPT/分区容量或保留布局。
+新 root 的实际存放/读取路径需先做清晰设计并单独验证；“镜像已组包”不能代替这个条件。不能为满足 27 而自动重刷旧 root。
+
+7. 保全建议（仅建议，本审计没有执行复制、重命名或设置只读属性）
+
+保留旧目录和入口不动，并建立独立只读参考索引/快照，至少包含：
+- 上述两个成功 boot、各自构建 manifest、Data2 较新的实机 report、对应 TOML 与日志
+- Start 的 boot.py/boot_guard.py 和 tools/python；DataGPU 的 boot_next.py/boot_guard.py/CMD（其 CMD 依赖兄弟目录 iPadOS17-Start/tools/python）
+- uefi-initrd-fix 的 FD、全部 pins/diffs/policy/本地源码补丁、BootShim/FAT/FV 测试结果
+- package17/reports/kernel-build.json、原始 candidate kernel/Data seed/trust、现有 root 文件的固定哈希索引
+- 已下载的 Apple 原始资源及源码 commit/patch 锁定记录，避免仅依赖会过期的 Actions artifact/cache
+
+新工作仅放 D:\iOS6sp\iPadOS27，使用独立的 sources/work/resources/images/reports/logs 和明显标明 27 的启动入口。
+不要把 27 构建脚本的输出默认设为 iPadOS17-Start/boot.img，也不要覆盖 data-persist.img、旧清单或 old root。
+新候选在未通过实机前应标记 assembled/untested，不能借用 17 的成功标志。

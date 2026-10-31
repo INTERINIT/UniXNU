@@ -1,0 +1,54 @@
+diff --git a/Platforms/Xiaomi/shengPkg/Include/DXE.inc b/Platforms/Xiaomi/shengPkg/Include/DXE.inc
+index 28b15ad..bf0fe34 100644
+--- a/Platforms/Xiaomi/shengPkg/Include/DXE.inc
++++ b/Platforms/Xiaomi/shengPkg/Include/DXE.inc
+@@ -130,3 +130,5 @@
+   INF Binaries/sheng/QcomPkg/Drivers/PILProxyDxe/PILProxyDxe.inf
+   INF Binaries/sheng/QcomPkg/Drivers/SPSSDxe/SPSSDxe.inf
+ !endif
++
++  INF UniXNUPkg/Driver/AdvancedLogDxe/AdvancedLogDxe.inf
+diff --git a/Platforms/Xiaomi/shengPkg/sheng.dsc b/Platforms/Xiaomi/shengPkg/sheng.dsc
+index 04aa2f6..67b5aa6 100644
+--- a/Platforms/Xiaomi/shengPkg/sheng.dsc
++++ b/Platforms/Xiaomi/shengPkg/sheng.dsc
+@@ -121,3 +121,39 @@
+ [LibraryClasses]
+   UniXNULib|UniXNUPkg/Library/UniXNULib/UniXNULib.inf
+   FdtLib|MdePkg/Library/BaseFdtLib/BaseFdtLib.inf
++
++# UniXNU official Advanced Logger integration (RAM only)
++
++[PcdsFixedAtBuild]
++  gUniXNUPkgTokenSpaceGuid.PcdUniXNUDeviceModel|"sheng"
++  gAdvLoggerPkgTokenSpaceGuid.PcdAdvancedLoggerPages|1024
++
++[PcdsFeatureFlag]
++  gAdvLoggerPkgTokenSpaceGuid.PcdAdvancedLoggerFixedInRAM|FALSE
++  gAdvLoggerPkgTokenSpaceGuid.PcdAdvancedLoggerLocator|FALSE
++  gAdvLoggerPkgTokenSpaceGuid.PcdAdvancedLoggerAutoWrapEnable|TRUE
++
++[LibraryClasses]
++  AdvancedLoggerAccessLib|AdvLoggerPkg/Library/AdvancedLoggerAccessLib/AdvancedLoggerAccessLib.inf
++  AdvancedLoggerHdwPortLib|AdvLoggerPkg/Library/AdvancedLoggerHdwPortLibNull/AdvancedLoggerHdwPortLibNull.inf
++  AssertLib|AdvLoggerPkg/Library/AssertLib/AssertLib.inf
++  QrEncoderLib|MsGraphicsPkg/Library/QrEncoderLib/QrEncoderLib.inf
++
++[Components]
++  UniXNUPkg/Driver/AdvancedLogDxe/AdvancedLogDxe.inf
++
++[LibraryClasses.common.DXE_CORE]
++  DebugLib|AdvLoggerPkg/Library/BaseDebugLibAdvancedLogger/BaseDebugLibAdvancedLogger.inf
++  AdvancedLoggerLib|AdvLoggerPkg/Library/AdvancedLoggerLib/DxeCore/AdvancedLoggerLib.inf
++
++[LibraryClasses.common.DXE_DRIVER]
++  DebugLib|AdvLoggerPkg/Library/BaseDebugLibAdvancedLogger/BaseDebugLibAdvancedLogger.inf
++  AdvancedLoggerLib|AdvLoggerPkg/Library/AdvancedLoggerLib/Dxe/AdvancedLoggerLib.inf
++
++[LibraryClasses.common.UEFI_DRIVER]
++  DebugLib|AdvLoggerPkg/Library/BaseDebugLibAdvancedLogger/BaseDebugLibAdvancedLogger.inf
++  AdvancedLoggerLib|AdvLoggerPkg/Library/AdvancedLoggerLib/Dxe/AdvancedLoggerLib.inf
++
++[LibraryClasses.common.UEFI_APPLICATION]
++  DebugLib|AdvLoggerPkg/Library/BaseDebugLibAdvancedLogger/BaseDebugLibAdvancedLogger.inf
++  AdvancedLoggerLib|AdvLoggerPkg/Library/AdvancedLoggerLib/Dxe/AdvancedLoggerLib.inf

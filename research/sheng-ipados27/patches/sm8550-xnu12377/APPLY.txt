@@ -1,0 +1,47 @@
+Local, reviewed SoC overlay for the iPadOS 27 build only
+
+Source identities
+UniXNU: 793d6bddf7ea90678e3a61e2b2bd4350e5fdce16 (feat/ipados27-gpu-parity)
+UniXNU-sheng: f47b27ad97e97bee945f8af34a8430e3abcf918c (same branch name)
+UniXNU-sm8550-common: 23b2049fcd9e30356161def84231334fb55ecca9
+Apple XNU: ac9718fb1af618d5ce8678d0dc6e8a58f252216f (xnu-12377.121.6)
+
+Why the overlay exists
+The published board requests soc:patches/xnu-12377/series. The pinned SoC
+repository has only patches/xnu/series; its public history and only public
+branch provide no alternate xnu-12377 revision. This is a local adaptation,
+not an unmodified upstream source claim.
+
+Integration
+1. Use a new checkout or resolved SoC cache under iPadOS27, never the old 17 tree.
+2. Retain the pinned SoC source and its existing patches/xnu/ directory.
+3. Copy these three files into its new patches/xnu-12377/ directory:
+   series, native-smp-secondary.patch, sheng-platform-power.patch
+4. Retain the board's patch_series order:
+   arch:patches/xnu/series
+   soc:patches/xnu-12377/series
+   os:patches/xnu/series
+   device:patches/xnu-12377/series
+5. Record the local addition and hashes from audit.json with the build.
+6. Run the resolver status and normal patch preparation. Do not skip failed hunks.
+
+No duplicate CPU-count patch
+The arch series starts with bcm2837-machine-config.patch. It already adds
+MAX_CPUS=8 and MAX_CPU_CLUSTERS=2 to this public XNU tree. Consequently this
+overlay's native-smp-secondary.patch changes only the secondary reset entry's
+MPIDR affinity mask. Do not copy the old iOS17 MAX_CPUS hunk into this series.
+
+Context verification actually performed
+scripts/prepare_soc27_overlay.py fetched the two raw files from the fixed
+Apple commit, recorded their SHA-256, generated exact diffs and checked them
+after every arch-series change to these affected files. Each local patch was
+git apply --check'ed and applied, then the OS and device series' hunks for
+these files were applied in order. All these affected-file contexts passed.
+Other source paths were excluded from this focused check. This is not a
+claim that the entire XNU tree compiles or that an iPadOS27 image has booted.
+
+Artifacts
+audit.json contains original Apple hashes, before/after overlay hashes,
+patch hashes, full series paths and the precise verification scope.
+research/soc27-context-check holds the resulting two-file context fixture.
+No device operation was performed.

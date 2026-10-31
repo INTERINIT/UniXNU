@@ -1,0 +1,132 @@
+UniXNU official iPadOS 27 source audit (2026-10-31, Asia/Shanghai)
+
+Result
+There is a substantial official experimental iPadOS27 source branch. It is
+not macOS27 and is not the already-qualified iPadOS17 recipe. Select:
+  UniXNU/UniXNU feat/ipados27-gpu-parity
+  793d6bddf7ea90678e3a61e2b2bd4350e5fdce16
+  UniXNU/UniXNU-sheng feat/ipados27-gpu-parity
+  f47b27ad97e97bee945f8af34a8430e3abcf918c
+Both refs and commits were verified through GitHub API. The main repository's
+branch diverges from current main (66 ahead, 11 behind at audit time). No
+branch literally named e was returned. No release assets were returned for
+either repository, and the source branch had no kernel/image build artifacts
+available through public Actions runs. Device runs listed documentation jobs,
+not validated boot-image releases.
+
+OS and kernel identity
+Profile: profiles/os/ipados-27.0.1-24A446/profile.toml
+iPadOS27.0.1 build24A446, product iPad17,3 / j820ap, chip33090, board12.
+IPSW:
+https://updates.cdn-apple.com/2026FallFCS/6074e110-d48d-40c2-b0e8-b611520941a3/iPad17,1,iPad17,2,iPad17,3,iPad17,4_27.0.1_24A446_Restore.ipsw
+Decompressed kernelcache SHA256:
+38e6d9fa5f789b8228f4617ef4c6d2a3fd8ab564abdc9b62920f1db53fc1780a
+The source profile explicitly uses public XNU12377.121.6 / Darwin25.5.0
+commit ac9718fb1af618d5ce8678d0dc6e8a58f252216f, adding Darwin26 calls/KPIs.
+It says no Darwin26 XNU source is published yet. Do not describe the source
+kernel as Apple's original Darwin26 implementation.
+Architecture is arm64e with 4096-byte pages. Fileset prelink, PAC boundary
+handling, source-storage and target-specific IOKit family bindings replace
+the old arm64/iOS17 pipeline. Prelink uses a same-source RELEASE reference
+and --allow-missing reporting stubs; this remains an experimental bring-up
+configuration rather than a compatibility guarantee.
+
+Actual build entry points
+configs/sheng_ipados27_defconfig selects source corecrypto, source storage,
+RamBlock Data, legacy display and Adreno. The board's archive chain includes
+corecrypto, ArmDTPlatform, ArmCpu, libpthread, source ShengUfs, RamBlock,
+Adreno740, GPU kits, accelerator, AppleKeyStoreState and the 27 display recipe.
+scripts/cycle27.sh shows real full-kernel/prelink/native-slide convergence
+and check-legacy27-binds.py, then payload/boot-image construction.
+It also auto-boots a hardcoded device serial UPSTREAM_EXAMPLE_SERIAL unless NOBOOT=1.
+Do not invoke its unattended hardware tail for the user's DEVICE_SERIAL_REDACTED tablet.
+
+Clean-runner gaps identified and preparation required
+1. Missing SoC xnu-12377 series: no alternate public SoC commit exists.
+   Local overlay generated and affected-file full-order context-checked at
+   ../patches/sm8550-xnu12377/. Read APPLY.txt and audit.json.
+2. Source-storage policies must be generated from both actual decrypted raw
+   OS media and SystemOS media. tree/build/verified-root-24A446/{OS,SystemOS}
+   needs manifest.bin, trusted-key.bin and real verification.json. Both must
+   share a complete395-byte RSA3072 owner anchor. The source builder enforces
+   actual image/UUID pins and C signature+all-block verification. Do not fake
+   the verification record or reuse17 policies. Policy preparation is being
+   supplied separately by the firmware agent.
+3. The source-HID compile audit reads an existing native .noctf kernel.
+   A clean bootstrap may leave only compilation records, so bootstrap a real
+   source CPU/storage kernel first, then restore the full graphics archive
+   chain. The draft does not synthesize a Mach-O or bypass the audit.
+4. build-fileset-release-reference.py still hardcodes the26 output tree and
+   iOS26 deployment. The draft makes a separate, hashed local copy pointing
+   at the27 tree/target, builds --lto and copies the real RELEASE result to
+   the profile's expected fileset-reference/mach.release...noctf path.
+5. build-gop-legacy-display-27.py assumes sibling directories named UniXNU
+   and UniXNU-sheng and an IOHIDFamily source at UniXNU/out/driver-sources/.
+   Clone the exact profile source pin or symlink the resolved pinned source.
+   Kernel REFERENCES alone does not fetch IOHIDFamily; explicitly fetch it.
+6. Even if Wi-Fi/audio are disabled at runtime, the27 display recipe compiles
+   their board objects. Initialize Ath12kWifi and other device submodules and
+   provide the recorded touch/GPU firmware. Do not omit these source inputs.
+7. make-nosetup-seed27.py edits an existing seed only. It is not a fresh-seed
+   creator and has an old DarwinBoot import path. Use a fresh prepared27 seed
+   and inject its actual UUID before kernel compilation. Seed growth changes
+   its persistent identity; complete seed construction before installation.
+
+GPU first-build route (no audio addon requirement)
+  build-adreno-compiler-host.py --probe
+  build-turnip-darwin.py --target host
+  build-turnip-darwin.py --target ios27
+  build-adreno-metal-plugin.py --target ios27
+The latter builds own GLSL smoke shaders via glslc/spirv-val and a host Turnip
+replay, then build-adreno-metal-bridge.py --target ios27. The bridge requires
+Rust1.98.0 plus rust-src: arm64e-apple-ios has no prebuilt std, so the source
+uses RUSTC_BOOTSTRAP=1 with cargo -Z build-std=std,panic_unwind. This is not a
+requirement to install an unspecified nightly toolchain.
+Translator pin:624bab3918de5b978e1101517abca2b4fa426565 on development, with
+the branch's exact20 recorded patches. Do not mix17 bridge or ABI objects.
+The original27 userland loads its original metallibs at runtime. Build-time
+smoke GLSL and scanout_convert.ll are owned repository inputs. A prime-list
+may be enumerated from the read-only27 OS volume; never reuse a17 list.
+Pack with ADRENO_PLUGIN_DIR=build/adreno-metal-plugin27 and make-gpu-addon.py
+--publish --no-daemon. Use trust-append-module.py to append exactly the plugin
+and Turnip CDHashes to the unchanged original27 trust bundle. This avoids
+pack27-gpu.sh's optional audio-hal/wallpaper input assumptions.
+
+Host route
+The branch's official .github/workflows/macos.yml specifies macos-26 with
+Xcode26.6 by default. The27 scripts target arm64e-apple-ios27.0 but contain
+no strict SDK27 precondition. This is a real source-defined starting point,
+not an assertion that this particular clean-runner build already passed.
+Tools include LLVM/LLD, mtools, dtc, unifdef, OpenSSL3, glslang, shaderc,
+SPIR-V tools, Vulkan headers, Rust1.98.0+rust-src and the AEA extractor.
+The framework bindings and Data seed still need macOS SDK/hdiutil/diskutil.
+
+Linux qualification
+The patched Linux LLVM setup can target arm64e, but kernel.py::linux_env still
+forces arm64-apple-ios17.0/SDK17 and prepare-xnu.py builds arm64/iOS17 cc_kext.
+The source-HID builder also consumes generated HIDDriverKit SDK declarations.
+Therefore Ubuntu can prepare source/IPSW inputs, but the checked-in branch is
+not a drop-in fully qualified Linux27 archive/reference/GPU build. Port it
+explicitly if used; do not infer success from the general Linux documentation.
+
+Firmware and geometry
+The new branch selects DarwinBoot3e3a8a969e1177995984d8ed98c9dcc44e318265.
+The17 known-good FD contains an older loader. Rebuild the UEFI integration
+with the new loader; retain the proven v3 container/FAT-window findings as
+board evidence rather than swapping only the kernel bytes.
+The27 board default payload is176MiB and owned-memory request0x130000000.
+Review actual payload occupancy and the12GiB board handoff map before packing.
+
+Draft available for the parent CI
+scripts/source_agent_cloud27_draft.py provides staged bootstrap/reference/
+full-kernel/GPU commands and target Data UUID injection. --help/AST passed.
+It has NOT run on a Mac, compiled XNU or operated hardware. Use real CI output
+to qualify/fix each stage; it requires separately supplied policy and seed
+inputs and the local SoC overlay before resolver setup.
+
+Primary source links
+https://github.com/UniXNU/UniXNU/tree/793d6bddf7ea90678e3a61e2b2bd4350e5fdce16
+https://github.com/UniXNU/UniXNU-sheng/tree/f47b27ad97e97bee945f8af34a8430e3abcf918c
+https://github.com/UniXNU/UniXNU/blob/793d6bddf7ea90678e3a61e2b2bd4350e5fdce16/profiles/os/ipados-27.0.1-24A446/profile.toml
+https://github.com/UniXNU/UniXNU-sheng/blob/f47b27ad97e97bee945f8af34a8430e3abcf918c/scripts/cycle27.sh
+https://github.com/UniXNU/UniXNU-sm8550-common/tree/23b2049fcd9e30356161def84231334fb55ecca9

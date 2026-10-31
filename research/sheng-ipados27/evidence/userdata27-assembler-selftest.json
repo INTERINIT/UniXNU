@@ -1,0 +1,17 @@
+{
+  "checks": [
+    "Real OpenSSL RSA3072-signed fixtures and every 4096-byte raw block verified",
+    "Actual raw APFS fast path plus synthetic UDIF RAW/zero/zlib decoding reproduces independent bytes",
+    "Changed signed UUID, hash table, actual data block and truncated raw stream refused",
+    "Complete independent sparse expansion equals SHNGROOTv2 windows, tables-only objects and a zeroed whole partition",
+    "DONT_CARE, nonzero FILL, truncated sparse body and corrupted written window refused",
+    "100GiB explicit zero coverage encodes in 44B without expansion; capacity misalignment and overrun refused",
+    "Still-encrypted AEA input refused instead of silently treating it as raw"
+  ],
+  "fixture_RSA_signatures_real": true,
+  "small_v2_sparse_fixture_passed": true,
+  "actual_Apple_root_media_tested": false,
+  "Mac_CI_policy_reports_not_fabricated": true,
+  "device_operations": false,
+  "hardware_tested": false
+}

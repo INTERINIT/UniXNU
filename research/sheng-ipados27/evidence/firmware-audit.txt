@@ -1,0 +1,107 @@
+iPadOS 27 firmware audit (2026-10-31, Asia/Shanghai)
+
+Scope and completed operations
+This work read public project/Apple resources and wrote new files below iPadOS27 only.
+No tablet command, Actions operation, existing iPadOS17 modification or whole-IPSW download occurred.
+The four small Apple inputs, native Windows AEA tool, metadata and a Mac policy builder draft are available locally.
+
+Version selection
+Apple's releases page currently lists iPadOS27.2 / 24B119 on 2026-10-26:
+https://developer.apple.com/news/releases/
+Do not substitute that newest release into a build whose ABI is pinned to 24A446.
+The official experimental profile is iPadOS27.0.1 / 24A446, released 2026-09-28.
+https://github.com/UniXNU/UniXNU/blob/793d6bddf7ea90678e3a61e2b2bd4350e5fdce16/profiles/os/ipados-27.0.1-24A446/profile.toml
+It targets iPad17,3 / j820ap, chip0x8142, board0x0C, arm64e.
+The current board main checkout still selects17; this candidate belongs to the experimental fixed source revision.
+
+Official resource and actual verification
+https://updates.cdn-apple.com/2026FallFCS/6074e110-d48d-40c2-b0e8-b611520941a3/iPad17,1,iPad17,2,iPad17,3,iPad17,4_27.0.1_24A446_Restore.ipsw
+This URL is from the official UniXNU profile and points directly to Apple CDN; no third-party firmware mirror is needed.
+Actual HEAD returned200 and exact byte-range reads returned206.
+IPSW Content-Length:11,654,176,243 bytes. Its complete file digest was not computed.
+Only1,351,155 bytes were needed to read ZIP metadata and BuildManifest.
+Actual BuildManifest confirms27.0.1 /24A446 and iPad17,1/2/3/4.
+BuildManifest SHA256:7655fd412eb2249724227503ee016122cf0292df7b6fc49c8caf9ba44e6ab2ac
+j820ap has both a normal Erase identity and a Recovery Erase identity.
+The audit explicitly selects Variant="Customer Erase Install (IPSW)", not "Recovery Customer Install".
+The current project helper chooses the first matching Erase identity; normal appears first in this manifest.
+
+Local evidence
+BuildManifest-24A446.plist
+ipsw-24A446-metadata.json (HTTP headers, exact byte ranges, identity, member sizes)
+ipsw-24A446-members.json (ZIP inventory)
+inspect_27_ipsw.py (bounded metadata-only fetcher)
+
+Small actual inputs fetched and checked by ZIP CRC
+Directory:apple-small-inputs-24A446
+KernelCache:kernelcache.release.ipad17,24,014,290 bytes
+Packed SHA256:802b495b3c5c587ec7c547c559652a31ebbff05532653441b5df70ee945110e7
+IM4P payload was LZFSE-decompressed locally to kernelcache.decompressed,80,035,840 bytes.
+Decompressed SHA256:38e6d9fa5f789b8228f4617ef4c6d2a3fd8ab564abdc9b62920f1db53fc1780a
+This matches the official profile pin exactly. Actual Mach-O is arm64e subtype0xc0000002, MH_FILESET12.
+DeviceTree:Firmware/all_flash/DeviceTree.j820ap.im4p,65,439 bytes
+StaticTrustCache:Firmware/043-68950-668.dmg.aea.trustcache,85,177 bytes
+SystemTrustCache:Firmware/043-69086-713.dmg.aea.trustcache,3,167 bytes
+input-manifest.json records all full file SHA256 values and actual CRC results.
+The two IM4P trust payloads are version2 modules:3547 entries/85152 bytes and130 entries/3144 bytes.
+Actual network transfer for this extraction was28,614,131 bytes; neither OS image was fetched by that step.
+
+Large root resources
+OS:043-68950-668.dmg.aea,8,254,390,272 bytes
+SystemOS:043-69086-713.dmg.aea,2,348,810,240 bytes
+Both ZIP members are stored without ZIP compression and have AEA1 encryption.
+AppOS:043-69297-793.dmg,16,777,216 bytes (8,955,771 compressed ZIP bytes); it is separate from the two root windows.
+The default profile selects OS and SystemOS root windows.
+
+Native Windows AEA route, actually checked
+Official tool release:https://github.com/blacktop/ipsw/releases/tag/v3.1.740
+Installed only in D:\iOS6sp\iPadOS27\tools\ipsw-3.1.740\bin\ipsw.exe
+Tool version3.1.740,BuildCommit6361083e1fe6e800eb1e7a0cf436e3c8178f4347
+Official ZIP checksums verified:
+ipsw_3.1.740_windows_x86_64.zip SHA256 e00366bc9f67813d3dd2351aa7c936321c6bc1b524061cb35b4caada16b0134a
+The version/help commands run successfully on this Windows machine.
+Source path pkg/aea/decrypt.go at that tag selects its Go decryption implementation when /usr/bin/aea is absent (linux/windows).
+https://github.com/blacktop/ipsw/blob/v3.1.740/pkg/aea/decrypt.go
+Command (the tool fetches the Apple archive key automatically):
+  ipsw.exe --no-color fw aea INPUT.dmg.aea -o OUTPUT_DIRECTORY
+For a Python subprocess wrapper, explicitly use encoding="utf-8",errors="replace"; native logs contain Unicode and Windows' GBK default caused a decoding error during the first audit attempt.
+check_windows_aea.py fetched only the first64KiB of each real root member, recognized AEA1, ran --info and --key successfully on Windows, and received32-byte archive keys for both.
+Only key hashes were retained by the audit script, not raw keys. Header-prefix files are not complete decryptable images.
+Evidence:aea-windows/windows-aea-prefix-check.json
+Full multi-GB Windows decryption remains to be tested with the complete input files.
+
+Mac policy-generation draft and exact hash semantics
+Script:D:\iOS6sp\iPadOS27\scripts\firmware_agent_policy27.py
+It is parameterized by resolved --tree, original --profile and two AEA-decrypted --os-dmg/--systemos-dmg inputs.
+It automatically runs kits/VerifiedRoot/tests/check.py to generate/preserve one owner key, build the real C/OpenSSL provider and execute upstream signature/tamper/block-refusal checks.
+There is no prerequisite named build-verified-root-host.py; the upstream kit's tests/check.py is the actual host builder.
+It then attaches each input with hdiutil -nomount -readonly, selects the physical GUID whole image rather than a synthesized APFS whole container, verifies DiskImage/readonly/size and the actual APFS UUID association, calls manifest.make, opens the real C RSA view, and verifies every4096-byte raw media block.
+Only after both complete digest checks and C block verification does it emit verification.json with real_c_signature_and_block_verification=true.
+Both policies must share the same395-byte owner anchor; private keys must never be published in artifacts.
+The source profile root pins are SHA256 of the complete virtual raw disk byte stream, not AEA archive bytes and not UDIF file bytes. This is confirmed by userdata.py disk_blocks()->raw device hashing and the root adapter's policy checks; the audit has not downloaded and independently hashed these two large raw disks yet.
+OS UUID:2F8E6EED-68D5-4261-B8A3-12571BAA2DD4
+OS raw SHA256:8a12cdad43f8f0d33dadcf01a800a560222baf40c05f71374c460ba57ba3a739
+SystemOS UUID:F914C62A-AD00-47C6-8281-5746291C339A
+SystemOS raw SHA256:d5b4873d35c85f96eaafaa31c59602b485afe33b5067eff1af67ba31204cdb4a
+
+CI invocation example (substitute actual absolute runner paths):
+  python scripts/firmware_agent_policy27.py --tree "$TREE" --profile "$MAIN/profiles/os/ipados-27.0.1-24A446/profile.toml" --os-dmg "$DECRYPTED/043-68950-668.dmg" --systemos-dmg "$DECRYPTED/043-69086-713.dmg"
+Output:TREE/build/verified-root-24A446/{OS,SystemOS}/{manifest.bin,trusted-key.bin,verification.json,...}
+The resolved tree normally lacks profiles/, so CI should pass --profile explicitly from the main source checkout.
+The draft's --help and Python syntax checks pass on Windows. Full execution requires Mac image tools and has not run yet; it is not an asserted successful27 policy artifact.
+Upstream host tests also cross-compile an arm64/iOS17 C object as a regression. That is not arm64e27 ABI qualification; the actual27 storage recipe separately builds target objects.
+
+Avoiding a10GB Actions artifact
+Windows can download/decrypt/assemble locally using the native tool.
+Mac Actions can fetch the same Apple members independently, create policies/kernel/Data seed, and return only the much smaller policy tables and build products.
+The local root assembler must reproduce the exact raw profile hashes and policy windows.
+Check real free space first: AEA input and decrypted UDIF coexist during decryption. Remove only each job's own encrypted temporary input after successful verified decryption if necessary; never remove existing17 assets.
+No modified or synthetic verification JSON, skipped root blocks, renamed17 kernel, or macOS image can substitute for these actual27 inputs.
+
+Subsequent review corrections / current status
+The user briefly selected26.5.2, then returned to27.0.1/24A446. Original27 resources and script remain preserved.
+26 metadata/AEA-header checks were retained separately under iPadOS26; its remaining small-input download was explicitly stopped, and no further26 work is running in this agent.
+SystemOS may be an original UDRW/raw APFS image without a koly trailer (the official udif.py explicitly supports this). The27 policy draft now accepts either UDIF or raw APFS/GPT inputs, retains the same exact raw hash and actual APFS UUID requirements, and distinguishes physical APFS stores from synthesized APFS whole containers. Its Mac full run is still pending.
+Important source-pin mismatch: UniXNU793d6... gitlink kits/VerifiedRoot is ed368a8d4451f8670228f9025f1b45479509c789, whose header implements vr_open_header. components.toml still records def026642c6c6e71be0dea267d989df1d29ddc64, whose header lacks it. SourceRootPolicies.cpp calls vr_open_header. The resolved build must use the coherent header-only-capable revision, not silently switch back to the stale catalog revision. Both versions retain the ctypes View layout used by the host policy builder.
+The existing Windows17 root assembler already uses the installed Python3.11 lzfse extension at D:\iOS6sp\tools\python-deps to decode UDIF chunks. It can inform a new27 assembler, but must not be edited or reused with17 pins/header assumptions. The27 root's header-only hash tables require SHNGROOT version2 data objects (flags3/block4096); windows remain flags1/block512. Expected objects and skip offsets must match the actual new NativeUfs reader.
+Pure raw images should be streamed directly; sparse zero/ignore chunks should be emitted and hashed in bounded buffers rather than allocating a huge all-zero chunk. A full raw output hash must match the27 profile before any flashing script can accept it.

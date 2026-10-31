@@ -1,0 +1,25 @@
+{
+  "source_commit": "793d6bddf7ea90678e3a61e2b2bd4350e5fdce16",
+  "darwinboot_commit": "3e3a8a969e1177995984d8ed98c9dcc44e318265",
+  "uefi_sheng_branch": "sheng",
+  "uefi_sheng_commit": "20ac23d5e0937106c2129303dfc931b3390ae660",
+  "patch_sha256": "667e38c3637da5ab6c08d27881132acfd7f4f6a2163582972d0bb6d97e2d8d0c",
+  "FatWindow_h_sha256": "a970191cdb4077522f610d4c967be72eb4fcddde41cf98cb57d8c87dda09826a",
+  "source_before": {
+    "UniXNURamDiskDxe.c": "b1cf184ebd217656daf92446d9bd724570aad61cb3c7d6d6a2a39d43199d9f35",
+    "UniXNURamDiskDxe.inf": "28491c49992134008d55fc0efe7e0792814d517d323ebfb7b70adc27c725e94a"
+  },
+  "command": [
+    "git",
+    "-C",
+    "D:\\iOS6sp\\iPadOS27\\source\\UniXNU",
+    "apply",
+    "--check",
+    "D:\\iOS6sp\\iPadOS27\\patches\\firmware\\ramdisk-fat-window27.patch"
+  ],
+  "check_exit_code": 0,
+  "source_tree_modified": false,
+  "firmware_built": false,
+  "hardware_tested_on_27": false,
+  "scope": "read-only bounded FAT-subwindow BlockIO adapter; no kernel or OS ABI change"
+}

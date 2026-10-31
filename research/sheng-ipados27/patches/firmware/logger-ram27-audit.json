@@ -1,0 +1,14 @@
+{
+  "uefi_commit": "20ac23d5e0937106c2129303dfc931b3390ae660",
+  "source_recipe": "D:\\iOS6sp\\uefi-initrd-fix\\logger-integration.patch.json",
+  "source_recipe_sha256": "486a070bc19fb28bf0c4b4b9f96847bf0328f6c46bee36bad1e8f54c2b0e1078",
+  "patch_sha256": "9aee04f08645c13f74f6ed1b4a851c9e8ea6f8bbe38c4d9f84a8b22d5b441cc7",
+  "patch_scope": [
+    "Platforms/Xiaomi/shengPkg/sheng.dsc",
+    "Platforms/Xiaomi/shengPkg/Include/DXE.inc"
+  ],
+  "upstream_logger_implementation_changed": false,
+  "check_exit_code": 0,
+  "firmware_built": false,
+  "device_operations": false
+}

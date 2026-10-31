@@ -1,0 +1,199 @@
+Publication review for the proposed INTERINIT/UniXNU research branch
+Scope: D:/iOS6sp/iPadOS27/{ci,scripts,patches,research}; read-only review.
+This review did not create a fork, push, open a PR, or change a source checkout.
+Report date: 2026-10-31
+
+Do not recursively add the workspace. Copy only explicitly reviewed source
+and sanitized evidence into a dedicated research directory in the fork.
+The public archive should contain build recipes, patches, pinned source/input
+hashes, and host-check results. It should fetch licensed binary inputs locally.
+
+Required changes before publishing
+
+1. ci/.github/workflows/ipados27.yml:27
+   UNIXNU_UNIQUE_CHIP_ID contains this user's real device ID. Remove it from
+   host-only stages; they do not need a physical-device identity. If a later
+   local packaging step requires one, accept an explicit environment variable
+   or local ignored configuration and do not echo it into logs/reports.
+   Do not move the current literal into a public workflow input default.
+
+2. scripts/build_userdata27_windows.py:423 and435
+   The initial scan found the same real device ID in the error and plan.serial.
+   A subsequent read confirmed that the owner removed the literal, made
+   --serial optional with defaultNone, and neutralized the capacity message.
+   Publish the updated source only; keep serial unset in public host evidence.
+   The partition-size assertion can remain as a measured layout constraint.
+
+3. research/official-source-audit.txt:41-42
+   Remove both the user's real ID and the unnecessary example ID copied from
+   an upstream unattended script. Keep the useful finding: cycle27 has an
+   unattended hardware tail, and this research pipeline sets NOBOOT=1.
+
+4. Policy private keys currently fall inside the broad Actions cache.
+   ci/scripts/policy27.py:208 sets host=tree/build/verified-root-host.
+   Its signing path is host/keys/owner.pem, used at lines131-134.
+   ci/.github/workflows/ipados27.yml caches all work27/UniXNU; excluding only
+   DMGs does not exclude that private key. Before enabling the workflow in a
+   public fork, cache only explicit source/download paths, or exclude every
+   verified-root-host/keys directory and all private-key paths in both restore
+   and save rules. Do not upload a complete tree/build or result directory
+   without a separate generated-artifact allowlist. Actions caches are not a
+   suitable secret store. If such a cache has already been public, delete that
+   cache and replace the signing key for future policy generation.
+   This review found the code path; it did not inspect any remote cache or
+   private-key value and does not assert that a key was publicly disclosed.
+
+5. GH_TOKEN: ${{ github.token }} is a normal runtime expression, not a literal
+   credential leak. Keep contents:read and do not copy a shell environment,
+   gh authentication file, credential helper, HTTP Authorization header, or
+   original private CI .git directory/history into the public fork.
+
+6. Normalize local paths in scripts and copied reports.
+   The reviewed text had no USER_HOME or /Users/<name> matches, but several
+   scripts/reports contain absolute D:/iOS6sp workspace paths. Make build input
+   roots explicit CLI arguments or paths relative to the research directory.
+   Replace paths in published command/evidence copies with <WORKSPACE> and
+   <CHECKOUT>. Preserve unredacted originals locally. Mark derived public
+   reports as sanitized, record their source-report SHA256 when useful, and
+   do not represent a redacted copy as the byte-identical original artifact.
+
+Source allowlist (privacy scan passed unless a prerequisite is noted)
+
+Canonical CI sources; publishing their code does not publish generated keys:
+  ci/scripts/cloud27.py
+  ci/scripts/policy27.py
+  ci/scripts/seed27.py
+  ci/scripts/target27.py
+  ci/.github/workflows/ipados27.yml AFTER changes1 and4 above
+
+Independent source tools:
+  scripts/firmware27_draft.py
+  scripts/firmware27_draft.txt
+  scripts/fetch_root_members.py
+  scripts/test_userdata27_windows.py
+  scripts/build_userdata27_windows.py (updated version described in item2)
+  scripts/prepare_fat_window27_patch.py AFTER parameterizing ROOT/SOURCE/OLD
+  scripts/prepare_soc27_overlay.py AFTER parameterizing ROOT/MAIN/DEVICE
+
+The following are also source-safe, but duplicate canonical CI implementations
+and should either be labelled historical drafts or omitted to avoid divergent
+entrypoints:
+  scripts/firmware_agent_policy27.py
+  scripts/reference_agent_seed27.py
+  scripts/source_agent_cloud27_draft.py
+
+scripts/preserve17.py is a local preservation utility, not a public CI step.
+It copies original17 manifests and boot scripts that may contain device IDs.
+If retained, parameterize WORK, describe it as a local-only tool, and do not
+publish or automatically upload its output/reference17 directory.
+
+Patch source allowlist:
+  patches/sm8550-xnu12377/native-smp-secondary.patch
+  patches/sm8550-xnu12377/sheng-platform-power.patch
+  patches/sm8550-xnu12377/series
+  patches/sm8550-xnu12377/audit.json
+  patches/sm8550-xnu12377/APPLY.txt
+  patches/firmware/ramdisk-fat-window27.patch
+  patches/firmware/logger-ram27.patch
+  patches/firmware/fat-tests/RealFatBpb.h
+  patches/firmware/fat-tests/test_fat_window.c
+  patches/firmware/ramdisk-fat-window27-audit.json AFTER path normalization
+  patches/firmware/logger-ram27-audit.json AFTER path normalization
+  patches/firmware/APPLY.txt AFTER path normalization
+The BPB fixture explicitly contains boot sectors from locally generated
+diagnostic FAT images, not contents of a user's filesystem or Apple root.
+Preserve the original source/license notices and upstream commit references.
+
+Research code suitable for a tools subdirectory:
+  research/inspect_27_ipsw.py
+  research/check_windows_aea.py
+  research/verified_root27_hostcheck.py
+  research/extract_small_27.py AFTER parameterizing its absolute ROOT
+
+Evidence allowlist
+
+Safe as-is for privacy, retaining their exact claims and untested flags:
+  research/firmware27-draft-validation.json
+  research/apple-small-inputs-24A446/input-manifest.json
+
+Safe after the stated transformation:
+  research/official-source-audit.txt: remove device IDs, normalize any paths
+  research/firmware-audit.txt: normalize local paths
+  research/ipados17-reference-audit.txt: normalize local paths; keep the
+    distinction between preserved PC boot resources and live Data backup
+  research/root27-layout-options.txt: normalize local paths
+  research/resolved-status.json: rewrite every resolved absolute path into
+    a declared <CHECKOUT>/<WORKSPACE> mapping; preserve pins and selectedOS
+  research/ipsw-24A446-metadata.json: retain URL/version/build/product/identity,
+    member offsets/sizes/CRC/hash, ETag and meaningful request counters; drop
+    incidental CDN trace headers such as Via/X-Amz-Cf-Id/Date/CDNUUID
+  research/ipsw-24A446-members.json: metadata only; no member bytes
+
+For CI run evidence not already in this local scope, publish a small explicit
+summary: run URL, source pins, compiler/SDK versions, phase, exit code, binary
+hashes/sizes, actual check booleans, and hardware_tested=false unless a real
+device observation exists. Review raw logs separately. A successful prepare
+or policies phase must not be presented as a compiled or booted27 GPU/kernel.
+
+Keep outside the public source archive
+
+  Any .git directory or copied history of the private CI workspace.
+  work27/, result27/ as whole trees, source/, tools/, resources/ as whole trees,
+  package/, reference17/, device logs/screenshots, Data seeds and live Data.
+  Any owner.pem, private PEM/key/PFX/P12, token, auth configuration, cookie,
+  SSH private key, Apple account data, activation record or keybag.
+  Raw IPSW/DMG/AEA, Apple kernelcache/DeviceTree/trustcache bytes, prepared
+  root images, sparse userdata, boot images and firmware FDs/ELFs.
+  research/apple-small-inputs-24A446/ EXCEPT its metadata input-manifest.json.
+  research/aea-windows/*prefix-only.aea.
+  resources/official-vendor/uefi.elf, including the exact recovered official
+    member: its small size or hash verification is not a redistribution license.
+    Keep download/reconstruction instructions and hash metadata instead.
+  research/BuildManifest-24A446.plist: unnecessary raw3MB input; metadata and
+    the upstream URL/hash make the result reproducible without copying it.
+  research/soc27-context-check/ and firmware27-logger-check/: redundant full
+    upstream source fixtures; retain only patch audit result/hash summaries.
+  research/NativeUfs-27-pinned.cpp, official-27-ipsw.py, official-27-userdata.py,
+    verified_root27*.h and aea-windows/*.go: redundant upstream source snapshots.
+    Prefer exact repository/commit/path links. If copying is necessary, retain
+    each upstream license and identify the original revision; these were not
+    authored as independent new contributions in this research branch.
+  Every __pycache__, .pyc, download partial, memory capture and original-samples.bin.
+
+Suggested ignore defense (allowlist copying is still the main control)
+
+  **/__pycache__/
+  **/*.pyc
+  work27/
+  result27/
+  resources/
+  reference17/
+  **/verified-root-host/keys/
+  **/*private*
+  **/*.pem
+  **/*.key
+  **/*.p12
+  **/*.pfx
+  **/*.ipsw
+  **/*.dmg
+  **/*.aea
+  **/*.dbr
+  **/*.img
+  **/*.raw
+  **/*.sparseimage
+  **/*.elf
+  **/*.fd
+  **/*.im4p
+  **/*.trustcache
+  **/kernelcache*
+  **/original-samples.bin
+
+Review result
+
+The initial scoped text scan found the real device ID in the workflow, Windows
+userdata builder, and official-source report listed above. The builder literal
+was removed during this review; the other original files still need their
+public-copy transformation. The scan found no PEM
+private-key material or token-shaped literal in reviewed source/text files.
+That is a scoped scan result, not a claim about all workspace binaries or any
+remote cache. No publication, remote action, or source modification was done.
