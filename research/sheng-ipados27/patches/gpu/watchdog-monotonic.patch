@@ -1,0 +1,43 @@
+--- a/NativeTurnipSmoke.h
++++ b/NativeTurnipSmoke.h
+@@ -16,6 +16,7 @@
+ #include "NativeTurnipShaders.h"   // generated: scripts/gen-turnip-smoke-shaders.py
+ #include <dlfcn.h>
+ #include <mach/mach.h>
++#include <mach/mach_time.h>
+ #include <mach-o/dyld.h>
+ #include <pthread.h>
+ #include <stdio.h>
+@@ -610,6 +611,13 @@
+ 
+ template <typename Marker, typename Reporter>
+ static Result runWatched(Marker &mark, Reporter &&report, const char *libraryPath) {
++    mach_timebase_info_data_t watchdogTimebase = {};
++    if (mach_timebase_info(&watchdogTimebase) != KERN_SUCCESS || !watchdogTimebase.numer || !watchdogTimebase.denom) {
++        Result r;
++        r.vkResult = -12;
++        snprintf(gFirstError, sizeof gFirstError, "watchdog monotonic clock unavailable");
++        return r;
++    }
+     Watched *w = new Watched{};
+     w->libraryPath = libraryPath;
+     w->markContext = &mark;
+@@ -622,10 +630,16 @@
+     pthread_attr_destroy(&attr);
+     if (!started) {Result r; r.stage = 0; r.vkResult = -12; return r;}
+     static const unsigned checkpoints[] = {15, 45, 90};
++    const uint64_t watchdogStart = mach_absolute_time();
+     unsigned next = 0;
+-    for (unsigned tenths = 0; !__atomic_load_n(&w->done, __ATOMIC_ACQUIRE); ++tenths) {
++    while (!__atomic_load_n(&w->done, __ATOMIC_ACQUIRE)) {
+         usleep(100000);
+-        if (next < 3 && tenths == checkpoints[next] * 10) {
++        const uint64_t ticks = mach_absolute_time() - watchdogStart;
++        // Divide before multiplying: the remainder product is bounded by two
++        // uint32_t timebase values, and the quotient covers only this run.
++        const uint64_t elapsedNanoseconds = ticks / watchdogTimebase.denom * watchdogTimebase.numer +
++            (ticks % watchdogTimebase.denom) * watchdogTimebase.numer / watchdogTimebase.denom;
++        if (next < 3 && elapsedNanoseconds >= uint64_t(checkpoints[next]) * 1000000000ull) {
+             char text[64] = {};
+             sample(*w, worker, text, sizeof text);
+             report(text);

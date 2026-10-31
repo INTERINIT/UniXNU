@@ -171,6 +171,8 @@ def addon_files(data):
 
 
 def check_gpu(result):
+    require(load(result / "gpu27-stage-status.json").get("status") == "passed",
+            "GPU build and host checks did not complete successfully in this result set")
     trust = load(result / "gpu27-trust.json")
     original = (result / "ipsw-trust27.bundle").read_bytes()
     preparation = load(result / "prepare.json")

@@ -74,6 +74,15 @@ def plist_command(*command):
     return plistlib.loads(subprocess.check_output(list(map(str, command))))
 
 
+def read_only(info):
+    # diskutil uses Writable/WritableVolume on recent macOS APFS volumes.
+    # Keep the same positive read-only evidence accepted by policy27.py;
+    # an absent flag alone must never count as read-only.
+    return (info.get("Writable") is False or info.get("WritableVolume") is False
+            or info.get("ReadOnlyMedia") is True or info.get("ReadOnlyVolume") is True
+            or info.get("MediaReadOnly") is True)
+
+
 def within(base, relative):
     result = base / relative
     require(result.resolve().is_relative_to(base.resolve()), "A Data path follows a symlink outside the new mount: " + relative)
@@ -222,8 +231,11 @@ def main():
         allocation = choose_size(args.userdata_bytes, root["image_bytes"], args.desired_gib, args.reserve_mib, args.margin_gib)
     source = args.os_mount.resolve()
     info = plist_command("diskutil", "info", "-plist", source)
-    require(info.get("ReadOnlyVolume") is True or info.get("ReadOnlyMedia") is True or info.get("MediaReadOnly") is True,
-            "Original OS mount is not read-only")
+    mount_evidence = {key: info[key] for key in (
+        "DeviceNode", "VolumeUUID", "MountPoint", "BusProtocol", "Writable", "WritableVolume",
+        "ReadOnlyMedia", "ReadOnlyVolume", "MediaReadOnly") if key in info}
+    print("SOURCE_MOUNT", json.dumps(mount_evidence, sort_keys=True), flush=True)
+    require(read_only(info), "Original OS mount is not read-only")
     require(str(uuid.UUID(info["VolumeUUID"])).upper() == expected["os_volume_uuid"], "Mounted original OS UUID differs")
     version = plistlib.loads((source / "System/Library/CoreServices/SystemVersion.plist").read_bytes())
     require(version.get("ProductBuildVersion") == EXPECTED_BUILD and version.get("ProductVersion") == EXPECTED_VERSION,
@@ -279,6 +291,7 @@ def main():
               "root_manifest_sha256": root.get("manifest_sha256"), "seed17_reused": False, "initial_only": args.initial_only,
               "source_verification_level": "verified raw-image policy plus mounted identity" if verified is not None else
                   "mounted read-only OS UUID, SystemVersion and recorded launchd hash only; CI must separately verify original OS raw-image SHA",
+              "source_mount_readonly_evidence": mount_evidence,
               "original_os_inputs_modified": False, "setup_marked_complete": True, "migration_marked_build": EXPECTED_BUILD,
               "staged_apps": "excluded from seed; requires owner-staged-apps=1 read-only OS view in matched 27 kernel",
               "gpu_preferences": "deep framebuffer and surface/framebuffer compression disabled; this does not enable GPU hardware",

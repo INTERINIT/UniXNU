@@ -8,6 +8,7 @@ This draft is syntax-checked only; each real build remains to be qualified.
 import argparse
 import copy
 import hashlib
+import importlib.util
 import json
 import os
 from pathlib import Path
@@ -31,9 +32,17 @@ def sha(path):
         return hashlib.file_digest(stream, "sha256").hexdigest()
 
 
-def run(command, cwd, env=None):
+def run(command, cwd, env=None, log_path=None):
     print("RUN", json.dumps(list(map(str, command))), flush=True)
-    subprocess.run(list(map(str, command)), cwd=cwd, env=env, check=True)
+    if log_path is None:
+        subprocess.run(list(map(str, command)), cwd=cwd, env=env, check=True)
+    else:
+        try:
+            with Path(log_path).open("w", encoding="utf-8") as stream:
+                subprocess.run(list(map(str, command)), cwd=cwd, env=env, check=True,
+                               stdout=stream, stderr=subprocess.STDOUT)
+        finally:
+            print(Path(log_path).read_text(encoding="utf-8", errors="replace")[-40000:], end="", flush=True)
 
 
 def context(main, device, seed_report):
@@ -176,19 +185,49 @@ def prepare_gpu_host_check(tree, output):
     return destination
 
 
+def prepare_gpu_watchdog(tree, output, env):
+    path = Path(__file__).with_name("gpu_watchdog27.py")
+    spec = importlib.util.spec_from_file_location("target27_watchdog_clock", path)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    report = module.apply(tree, output)
+    module.qualify_clock(output, env)
+    return report
+
+
+def export_gpu_logs(tree, output):
+    # Preserve failing-process evidence as well as successful logs. No output
+    # from a failed suite may be reclassified as a qualification report.
+    for directory, prefix in (("turnip-darwin-host", "host-turnip-"), ("adreno-metal-bridge", "bridge-")):
+        for path in (tree / "build" / directory).glob("*.log"):
+            shutil.copy2(path, output / (prefix + path.name))
+
+
 def gpu_host_check(tree, output, env):
     report_path = output / "gpu27-host-checks.json"
     report_path.unlink(missing_ok=True)
     local = prepare_gpu_host_check(tree, output)
     # Run even when a previous failed aggregate left plugin_smoke in the cache.
     # Its existence alone is not evidence that the watchdog/controls passed.
-    run([sys.executable, local], tree, env)
+    failure = output / "gpu27-host-check-failure.json"
+    failure.unlink(missing_ok=True)
+    try:
+        run([sys.executable, local], tree, env, log_path=output / "gpu27-host-check.stdout.log")
+    except (subprocess.CalledProcessError, subprocess.TimeoutExpired) as error:
+        failure.write_text(json.dumps({"status": "failed", "error_type": type(error).__name__,
+                                       "returncode": getattr(error, "returncode", None),
+                                       "host_qualified": False, "hardware_tested": False,
+                                       "local_check_sha256": sha(local)}, indent=2) + "\n")
+        raise
+    finally:
+        export_gpu_logs(tree, output)
     host = tree / "build/turnip-darwin-host"
     inputs = {
         "host_turnip": tree / "build/mesa-tu/src/freedreno/vulkan/libvulkan_freedreno.dylib",
         "host_bridge": tree / "build/adreno-metal-bridge/host/libadreno_metal_bridge.a",
         "software_peer": host / "libhostiokit.dylib",
         "plugin_smoke": host / "plugin_smoke",
+        "shipping_watchdog_header": tree / "drivers/AdrenoMetal/NativeTurnipSmoke.h",
     }
     report = {
         "target": "iPadOS27.0.1 / 24A446",
@@ -204,14 +243,13 @@ def gpu_host_check(tree, output, env):
         "inputs": {name: {"bytes": path.stat().st_size, "sha256": sha(path)} for name, path in inputs.items()},
     }
     report_path.write_text(json.dumps(report, indent=2) + "\n")
-    for path in host.glob("*.log"):
-        shutil.copy2(path, output / ("host-turnip-" + path.name))
 
 
-def gpu(main, ctx, trust, output):
+def gpu_build(main, ctx, trust, output):
     tree = ctx.tree
     env = dict(os.environ)
     env["PATH"] = "/opt/homebrew/opt/llvm/bin:" + str(Path.home() / ".cargo/bin") + ":" + env["PATH"]
+    prepare_gpu_watchdog(tree, output, env)
     pin = json.loads((tree / "scripts/data/gpu-metal-vulkan-inputs.json").read_text())["translator"]
     translator = tree / ".cache/gpu-reference/metal2vulkan"
     if not translator.exists():
@@ -243,6 +281,22 @@ def gpu(main, ctx, trust, output):
     bridge = tree / "build/adreno-metal-bridge"
     for name in ("Cargo.lock", "Cargo.toml", "build-ios27.log"):
         shutil.copy2(bridge / name, output / name)
+
+
+def gpu(main, ctx, trust, output):
+    status = {"status": "in_progress", "stage": "GPU host build and transport qualification",
+              "hardware_tested": False, "shader_execution_verified": False}
+    receipt = output / "gpu27-stage-status.json"
+    (output / "gpu27-host-checks.json").unlink(missing_ok=True)
+    receipt.write_text(json.dumps(status, indent=2) + "\n")
+    try:
+        gpu_build(main, ctx, trust, output)
+        status["status"] = "passed"
+    finally:
+        if status["status"] != "passed":
+            status["status"] = "failed"
+        export_gpu_logs(ctx.tree, output)
+        receipt.write_text(json.dumps(status, indent=2) + "\n")
 
 
 def main():

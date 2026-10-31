@@ -4,9 +4,11 @@ These tests do not execute Darwin code or qualify GPU hardware.
 """
 import ast
 import importlib.util
+import json
 from pathlib import Path
 import shutil
 import subprocess
+import sys
 import tempfile
 import unittest
 from unittest.mock import patch
@@ -64,6 +66,7 @@ class ReplayScopeTests(unittest.TestCase):
         host = self.tree / "build/turnip-darwin-host"
         host.mkdir(parents=True)
         (host / "plugin_smoke").write_bytes(b"left by earlier failed aggregate")
+        (host / "plugin_watchdog.log").write_text("actual failing stall stdout/stderr")
         (self.output / "gpu27-host-checks.json").write_text('{"passed": ["stale run"]}')
         with patch.object(target, "run", side_effect=subprocess.CalledProcessError(1, "host-check")) as call:
             with self.assertRaises(subprocess.CalledProcessError):
@@ -71,6 +74,16 @@ class ReplayScopeTests(unittest.TestCase):
         self.assertEqual(call.call_count, 1)
         self.assertEqual(call.call_args.args[0][1], self.output / "check-turnip-host27-local.py")
         self.assertFalse((self.output / "gpu27-host-checks.json").exists())
+        self.assertEqual((self.output / "host-turnip-plugin_watchdog.log").read_text(), "actual failing stall stdout/stderr")
+        self.assertEqual(json.loads((self.output / "gpu27-host-check-failure.json").read_text())["status"], "failed")
+
+    def test_failed_child_stdout_and_stderr_preserved(self):
+        log = self.output / "failing-child.log"
+        with self.assertRaises(subprocess.CalledProcessError):
+            target.run([sys.executable, "-c", "import sys; print('real stdout'); print('real stderr', file=sys.stderr); sys.exit(9)"],
+                       self.tree, log_path=log)
+        self.assertIn("real stdout", log.read_text())
+        self.assertIn("real stderr", log.read_text())
 
 
 if __name__ == "__main__":

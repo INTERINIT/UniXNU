@@ -40,8 +40,10 @@ jobs:
           python research/sheng-ipados27/scripts/build_userdata27_windows.py --self-test
       - name: Firmware adapter and GPU test scope controls
         run: |
+          git submodule update --init --depth=1 -- drivers/AdrenoMetal
           python research/sheng-ipados27/ci/scripts/firmware_stage27.py --self-test
           python research/sheng-ipados27/ci/scripts/test_target27_gpu.py
+          python research/sheng-ipados27/ci/scripts/test_gpu_watchdog27.py --source drivers/AdrenoMetal/NativeTurnipSmoke.h
       - name: Payload pairing and offline deployment guards
         run: |
           python research/sheng-ipados27/ci/scripts/test_payload_stage27.py

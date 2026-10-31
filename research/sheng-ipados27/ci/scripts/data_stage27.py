@@ -246,8 +246,10 @@ def data(main, ctx, result, *, desired_gib=8):
             require(encrypted.resolve().is_relative_to(source.cache.resolve()), "Encrypted input cleanup escaped the cache")
             encrypted.unlink()
         policy_tools = helper("stage27_policy_attachment", SCRIPTS / "policy27.py")
-        stage_work = result / "data-stage-work"
-        stage_work.mkdir(exist_ok=True)
+        # Each unfinished recipe gets a separate host-only work directory.
+        # A helper fix must not collide with or erase an earlier failed seed.
+        stage_work = result / "data-stage-work" / request_key
+        stage_work.mkdir(parents=True, exist_ok=True)
         seed_output = stage_work / "fresh-seed"
         request_path = stage_work / "request.json"
         if request_path.exists():
