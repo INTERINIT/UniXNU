@@ -1,0 +1,53 @@
+{
+  "run_id": 41180371505,
+  "repo": "INTERINIT/UniXNU",
+  "url": "https://github.com/INTERINIT/UniXNU/actions/runs/41180371505",
+  "source_commit": "f54011ad68ec29012140e6457669621eac14d047",
+  "conclusion": "failure",
+  "actual_error": "EXPORT_HDRS/bsd/bsm/audit.h:194:9 unknown type name 'uid_t'",
+  "phases": {
+    "data": {
+      "status": "passed",
+      "elapsed_seconds": 0.255,
+      "reused": true,
+      "fresh_build": false,
+      "source_run": 41173083070
+    },
+    "native": {
+      "status": "failed",
+      "error_type": "CalledProcessError",
+      "traceback": "package-native-failure.log",
+      "elapsed_seconds": 565.917,
+      "reused": false,
+      "fresh_build": true
+    },
+    "gpu": {
+      "status": "passed",
+      "elapsed_seconds": 0.101,
+      "reused": true,
+      "fresh_build": false,
+      "source_run": 41173083070
+    },
+    "firmware": {
+      "status": "passed",
+      "elapsed_seconds": 46.434,
+      "reused": true,
+      "fresh_build": false,
+      "source_run": 41173083070,
+      "fresh_source_preparation": true
+    },
+    "payload": {
+      "status": "blocked",
+      "dependencies": [
+        "native"
+      ],
+      "reused": false,
+      "fresh_build": true
+    }
+  },
+  "complete_boot_built": false,
+  "device_operations": false,
+  "offline_repair": "Include sys/types.h before sys/proc.h in the isolated RELEASE copy; no compiler option or driver change",
+  "source": "apple XNU ac9718fb bsd/sys/types.h defines all four missing type classes",
+  "new_gate_added": false
+}

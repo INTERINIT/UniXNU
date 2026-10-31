@@ -191,7 +191,7 @@ def prepare_reference_builder(main, ctx, output):
     if (exception_text.count(marker) != 1 or '#include <sys/proc.h>' in exception_text or
             'proc_pid(get_bsdtask_info(task))' not in exception_text):
         raise ValueError('Review changed RELEASE exception diagnostic includes')
-    exception_text = exception_text.replace(marker, marker + '#ifdef MACH_BSD\\n#include <sys/proc.h>\\n#endif\\n', 1)
+    exception_text = exception_text.replace(marker, marker + '#ifdef MACH_BSD\\n#include <sys/types.h>\\n#include <sys/proc.h>\\n#endif\\n', 1)
     exception.write_text(exception_text, encoding='utf-8', newline='\\n')
     # This comparison links no SourceStorage archive. Respect the existing
     # feature switch for its optional startup hook; full native is unchanged.

@@ -69,7 +69,7 @@ class NativeRecipeTests(unittest.TestCase):
             self.assertNotIn("version-min=26.0", text)
             self.assertNotIn("-ios_version_min,26.0", text)
             self.assertNotIn("root = repo /", text)
-            self.assertIn("#ifdef MACH_BSD\\n#include <sys/proc.h>\\n#endif\\n", text)
+            self.assertIn("#ifdef MACH_BSD\\n#include <sys/types.h>\\n#include <sys/proc.h>\\n#endif\\n", text)
             self.assertLess(text.index("exception.write_text"), text.index("    manifest ="))
             self.assertTrue(first.is_relative_to(tree / "build/xnu/fileset-reference"))
             self.assertEqual(first, target.prepare_reference_builder(MAIN, ctx, output)[1])
@@ -105,7 +105,7 @@ class NativeRecipeTests(unittest.TestCase):
             code = compile(ast.Module(body=snapshot.body[start:end], type_ignores=[]), str(local), "exec")
             exec(code, {"source": source})
             result = exception.read_text(encoding="utf-8")
-            added = '#ifdef MACH_BSD\n#include <sys/proc.h>\n#endif\n'
+            added = '#ifdef MACH_BSD\n#include <sys/types.h>\n#include <sys/proc.h>\n#endif\n'
             self.assertEqual(result.replace(added, ""), fixture)
             self.assertEqual(storage.read_text(encoding="utf-8"), "\tvfsinit();\n#if defined(XNU_SOURCE_STORAGE) && XNU_SOURCE_STORAGE\n" + hook + "#endif\n")
             with self.assertRaisesRegex(ValueError, "Review changed"):
