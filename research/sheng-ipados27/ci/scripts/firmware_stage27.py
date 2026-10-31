@@ -74,6 +74,7 @@ def command(main, device, result, root, *, out_root=None, jobs=4):
 def check_manifest(manifest):
     require(manifest.get("DarwinBoot_commit") == PINS["DARWIN_PIN"], "Do not reuse an older DarwinBoot FD")
     require(manifest.get("host_fv_and_bootshim_verified") is True, "Actual FV and both BootShim checks are required")
+    require(manifest.get("official_empty_control_verified") is True, "The official empty-ramdisk container control is required")
     require(manifest.get("kernel_or_payload_built") is False and manifest.get("device_operations") is False
             and manifest.get("hardware_tested") is False, "Firmware phase must stay host-only")
 
@@ -112,6 +113,8 @@ def run(main, device, result, root, *, ctx=None, jobs=4):
         "source_pins": PINS, "draft_sha256": sha(SOURCE), "fd_sha256": sha(fd),
         "fd_bytes": fd.stat().st_size, "output_subdirectory": "firmware",
         "vendor_sha256": VENDOR_SHA, "host_fv_and_bootshim_verified": True,
+        "official_empty_control_verified": True,
+        "stock_boot_header_compared": manifest["stock_boot_header_compared"],
         "device_operations": False, "hardware_tested": False,
     }
     (result / "firmware-stage27.json").write_text(json.dumps(receipt, indent=2) + "\n", encoding="utf-8")
@@ -138,7 +141,8 @@ def self_test():
     require(parsed.output == base / "result27/firmware" and parsed.out_root == base / "work27/UniXNU/out",
             "Dedicated firmware output or resolver layout changed")
     valid = {"DarwinBoot_commit": PINS["DARWIN_PIN"], "host_fv_and_bootshim_verified": True,
-             "kernel_or_payload_built": False, "device_operations": False, "hardware_tested": False}
+             "official_empty_control_verified": True, "kernel_or_payload_built": False,
+             "device_operations": False, "hardware_tested": False}
     check_manifest(valid)
     rejected = False
     try:

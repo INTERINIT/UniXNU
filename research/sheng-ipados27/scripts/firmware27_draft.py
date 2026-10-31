@@ -4,10 +4,12 @@
 Prerequisite: cloud27 prepare has populated the fixed UniXNU/UniXNU-sheng pair
 and the xnu-12377 SoC overlay. This script never checks out/reset those repos.
 Use on a fresh macOS runner with brew cmake ninja llvm lld dtc acpica mtools
-qemu. No kernel, root volume, Data, payload or full boot image is built here.
+qemu. Builds firmware and empty container controls; no kernel, root volume,
+Data or iPadOS payload is built here.
 """
 
 import argparse
+import difflib
 import hashlib
 import json
 import os
@@ -31,6 +33,59 @@ PATCH_SHA = {
 }
 VENDOR_UEFI_SHA = "a846d86dc6fc471a879ec02f8c8d87ee28dc1329e819f03629662fe0409ff520"
 VENDOR_ROM_MD5 = "31450b6677d9e46edc4937c3f797c51d"
+BOOTSHIM_CHECK_SHA = "f2ef7ac8500e42944ccfd56d8022af1745a974e4f62b944699e2597f0726e4bb"
+STOCK_HEADER_READ = """    stock = ROOT / '.cache/firmware/sheng/porting-inputs'
+    stock_boot = next(stock.rglob('boot.img'))
+    with stock_boot.open('rb') as stream:
+        stock_header = stream.read(44)
+    if stock_header[:8] != b'ANDROID!':
+        raise SystemExit('Unexpected stock boot image magic')
+"""
+OPTIONAL_STOCK_HEADER_READ = """    stock = ROOT / '.cache/firmware/sheng/porting-inputs'
+    stock_candidates = sorted(stock.rglob('boot.img'))
+    stock_boot_header_version = None
+    if stock_candidates:
+        if len(stock_candidates) != 1:
+            raise SystemExit('Ambiguous original stock boot image inputs')
+        with stock_candidates[0].open('rb') as stream:
+            stock_header = stream.read(44)
+        if len(stock_header) != 44 or stock_header[:8] != b'ANDROID!':
+            raise SystemExit('Unexpected stock boot image header')
+        stock_boot_header_version = struct.unpack_from('<I', stock_header, 40)[0]
+"""
+
+
+def prepare_bootshim_check(source, tree, output):
+    """Keep the real upstream fixtures; make only stock-header reporting optional.
+
+    The fixed upstream script reads stock boot.img only after all QEMU and
+    container round-trip checks, to report its header version. A UEFI-only
+    build has the genuine uefi.elf but not that separate Android image.
+    """
+    text = source.read_text(encoding="utf-8")
+    require(hashlib.sha256(text.encode()).hexdigest() == BOOTSHIM_CHECK_SHA,
+            "BootShim checker source changed; review the stock-input scope")
+    root = "ROOT = Path(__file__).resolve().parents[1]"
+    version = "'stock_boot_header_version': struct.unpack_from('<I', stock_header, 40)[0],"
+    limitation = "'Legacy v0 recipe follows debian-sheng; stock firmware uses v4'"
+    require(text.count(root) == text.count(STOCK_HEADER_READ) == text.count(version) == text.count(limitation) == 1,
+            "Require the exact reviewed BootShim reporting context")
+    updated = text.replace(root, "ROOT = Path(" + repr(str(tree)) + ")")
+    updated = updated.replace(STOCK_HEADER_READ, OPTIONAL_STOCK_HEADER_READ)
+    updated = updated.replace(version, "'stock_boot_header_version': stock_boot_header_version,\n"
+                              "              'stock_boot_header_compared': stock_boot_header_version is not None,")
+    updated = updated.replace(limitation, "'Legacy v0 control; stock header comparison is unavailable when the original boot image is absent'")
+    target = output / "package-sheng-boot27-local.py"
+    target.write_text(updated, encoding="utf-8", newline="\n")
+    patch = "".join(difflib.unified_diff(text.splitlines(keepends=True), updated.splitlines(keepends=True),
+                                      fromfile="a/scripts/package-sheng-boot.py", tofile="b/package-sheng-boot27-local.py"))
+    (output / "bootshim-checker27-local.patch").write_text(patch, encoding="utf-8", newline="\n")
+    report = {"upstream_checker_sha256": BOOTSHIM_CHECK_SHA, "local_checker_sha256": sha(target),
+              "change": "Optional report-only stock boot header; explicit null when absent",
+              "original_device_script_modified": False, "QEMU_or_roundtrip_checks_removed": False,
+              "stock_image_generated_or_substituted": False, "device_operations": False}
+    (output / "bootshim-checker27-adaptation.json").write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
+    return target
 
 
 def require(condition, message):
@@ -240,11 +295,22 @@ class Pipeline:
         require(fd.is_file() and fd.stat().st_size == 0x300000, "Unexpected FD size")
         (self.device / "build/sheng").mkdir(parents=True, exist_ok=True)
         run(sys.executable, self.device / "scripts/check-sheng-fv.py", cwd=self.device)
-        # This also runs FV validation in the resolved tree and the actual
-        # BootShim copy/already-in-place QEMU fixtures. It never accesses USB.
-        run(sys.executable, ctx.tree / "scripts/package-sheng-boot.py", cwd=ctx.tree)
+        # The original stock boot.img was used only for a report field, not
+        # for shim execution or image generation. Preserve every actual check
+        # in a hash-guarded local copy and report an absent stock header as null.
+        checker = prepare_bootshim_check(ctx.tree / "scripts/package-sheng-boot.py", ctx.tree, self.output)
+        run(sys.executable, checker, cwd=ctx.tree)
         report = json.loads((ctx.tree / "build/sheng/boot/report.json").read_text())
         require(len(report["qemu"]) == 2 and all(item["passed"] for item in report["qemu"]), "Both BootShim cases must pass")
+        require(report["fd_sha256"] == sha(fd) and report["qemu_skipped"] is False,
+                "BootShim check must exercise this exact newly built FD path")
+        # Separately use the unmodified official bootimg driver with an empty
+        # ramdisk. This is a host v0 container control, not a hardware claim.
+        control = self.output / "empty-control/boot-uefi-empty.img"
+        self.cli("bootimg", "--dtb", ctx.tree / "build/sheng/sheng.dtb", "--ramdisk", "none", "-o", control)
+        empty = json.loads((control.parent / "boot.json").read_text())
+        require(empty["ramdisk_bytes"] == 0 and empty["fd_sha256"] == sha(fd)
+                and empty["image_sha256"] == sha(control), "Official empty control differs from this new FD")
         proofs = {}
         dump = fd.with_name(fd.name + ".dump")
         for name, inf in (("AdvancedLogDxe", self.main / "package/UniXNUPkg/Driver/AdvancedLogDxe/AdvancedLogDxe.inf"),
@@ -271,6 +337,10 @@ class Pipeline:
         (self.output / "firmware-manifest.json").write_text(json.dumps({
             "fd_sha256": sha(fd), "DarwinBoot_commit": DARWIN_PIN, "files": files,
             "host_fv_and_bootshim_verified": True, "kernel_or_payload_built": False,
+            "official_empty_control_verified": True,
+            "empty_control_sha256": sha(control), "empty_control_header_version": empty["header_version"],
+            "stock_boot_header_compared": report["stock_boot_header_compared"],
+            "stock_boot_header_version": report["stock_boot_header_version"],
             "device_operations": False, "hardware_tested": False}, indent=2) + "\n")
 
 

@@ -1,0 +1,48 @@
+{
+  "check": "Bootstrap component dependency closure through the actual resolver and archive planner",
+  "profile": "ipados-27.0.1-24A446",
+  "catalog_sha256": "8089813f78343fadc81c2d291ca918fd99f1078cfb893f1bc73940ee4166945c",
+  "native_bootstrap_function_sha256": "0c8772ccd661a64eafe93354d867ac4f9947856c6b00da7eada45de1d62d234b",
+  "actual_Context_and_components_resolver_used": true,
+  "actual_native_bootstrap_setup_used": true,
+  "actual_kernel_archive_plan_used": true,
+  "catalog_modified": false,
+  "archive_plan": [
+    {
+      "kind": "script",
+      "entry": "build-corecrypto-14.py"
+    },
+    {
+      "kind": "script",
+      "entry": "build-corecrypto-14.py --namespace"
+    },
+    {
+      "kind": "component",
+      "entry": "ArmDTPlatform"
+    },
+    {
+      "kind": "component",
+      "entry": "ArmCpu"
+    },
+    {
+      "kind": "script",
+      "entry": "build-libpthread-kernel.py"
+    },
+    {
+      "kind": "component",
+      "entry": "VirtioMmioBlock"
+    },
+    {
+      "kind": "component",
+      "entry": "ShengUfs"
+    },
+    {
+      "kind": "component",
+      "entry": "RamBlock"
+    }
+  ],
+  "check_passed": true,
+  "XNU_or_archives_compiled": false,
+  "device_operations": false,
+  "hardware_tested": false
+}

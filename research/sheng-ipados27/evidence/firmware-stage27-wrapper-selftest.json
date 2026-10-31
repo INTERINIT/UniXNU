@@ -6,8 +6,8 @@
   "firmware_build_executed": false,
   "device_operations": false,
   "hardware_tested": false,
-  "wrapper_sha256": "ef0a278ad7067216e092e282293f8df4ec68c8ea123648cc76253897ac076040",
-  "draft_sha256": "fb024f6aad1aedfba69fc4de3a4d7631e21470cffdda6adaab5cd650d13d8ab6",
+  "wrapper_sha256": "ee17887f18d710e6de31a323f0f1836ed51663cdceb91206e4b0de225cd1eb13",
+  "draft_sha256": "d9cf8f6db148ce222715036bff3eb3890f8aa89b68ec7bd229005524f412782d",
   "check_command": "python ci/scripts/firmware_stage27.py --self-test",
   "actual_Mac_FD_compilation_performed": false,
   "check_exit_code": 0
