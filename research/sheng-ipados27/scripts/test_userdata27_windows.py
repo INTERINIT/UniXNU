@@ -61,7 +61,11 @@ def self_test(executable):
         os.environ["PATH"] = str(executable.parent) + os.pathsep + previous_path
         try:
             # Sign fixtures using the upstream implementation and real OpenSSL.
-            source = b.WORK / "sources/UniXNU/kits/VerifiedRoot/tools/manifest.py"
+            sources = (b.SOURCE / "kits/VerifiedRoot/tools/manifest.py",
+                       b.WORK / "sources/UniXNU/kits/VerifiedRoot/tools/manifest.py")
+            source = next((path for path in sources if path.is_file()), None)
+            if source is None:
+                raise ValueError("Initialize the pinned kits/VerifiedRoot submodule before this host check")
             spec = importlib.util.spec_from_file_location("fixture_manifest", source)
             manifest = importlib.util.module_from_spec(spec)
             spec.loader.exec_module(manifest)

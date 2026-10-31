@@ -35,4 +35,6 @@ jobs:
           print('Research Python syntax passed')
           PY
       - name: Real RSA and userdata transport controls
-        run: python research/sheng-ipados27/scripts/build_userdata27_windows.py --self-test
+        run: |
+          git submodule update --init --depth=1 -- kits/VerifiedRoot
+          python research/sheng-ipados27/scripts/build_userdata27_windows.py --self-test
