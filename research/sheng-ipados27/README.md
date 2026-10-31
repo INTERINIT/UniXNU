@@ -33,6 +33,13 @@ missing sandbox boot-argument import. Binding it to the real
 `PE_parse_boot_arg_str` moved hardware startup into IOKit service matching,
 where an IOCPU virtual import was the next reported gap. The reviewed IOCPU
 get/set/serialization identities are recorded alongside the sandbox fix.
+The next observed VFS registration fault came from seven unbound vnode
+operation descriptors, which have been redirected to the canonical native
+objects. Startup then reached HID initialization and a required OSArray cast
+using an overwritten original metaclass pointer slot. Four reviewed metaclass
+pointer variables now correct35 retained imports in the next RAM candidate.
+These changes bind the variables themselves, preserving the consumer's second
+load of the metaclass object and the existing type checks.
 Full OS startup is still unconfirmed. Root media and Data were not reflashed
 during diagnostics. See
 `evidence/hardware-entry-20261031.json`.

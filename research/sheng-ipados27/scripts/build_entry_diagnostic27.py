@@ -58,7 +58,8 @@ def apply_bindings(kernel, record_path):
         at = image.offset(site, 8)
         previous = struct.unpack_from("<Q", data, at)[0]
         target, auth, key, diversity, addrdiv, step = decode(previous)
-        old_names = names[entry["expected_target_symbol"]]
+        old_names = (names[entry["expected_target_symbol"]] if "expected_target_symbol" in entry
+                     else {int(entry["expected_target"], 16)})
         new_names = names[entry["native_symbol"]]
         if (previous != int(entry["expected_word"], 16) or site not in fixups or
                 len(old_names) != 1 or image.base + target != next(iter(old_names)) or len(new_names) != 1):

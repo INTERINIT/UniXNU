@@ -120,6 +120,9 @@
     "boot_sha256": "b6b3539d1e57afb2ac6e07f074c4aa382ff28ab3359008f66b9b7c4639619053",
     "three_reviewed_bindings_applied": true,
     "PAC_and_chain_metadata_preserved": true,
-    "hardware_tested": false
+    "hardware_tested": true,
+    "previous_IOCPU_getter_panic_crossed": true,
+    "next_fault": "Kernel data abort in vfs_fsadd",
+    "next_PC": "0xfffffff00af9bae8"
   }
 }

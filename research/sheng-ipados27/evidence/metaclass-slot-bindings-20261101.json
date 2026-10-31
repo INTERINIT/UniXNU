@@ -1,0 +1,240 @@
+{
+  "kind": "source-and-binary-backed-constant-metaclass-pointer-slot-identities",
+  "inputs": {
+    "kernelcache_sha256": "38e6d9fa5f789b8228f4617ef4c6d2a3fd8ab564abdc9b62920f1db53fc1780a",
+    "entry": "com.apple.kernel"
+  },
+  "actual_fix3_kernel_sha256": "af167af3ad48ccdc165b1e4e730134e88e95799d9bf11342d3e43ac56a1e82a0",
+  "data": [
+    {
+      "original": "0xfffffe0007ed04f0",
+      "native_symbol": "__ZN5IOCPU9metaClassE",
+      "evidence": "Exact original constant pointer slot points to original IOCPU::gMetaClass already identified in the actual map. The unique native IOCPU::metaClass pointer slot points to the unique native IOCPU::gMetaClass. Apple OSDefineMetaClassWithInit declares const OSMetaClass * const Class::metaClass = &Class::gMetaClass. Bind the variable slot, not the object, because consumers load through the slot.",
+      "original_slot_bytes": 8,
+      "original_chain_word": "0x10000004925fb0",
+      "original_static_slot_sha256": "78dfff1b36fd04b9167c893bdfdbf36590d5facbb1d3db6b518831238ad6719b",
+      "original_pointee": "0xfffffe000b929fb0",
+      "existing_gMetaClass_mapping": {
+        "native": "0xfffffff007f48f20",
+        "name": "__ZN5IOCPU10gMetaClassE",
+        "how": "reference-data",
+        "sections": [
+          "__DATA,__common",
+          "__DATA,__common"
+        ]
+      },
+      "actual_final_native_variable": "0xfffffff007e59948",
+      "native_chain_word": "0x10000004938f20",
+      "actual_final_native_gMetaClass": "0xfffffff00b93cf20",
+      "gMetaClass_symbol": "__ZN5IOCPU10gMetaClassE",
+      "unresolved_emitted_slot": "0xfffffff007ed04f0",
+      "current_native_reuse_symbol": [
+        "_qmi_wlanfw_host_cap_req_msg_v01_ei"
+      ],
+      "current_native_reuse_addend": "0x548",
+      "unresolved_consumers": {
+        "com.apple.driver.AppleARMPlatform": 1
+      },
+      "unresolved_references": 1,
+      "pointee_is_not_the_binding_target": true
+    },
+    {
+      "original": "0xfffffe0007f07468",
+      "native_symbol": "__ZN9IOService9metaClassE",
+      "evidence": "Exact original constant pointer slot points to original IOService::gMetaClass already identified in the actual map. The unique native IOService::metaClass pointer slot points to the unique native IOService::gMetaClass. Apple OSDefineMetaClassWithInit declares const OSMetaClass * const Class::metaClass = &Class::gMetaClass. Bind the variable slot, not the object, because consumers load through the slot.",
+      "original_slot_bytes": 8,
+      "original_chain_word": "0x100000049274d8",
+      "original_static_slot_sha256": "22e67bbc8836039e3001c493d55cd77e186f74f8516d118544fed5f97b2db0dc",
+      "original_pointee": "0xfffffe000b92b4d8",
+      "existing_gMetaClass_mapping": {
+        "native": "0xfffffff007f481d8",
+        "name": "__ZN9IOService10gMetaClassE",
+        "how": "reference-data",
+        "sections": [
+          "__DATA,__common",
+          "__DATA,__common"
+        ]
+      },
+      "actual_final_native_variable": "0xfffffff007e4f0c0",
+      "native_chain_word": "0x100000049381d8",
+      "actual_final_native_gMetaClass": "0xfffffff00b93c1d8",
+      "gMetaClass_symbol": "__ZN9IOService10gMetaClassE",
+      "unresolved_emitted_slot": "0xfffffff007f07468",
+      "current_native_reuse_symbol": [
+        "_vfs_exclave_fs_readdir.kalloc_type_view_1455"
+      ],
+      "current_native_reuse_addend": "0x20",
+      "unresolved_consumers": {
+        "com.apple.driver.AppleARMPlatform": 1,
+        "com.apple.driver.AppleARMWatchdogTimer": 1,
+        "com.apple.driver.ApplePMGR": 1,
+        "com.apple.filesystems.apfs": 1,
+        "com.apple.iokit.IOAVFamily": 1,
+        "com.apple.iokit.IOHIDFamily": 1,
+        "com.apple.iokit.IOMobileGraphicsFamily": 1,
+        "com.apple.iokit.IOStorageFamily": 1,
+        "com.apple.security.sandbox": 1
+      },
+      "unresolved_references": 9,
+      "pointee_is_not_the_binding_target": true
+    },
+    {
+      "original": "0xfffffe0007f07470",
+      "native_symbol": "__ZN8OSString9metaClassE",
+      "evidence": "Exact original constant pointer slot points to original OSString::gMetaClass already identified in the actual map. The unique native OSString::metaClass pointer slot points to the unique native OSString::gMetaClass. Apple OSDefineMetaClassWithInit declares const OSMetaClass * const Class::metaClass = &Class::gMetaClass. Bind the variable slot, not the object, because consumers load through the slot.",
+      "original_slot_bytes": 8,
+      "original_chain_word": "0x10000004924b40",
+      "original_static_slot_sha256": "c760366054acc37204e01e101dca3d6cc7aee0c098ad2a0d50767add991bc4e3",
+      "original_pointee": "0xfffffe000b928b40",
+      "existing_gMetaClass_mapping": {
+        "native": "0xfffffff007f47440",
+        "name": "__ZN8OSString10gMetaClassE",
+        "how": "reference-data",
+        "sections": [
+          "__DATA,__common",
+          "__DATA,__common"
+        ]
+      },
+      "actual_final_native_variable": "0xfffffff007e4d478",
+      "native_chain_word": "0x10000004937440",
+      "actual_final_native_gMetaClass": "0xfffffff00b93b440",
+      "gMetaClass_symbol": "__ZN8OSString10gMetaClassE",
+      "unresolved_emitted_slot": "0xfffffff007f07470",
+      "current_native_reuse_symbol": [
+        "_vfs_exclave_fs_readdir.kalloc_type_view_1455"
+      ],
+      "current_native_reuse_addend": "0x28",
+      "unresolved_consumers": {
+        "com.apple.driver.AppleARMPlatform": 1,
+        "com.apple.driver.AppleM2ScalerCSCDriver": 1,
+        "com.apple.driver.AppleMobileFileIntegrity": 1,
+        "com.apple.filesystems.apfs": 1,
+        "com.apple.iokit.CoreAnalyticsFamily": 1,
+        "com.apple.iokit.IOAVFamily": 1,
+        "com.apple.iokit.IOAudio2Family": 1,
+        "com.apple.iokit.IOGPUFamily": 1,
+        "com.apple.iokit.IOHIDFamily": 1,
+        "com.apple.iokit.IOMobileGraphicsFamily": 1,
+        "com.apple.iokit.IOStorageFamily": 1,
+        "com.apple.iokit.IOSurface": 1,
+        "com.apple.security.AppleImage4": 1,
+        "com.apple.security.sandbox": 1
+      },
+      "unresolved_references": 14,
+      "pointee_is_not_the_binding_target": true
+    },
+    {
+      "original": "0xfffffe0007f07488",
+      "native_symbol": "__ZN7OSArray9metaClassE",
+      "evidence": "Exact original constant pointer slot points to original OSArray::gMetaClass already identified in the actual map. The unique native OSArray::metaClass pointer slot points to the unique native OSArray::gMetaClass. Apple OSDefineMetaClassWithInit declares const OSMetaClass * const Class::metaClass = &Class::gMetaClass. Bind the variable slot, not the object, because consumers load through the slot.",
+      "original_slot_bytes": 8,
+      "original_chain_word": "0x10000004924830",
+      "original_static_slot_sha256": "15b38ce2e6a4db03b856504cc9cca4c38aa181db916aa1fb52b65f3690f6da95",
+      "original_pointee": "0xfffffe000b928830",
+      "existing_gMetaClass_mapping": {
+        "native": "0xfffffff007f47180",
+        "name": "__ZN7OSArray10gMetaClassE",
+        "how": "reference-data",
+        "sections": [
+          "__DATA,__common",
+          "__DATA,__common"
+        ]
+      },
+      "actual_final_native_variable": "0xfffffff007e4b578",
+      "native_chain_word": "0x10000004937180",
+      "actual_final_native_gMetaClass": "0xfffffff00b93b180",
+      "gMetaClass_symbol": "__ZN7OSArray10gMetaClassE",
+      "unresolved_emitted_slot": "0xfffffff007f07488",
+      "current_native_reuse_symbol": [
+        "_vfs_exclave_fs_readdir.kalloc_type_view_1499"
+      ],
+      "current_native_reuse_addend": "0x0",
+      "unresolved_consumers": {
+        "com.apple.driver.AppleARMPlatform": 1,
+        "com.apple.driver.AppleM2ScalerCSCDriver": 1,
+        "com.apple.driver.ApplePMGR": 1,
+        "com.apple.iokit.IOAVFamily": 1,
+        "com.apple.iokit.IOAudio2Family": 1,
+        "com.apple.iokit.IOGPUFamily": 1,
+        "com.apple.iokit.IOHIDFamily": 1,
+        "com.apple.iokit.IOMobileGraphicsFamily": 1,
+        "com.apple.iokit.IOReportFamily": 1,
+        "com.apple.iokit.IOSurface": 1,
+        "com.apple.security.sandbox": 1
+      },
+      "unresolved_references": 11,
+      "pointee_is_not_the_binding_target": true
+    }
+  ],
+  "pointer_variables": 4,
+  "unresolved_references_covered": 35,
+  "ABI": {
+    "type": "const OSMetaClass * const",
+    "arm64_width_bytes": 8,
+    "consumer_indirection": "GOT entry -> address of Class::metaClass variable -> pointer to Class::gMetaClass object",
+    "must_bind_to_variable_slot": true,
+    "must_not_bind_directly_to_object": true,
+    "does_not_claim_full_private_OSMetaClass_object_layout_equivalence": true
+  },
+  "primary_source": {
+    "xnu_pin": "ac9718fb1af618d5ce8678d0dc6e8a58f252216f",
+    "macro_file": "libkern/libkern/c++/OSMetaClass.h",
+    "macro_lines": "2024-2028",
+    "macro_definition": "className::MetaClass className::gMetaClass; const OSMetaClass * const className::metaClass = &className::gMetaClass;",
+    "macro_url": "https://github.com/apple-oss-distributions/xnu/blob/ac9718fb1af618d5ce8678d0dc6e8a58f252216f/libkern/libkern/c%2B%2B/OSMetaClass.h#L2024",
+    "OSTypeID_line": 353,
+    "required_cast_file": "libkern/c++/OSMetaClass.cpp",
+    "required_cast_lines": "291-317",
+    "panic_line": 304,
+    "panic_argument_meaning": "from is object me; to is const OSMetaClass* toType"
+  },
+  "runtime_case": {
+    "photo": "codex-clipboard-0629f302-4286-4ff8-b37f-a320c46b9a13.jpg",
+    "transcription_confirmed_by_firmware_agent": {
+      "from": "0xfffffff45343b538",
+      "to": "0xfffffff00b897480",
+      "source": "OSMetaClass.cpp:304"
+    },
+    "consumer": "com.apple.iokit.IOHIDFamily",
+    "native_caller_frame": "0xfffffff00b3b4238 OSMetaClassBase::requiredMetaCast +0x58",
+    "retained_caller_return": "0xfffffff00a1b746c",
+    "GOT_entry": "0xfffffff0083585c8",
+    "GOT_raw_chain_word": "0x10000000f03488",
+    "GOT_target": "0xfffffff007f07488",
+    "confirmed_instruction_path": [
+      "0xfffffff00a1b7428: ADRP x8, GOT page",
+      "0xfffffff00a1b742c: LDR x8, [x8,#0x5c8]",
+      "0xfffffff00a1b7430: LDR x23, [x8]",
+      "0xfffffff00a1b7464: MOV x1,x23",
+      "0xfffffff00a1b7468: BL requiredMetaCast import thunk"
+    ],
+    "wrong_native_reused_slot": "_vfs_exclave_fs_readdir.kalloc_type_view_1499",
+    "observed_wrong_type_address_native_region": "zone_array +0xc000",
+    "IOHID_source_pin": "e31e90a24c27ad6cbe981650d12a1a4124065b03",
+    "IOHID_source": "IOHIDFamily/IOHIDDevice.cpp",
+    "source_lines": [
+      579,
+      621
+    ],
+    "source_cast": "OSArray *elements = OSRequiredCast(OSArray, interfaceElementArrays->getObject(i));",
+    "source_url": "https://github.com/apple-oss-distributions/IOHIDFamily/blob/e31e90a24c27ad6cbe981650d12a1a4124065b03/IOHIDFamily/IOHIDDevice.cpp#L621"
+  },
+  "cast_or_type_checks_removed": false,
+  "metadata_objects_fabricated": false,
+  "code_modified": false,
+  "artifact_modified": false,
+  "new_candidate_booted": false,
+  "cloud_build_started": false,
+  "device_operations": false,
+  "prepared_date": "2026-11-01",
+  "local_candidate": {
+    "boot_sha256": "a5fad916f1b370a40a94376692dc7a18ad0215fcfb884f8693fba0cd1f8edc1c",
+    "kernel_sha256": "5f98c47afae938b0a30dcd342932413536471fbb7820f44a90bee8e69ba6607a",
+    "metaclass_imports_rebound": 35,
+    "earlier_import_repairs_retained": 23,
+    "hardware_tested": false,
+    "two_load_indirection_preserved": true,
+    "cast_checks_preserved": true,
+    "host_byte_review_passed": true
+  }
+}

@@ -1,0 +1,407 @@
+{
+  "kind": "source-and-binary-backed-vnode-operation-descriptor-identities",
+  "inputs": {
+    "kernelcache_sha256": "38e6d9fa5f789b8228f4617ef4c6d2a3fd8ab564abdc9b62920f1db53fc1780a",
+    "entry": "com.apple.kernel"
+  },
+  "actual_fix2_kernel_sha256": "ff9a91d308d552523bf87b4a8b47050920b475c9a2039ca5d1182a4f9b88af78",
+  "runtime_observation": {
+    "photo": "codex-clipboard-e79d77d1-a931-4a97-b6d4-fba8c4b11cd6.jpg",
+    "PC": "0xfffffff00af9bae8",
+    "function": "vfs_fsadd + 0x364",
+    "x0_descriptor_pointer": "0xfffffff00b8912a8",
+    "descriptor_identity": "_vnop_mknod_desc",
+    "interpretation": "The observed pointer exactly matches a previously reported unresolved APFS data target; the current audit does not infer a new IOCPU object-layout fault."
+  },
+  "native_descriptor_layout": {
+    "source": "bsd/sys/vnode_internal.h",
+    "source_pin": "ac9718fb1af618d5ce8678d0dc6e8a58f252216f",
+    "source_line": 397,
+    "LP64_size": 64,
+    "fields": {
+      "vdesc_offset": 0,
+      "vdesc_name": 8,
+      "vdesc_flags": 16,
+      "vdesc_vp_offsets": 24,
+      "vdesc_vpp_offset": 32,
+      "vdesc_cred_offset": 36,
+      "vdesc_proc_offset": 40,
+      "vdesc_componentname_offset": 44,
+      "vdesc_context_offset": 48,
+      "vdesc_transports": 56
+    },
+    "scope": "Confirms these observed descriptor fields and argument metadata; does not assert all private APFS/kernel structures or protocols are identical.",
+    "url": "https://github.com/apple-oss-distributions/xnu/blob/ac9718fb1af618d5ce8678d0dc6e8a58f252216f/bsd/sys/vnode_internal.h#L397"
+  },
+  "source_consumer": {
+    "vnodeopv_entry_desc": "bsd/sys/vnode.h:878-885 declares opve_op descriptor pointer then opve_impl callback",
+    "register_operation_store": "bsd/vfs/kpi_vfs.c:1137-1138 opv_desc_vector[opve_descp->opve_op->vdesc_offset] = opve_descp->opve_impl",
+    "canonical_index_initialization": "bsd/vfs/vfs_init.c:264-270 skips disabled operations and assigns native vfs_op_descs[i]->vdesc_offset = vfs_opv_numops",
+    "url": "https://github.com/apple-oss-distributions/xnu/blob/ac9718fb1af618d5ce8678d0dc6e8a58f252216f/bsd/vfs/kpi_vfs.c#L1137"
+  },
+  "data": [
+    {
+      "original": "0xfffffe000b8910b0",
+      "native_symbol": "_vnop_getnamedstream_desc",
+      "evidence": "Both real images name this vnodeop_desc vnop_getnamedstream through their chained pointer at +8. Scalar flags, five argument offsets, terminated vnode-argument-offset array and null transports match. vdesc_offset is a 32-bit first field at +0 on both sides; vfs_op_init assigns the native canonical object its runtime operation index. This binds the pointer identity rather than copying or zeroing a descriptor.",
+      "original_static_size_checked": 64,
+      "original_static_sha256": "89cf1646ea727023708bff82ba7d2fae118db575efff7cf6a8b90e8719a418a3",
+      "original_static_bytes_hex": "0000000000000000b3c3060000002000000000000000000094c988040000600010000000ffffffffffffffff1800000028000000000000000000000000000000",
+      "actual_final_native_address": "0xfffffff00b846ec8",
+      "native_static_bytes_hex": "00000000000000006a0e2700000020000000000000000000c02e84040000700010000000ffffffffffffffff1800000028000000000000000000000000000000",
+      "original_name_pointer": "0xfffffe00070703b3",
+      "native_name_pointer": "0xfffffff007274e6a",
+      "original_name": "vnop_getnamedstream",
+      "native_name": "vnop_getnamedstream",
+      "vdesc_offset_field_byte_offset": 0,
+      "vdesc_offset_field_bytes": 4,
+      "original_static_vdesc_offset": 0,
+      "native_static_vdesc_offset": 0,
+      "original_flags": "0x0",
+      "native_flags": "0x0",
+      "original_argument_offsets": [
+        16,
+        -1,
+        -1,
+        24,
+        40
+      ],
+      "native_argument_offsets": [
+        16,
+        -1,
+        -1,
+        24,
+        40
+      ],
+      "original_vnode_argument_array": "0xfffffe000b890994",
+      "native_vnode_argument_array": "0xfffffff00b846ec0",
+      "original_vnode_argument_offsets": [
+        8,
+        -1
+      ],
+      "native_vnode_argument_offsets": [
+        8,
+        -1
+      ],
+      "transports_null_on_both": true,
+      "unresolved_emitted_address": "0xfffffff00b8910b0",
+      "original_unresolved_consumers": {
+        "com.apple.filesystems.apfs": 1
+      }
+    },
+    {
+      "original": "0xfffffe000b8910f0",
+      "native_symbol": "_vnop_makenamedstream_desc",
+      "evidence": "Both real images name this vnodeop_desc vnop_makenamedstream through their chained pointer at +8. Scalar flags, five argument offsets, terminated vnode-argument-offset array and null transports match. vdesc_offset is a 32-bit first field at +0 on both sides; vfs_op_init assigns the native canonical object its runtime operation index. This binds the pointer identity rather than copying or zeroing a descriptor.",
+      "original_static_size_checked": 64,
+      "original_static_sha256": "e59bb5a7465662ef243d5906897039d95fa18d8eca5fb9eadaabfa2a8b111efc",
+      "original_static_bytes_hex": "0000000000000000c7c306000000200000000000000000009cc988040000600008000000ffffffffffffffff1800000028000000000000000000000000000000",
+      "actual_final_native_address": "0xfffffff00b846f10",
+      "native_static_bytes_hex": "00000000000000007e0e2700000020000000000000000000082f84040000700008000000ffffffffffffffff1800000028000000000000000000000000000000",
+      "original_name_pointer": "0xfffffe00070703c7",
+      "native_name_pointer": "0xfffffff007274e7e",
+      "original_name": "vnop_makenamedstream",
+      "native_name": "vnop_makenamedstream",
+      "vdesc_offset_field_byte_offset": 0,
+      "vdesc_offset_field_bytes": 4,
+      "original_static_vdesc_offset": 0,
+      "native_static_vdesc_offset": 0,
+      "original_flags": "0x0",
+      "native_flags": "0x0",
+      "original_argument_offsets": [
+        8,
+        -1,
+        -1,
+        24,
+        40
+      ],
+      "native_argument_offsets": [
+        8,
+        -1,
+        -1,
+        24,
+        40
+      ],
+      "original_vnode_argument_array": "0xfffffe000b89099c",
+      "native_vnode_argument_array": "0xfffffff00b846f08",
+      "original_vnode_argument_offsets": [
+        16,
+        -1
+      ],
+      "native_vnode_argument_offsets": [
+        16,
+        -1
+      ],
+      "transports_null_on_both": true,
+      "unresolved_emitted_address": "0xfffffff00b8910f0",
+      "original_unresolved_consumers": {
+        "com.apple.filesystems.apfs": 1
+      }
+    },
+    {
+      "original": "0xfffffe000b891130",
+      "native_symbol": "_vnop_removenamedstream_desc",
+      "evidence": "Both real images name this vnodeop_desc vnop_removenamedstream through their chained pointer at +8. Scalar flags, five argument offsets, terminated vnode-argument-offset array and null transports match. vdesc_offset is a 32-bit first field at +0 on both sides; vfs_op_init assigns the native canonical object its runtime operation index. This binds the pointer identity rather than copying or zeroing a descriptor.",
+      "original_static_size_checked": 64,
+      "original_static_sha256": "be447548f91860f9e7b17cdbbe38214069161a4b4a69554a024c789f8d5173ca",
+      "original_static_bytes_hex": "0000000000000000dcc30600000020000000000000000000a4c988040000e000ffffffffffffffffffffffff1800000028000000000000000000000000000000",
+      "actual_final_native_address": "0xfffffff00b846f58",
+      "native_static_bytes_hex": "0000000000000000930e2700000020000000000000000000502f840400007000ffffffffffffffffffffffff1800000028000000000000000000000000000000",
+      "original_name_pointer": "0xfffffe00070703dc",
+      "native_name_pointer": "0xfffffff007274e93",
+      "original_name": "vnop_removenamedstream",
+      "native_name": "vnop_removenamedstream",
+      "vdesc_offset_field_byte_offset": 0,
+      "vdesc_offset_field_bytes": 4,
+      "original_static_vdesc_offset": 0,
+      "native_static_vdesc_offset": 0,
+      "original_flags": "0x0",
+      "native_flags": "0x0",
+      "original_argument_offsets": [
+        -1,
+        -1,
+        -1,
+        24,
+        40
+      ],
+      "native_argument_offsets": [
+        -1,
+        -1,
+        -1,
+        24,
+        40
+      ],
+      "original_vnode_argument_array": "0xfffffe000b8909a4",
+      "native_vnode_argument_array": "0xfffffff00b846f50",
+      "original_vnode_argument_offsets": [
+        8,
+        -1
+      ],
+      "native_vnode_argument_offsets": [
+        8,
+        -1
+      ],
+      "transports_null_on_both": true,
+      "unresolved_emitted_address": "0xfffffff00b891130",
+      "original_unresolved_consumers": {
+        "com.apple.filesystems.apfs": 1
+      }
+    },
+    {
+      "original": "0xfffffe000b891228",
+      "native_symbol": "_vnop_create_desc",
+      "evidence": "Both real images name this vnodeop_desc vnop_create through their chained pointer at +8. Scalar flags, five argument offsets, terminated vnode-argument-offset array and null transports match. vdesc_offset is a 32-bit first field at +0 on both sides; vfs_op_init assigns the native canonical object its runtime operation index. This binds the pointer identity rather than copying or zeroing a descriptor.",
+      "original_static_size_checked": 64,
+      "original_static_sha256": "929c1fb5340a91c1ce05a60e4c8777bea4216c6333ed9808765631a66fa6d8d4",
+      "original_static_bytes_hex": "0000000000000000cbc0060000002000010000000000000060c788040000600010000000ffffffffffffffff1800000028000000000000000000000000000000",
+      "actual_final_native_address": "0xfffffff00b845f38",
+      "native_static_bytes_hex": "0000000000000000820b2700000020000100000000000000301f84040000700010000000ffffffffffffffff1800000028000000000000000000000000000000",
+      "original_name_pointer": "0xfffffe00070700cb",
+      "native_name_pointer": "0xfffffff007274b82",
+      "original_name": "vnop_create",
+      "native_name": "vnop_create",
+      "vdesc_offset_field_byte_offset": 0,
+      "vdesc_offset_field_bytes": 4,
+      "original_static_vdesc_offset": 0,
+      "native_static_vdesc_offset": 0,
+      "original_flags": "0x1",
+      "native_flags": "0x1",
+      "original_argument_offsets": [
+        16,
+        -1,
+        -1,
+        24,
+        40
+      ],
+      "native_argument_offsets": [
+        16,
+        -1,
+        -1,
+        24,
+        40
+      ],
+      "original_vnode_argument_array": "0xfffffe000b890760",
+      "native_vnode_argument_array": "0xfffffff00b845f30",
+      "original_vnode_argument_offsets": [
+        8,
+        -1
+      ],
+      "native_vnode_argument_offsets": [
+        8,
+        -1
+      ],
+      "transports_null_on_both": true,
+      "unresolved_emitted_address": "0xfffffff00b891228",
+      "original_unresolved_consumers": {
+        "com.apple.filesystems.apfs": 4
+      }
+    },
+    {
+      "original": "0xfffffe000b8912a8",
+      "native_symbol": "_vnop_mknod_desc",
+      "evidence": "Both real images name this vnodeop_desc vnop_mknod through their chained pointer at +8. Scalar flags, five argument offsets, terminated vnode-argument-offset array and null transports match. vdesc_offset is a 32-bit first field at +0 on both sides; vfs_op_init assigns the native canonical object its runtime operation index. This binds the pointer identity rather than copying or zeroing a descriptor.",
+      "original_static_size_checked": 64,
+      "original_static_sha256": "b1b67145f689d4bf327dd77474bce0ff0c472981fbe02e067ca6162afd6db1fc",
+      "original_static_bytes_hex": "0000000000000000e5c0060000002000010200000000000070c788040000600010000000ffffffffffffffff1800000028000000000000000000000000000000",
+      "actual_final_native_address": "0xfffffff00b845fc8",
+      "native_static_bytes_hex": "00000000000000009c0b2700000020000102000000000000c01f84040000700010000000ffffffffffffffff1800000028000000000000000000000000000000",
+      "original_name_pointer": "0xfffffe00070700e5",
+      "native_name_pointer": "0xfffffff007274b9c",
+      "original_name": "vnop_mknod",
+      "native_name": "vnop_mknod",
+      "vdesc_offset_field_byte_offset": 0,
+      "vdesc_offset_field_bytes": 4,
+      "original_static_vdesc_offset": 0,
+      "native_static_vdesc_offset": 0,
+      "original_flags": "0x201",
+      "native_flags": "0x201",
+      "original_argument_offsets": [
+        16,
+        -1,
+        -1,
+        24,
+        40
+      ],
+      "native_argument_offsets": [
+        16,
+        -1,
+        -1,
+        24,
+        40
+      ],
+      "original_vnode_argument_array": "0xfffffe000b890770",
+      "native_vnode_argument_array": "0xfffffff00b845fc0",
+      "original_vnode_argument_offsets": [
+        8,
+        -1
+      ],
+      "native_vnode_argument_offsets": [
+        8,
+        -1
+      ],
+      "transports_null_on_both": true,
+      "unresolved_emitted_address": "0xfffffff00b8912a8",
+      "original_unresolved_consumers": {
+        "com.apple.filesystems.apfs": 3
+      }
+    },
+    {
+      "original": "0xfffffe000b8912e8",
+      "native_symbol": "_vnop_setattr_desc",
+      "evidence": "Both real images name this vnodeop_desc vnop_setattr through their chained pointer at +8. Scalar flags, five argument offsets, terminated vnode-argument-offset array and null transports match. vdesc_offset is a 32-bit first field at +0 on both sides; vfs_op_init assigns the native canonical object its runtime operation index. This binds the pointer identity rather than copying or zeroing a descriptor.",
+      "original_static_size_checked": 64,
+      "original_static_sha256": "0374bcc65251c2be9aa82591945e92216329ec606f51a2a949eb4dee2f6d903a",
+      "original_static_bytes_hex": "00000000000000001ec1060000002000000000000000000098c7880400006000ffffffffffffffffffffffffffffffff18000000000000000000000000000000",
+      "actual_final_native_address": "0xfffffff00b846130",
+      "native_static_bytes_hex": "0000000000000000d50b27000000200000000000000000002821840400007000ffffffffffffffffffffffffffffffff18000000000000000000000000000000",
+      "original_name_pointer": "0xfffffe000707011e",
+      "native_name_pointer": "0xfffffff007274bd5",
+      "original_name": "vnop_setattr",
+      "native_name": "vnop_setattr",
+      "vdesc_offset_field_byte_offset": 0,
+      "vdesc_offset_field_bytes": 4,
+      "original_static_vdesc_offset": 0,
+      "native_static_vdesc_offset": 0,
+      "original_flags": "0x0",
+      "native_flags": "0x0",
+      "original_argument_offsets": [
+        -1,
+        -1,
+        -1,
+        -1,
+        24
+      ],
+      "native_argument_offsets": [
+        -1,
+        -1,
+        -1,
+        -1,
+        24
+      ],
+      "original_vnode_argument_array": "0xfffffe000b890798",
+      "native_vnode_argument_array": "0xfffffff00b846128",
+      "original_vnode_argument_offsets": [
+        8,
+        -1
+      ],
+      "native_vnode_argument_offsets": [
+        8,
+        -1
+      ],
+      "transports_null_on_both": true,
+      "unresolved_emitted_address": "0xfffffff00b8912e8",
+      "original_unresolved_consumers": {
+        "com.apple.filesystems.apfs": 4
+      }
+    },
+    {
+      "original": "0xfffffe000b891328",
+      "native_symbol": "_vnop_write_desc",
+      "evidence": "Both real images name this vnodeop_desc vnop_write through their chained pointer at +8. Scalar flags, five argument offsets, terminated vnode-argument-offset array and null transports match. vdesc_offset is a 32-bit first field at +0 on both sides; vfs_op_init assigns the native canonical object its runtime operation index. This binds the pointer identity rather than copying or zeroing a descriptor.",
+      "original_static_size_checked": 64,
+      "original_static_sha256": "5270e387a44302ca1d20ac7fa89bdadc83d110afa660db6c742de5c283c3cb91",
+      "original_static_bytes_hex": "000000000000000035c10600000020000000000000000000a8c7880400006000ffffffffffffffffffffffffffffffff20000000000000000000000000000000",
+      "actual_final_native_address": "0xfffffff00b8461c0",
+      "native_static_bytes_hex": "0000000000000000ec0b2700000020000000000000000000b821840400007000ffffffffffffffffffffffffffffffff20000000000000000000000000000000",
+      "original_name_pointer": "0xfffffe0007070135",
+      "native_name_pointer": "0xfffffff007274bec",
+      "original_name": "vnop_write",
+      "native_name": "vnop_write",
+      "vdesc_offset_field_byte_offset": 0,
+      "vdesc_offset_field_bytes": 4,
+      "original_static_vdesc_offset": 0,
+      "native_static_vdesc_offset": 0,
+      "original_flags": "0x0",
+      "native_flags": "0x0",
+      "original_argument_offsets": [
+        -1,
+        -1,
+        -1,
+        -1,
+        32
+      ],
+      "native_argument_offsets": [
+        -1,
+        -1,
+        -1,
+        -1,
+        32
+      ],
+      "original_vnode_argument_array": "0xfffffe000b8907a8",
+      "native_vnode_argument_array": "0xfffffff00b8461b8",
+      "original_vnode_argument_offsets": [
+        8,
+        -1
+      ],
+      "native_vnode_argument_offsets": [
+        8,
+        -1
+      ],
+      "transports_null_on_both": true,
+      "unresolved_emitted_address": "0xfffffff00b891328",
+      "original_unresolved_consumers": {
+        "com.apple.filesystems.apfs": 5
+      }
+    }
+  ],
+  "data_targets": 7,
+  "original_unresolved_pointer_references": 19,
+  "bounds_or_disabled_operation_checks_removed": false,
+  "descriptors_copied_or_zeroed": false,
+  "code_modified": false,
+  "artifact_modified": false,
+  "fixture_applied": false,
+  "new_candidate_booted": false,
+  "device_operations": false,
+  "local_candidate": {
+    "boot_sha256": "fe1cdda1fe6e4c900522a7b3aa58e11bcfa0755106dcd9db94d9407aa9689a6b",
+    "kernel_sha256": "af167af3ad48ccdc165b1e4e730134e88e95799d9bf11342d3e43ac56a1e82a0",
+    "APFS_imports_corrected": 19,
+    "earlier_reviewed_imports_retained": 4,
+    "RAM_boot_accepted": true,
+    "user_screen_result": "Previous VFS data-abort crossed; Unexpected cast fail during NativeHidInput::start",
+    "root_media_reflashed": false,
+    "Data_reset_requested": false,
+    "previous_vfs_fault_crossed": true
+  }
+}

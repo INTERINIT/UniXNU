@@ -32,5 +32,73 @@
       "native_symbol": "__ZNK5IOCPU19serializePropertiesEP11OSSerialize",
       "evidence": "Paired original and native IOCPU vtables identify the same virtual method slot; pinned Apple iokit/Kernel/IOCPU.cpp defines its ABI. Original get/set wrappers null-check and tail-call the already identified IORegistryEntry implementation; serializeProperties copies/serializes the property dictionary. The native methods preserve CPU-state behavior. See iocpu-property-bindings-20261031.json; runtime getProperty call at IORegistryEntry::init+0x1cc hit the retained AppleARMPlatform vtable slot with discriminator0x82eb."
     }
+  ],
+  "data": [
+    {
+      "original": "0xfffffe000b8910b0",
+      "native_symbol": "_vnop_getnamedstream_desc",
+      "addend": 0,
+      "evidence": "Both real images name this vnodeop_desc vnop_getnamedstream through their chained pointer at +8. Scalar flags, five argument offsets, terminated vnode-argument-offset array and null transports match. vdesc_offset is a 32-bit first field at +0 on both sides; vfs_op_init assigns the native canonical object its runtime operation index. This binds the pointer identity rather than copying or zeroing a descriptor. Detailed ABI and runtime evidence: apfs-vnop-descriptor-bindings-20261031.json."
+    },
+    {
+      "original": "0xfffffe000b8910f0",
+      "native_symbol": "_vnop_makenamedstream_desc",
+      "addend": 0,
+      "evidence": "Both real images name this vnodeop_desc vnop_makenamedstream through their chained pointer at +8. Scalar flags, five argument offsets, terminated vnode-argument-offset array and null transports match. vdesc_offset is a 32-bit first field at +0 on both sides; vfs_op_init assigns the native canonical object its runtime operation index. This binds the pointer identity rather than copying or zeroing a descriptor. Detailed ABI and runtime evidence: apfs-vnop-descriptor-bindings-20261031.json."
+    },
+    {
+      "original": "0xfffffe000b891130",
+      "native_symbol": "_vnop_removenamedstream_desc",
+      "addend": 0,
+      "evidence": "Both real images name this vnodeop_desc vnop_removenamedstream through their chained pointer at +8. Scalar flags, five argument offsets, terminated vnode-argument-offset array and null transports match. vdesc_offset is a 32-bit first field at +0 on both sides; vfs_op_init assigns the native canonical object its runtime operation index. This binds the pointer identity rather than copying or zeroing a descriptor. Detailed ABI and runtime evidence: apfs-vnop-descriptor-bindings-20261031.json."
+    },
+    {
+      "original": "0xfffffe000b891228",
+      "native_symbol": "_vnop_create_desc",
+      "addend": 0,
+      "evidence": "Both real images name this vnodeop_desc vnop_create through their chained pointer at +8. Scalar flags, five argument offsets, terminated vnode-argument-offset array and null transports match. vdesc_offset is a 32-bit first field at +0 on both sides; vfs_op_init assigns the native canonical object its runtime operation index. This binds the pointer identity rather than copying or zeroing a descriptor. Detailed ABI and runtime evidence: apfs-vnop-descriptor-bindings-20261031.json."
+    },
+    {
+      "original": "0xfffffe000b8912a8",
+      "native_symbol": "_vnop_mknod_desc",
+      "addend": 0,
+      "evidence": "Both real images name this vnodeop_desc vnop_mknod through their chained pointer at +8. Scalar flags, five argument offsets, terminated vnode-argument-offset array and null transports match. vdesc_offset is a 32-bit first field at +0 on both sides; vfs_op_init assigns the native canonical object its runtime operation index. This binds the pointer identity rather than copying or zeroing a descriptor. Detailed ABI and runtime evidence: apfs-vnop-descriptor-bindings-20261031.json."
+    },
+    {
+      "original": "0xfffffe000b8912e8",
+      "native_symbol": "_vnop_setattr_desc",
+      "addend": 0,
+      "evidence": "Both real images name this vnodeop_desc vnop_setattr through their chained pointer at +8. Scalar flags, five argument offsets, terminated vnode-argument-offset array and null transports match. vdesc_offset is a 32-bit first field at +0 on both sides; vfs_op_init assigns the native canonical object its runtime operation index. This binds the pointer identity rather than copying or zeroing a descriptor. Detailed ABI and runtime evidence: apfs-vnop-descriptor-bindings-20261031.json."
+    },
+    {
+      "original": "0xfffffe000b891328",
+      "native_symbol": "_vnop_write_desc",
+      "addend": 0,
+      "evidence": "Both real images name this vnodeop_desc vnop_write through their chained pointer at +8. Scalar flags, five argument offsets, terminated vnode-argument-offset array and null transports match. vdesc_offset is a 32-bit first field at +0 on both sides; vfs_op_init assigns the native canonical object its runtime operation index. This binds the pointer identity rather than copying or zeroing a descriptor. Detailed ABI and runtime evidence: apfs-vnop-descriptor-bindings-20261031.json."
+    },
+    {
+      "original": "0xfffffe0007ed04f0",
+      "native_symbol": "__ZN5IOCPU9metaClassE",
+      "addend": 0,
+      "evidence": "Exact original constant pointer slot points to original IOCPU::gMetaClass already identified in the actual map. The unique native IOCPU::metaClass pointer slot points to the unique native IOCPU::gMetaClass. Apple OSDefineMetaClassWithInit declares const OSMetaClass * const Class::metaClass = &Class::gMetaClass. Bind the variable slot, not the object, because consumers load through the slot. Detailed two-load ABI and observed IOHID cast evidence: metaclass-slot-bindings-20261101.json."
+    },
+    {
+      "original": "0xfffffe0007f07468",
+      "native_symbol": "__ZN9IOService9metaClassE",
+      "addend": 0,
+      "evidence": "Exact original constant pointer slot points to original IOService::gMetaClass already identified in the actual map. The unique native IOService::metaClass pointer slot points to the unique native IOService::gMetaClass. Apple OSDefineMetaClassWithInit declares const OSMetaClass * const Class::metaClass = &Class::gMetaClass. Bind the variable slot, not the object, because consumers load through the slot. Detailed two-load ABI and observed IOHID cast evidence: metaclass-slot-bindings-20261101.json."
+    },
+    {
+      "original": "0xfffffe0007f07470",
+      "native_symbol": "__ZN8OSString9metaClassE",
+      "addend": 0,
+      "evidence": "Exact original constant pointer slot points to original OSString::gMetaClass already identified in the actual map. The unique native OSString::metaClass pointer slot points to the unique native OSString::gMetaClass. Apple OSDefineMetaClassWithInit declares const OSMetaClass * const Class::metaClass = &Class::gMetaClass. Bind the variable slot, not the object, because consumers load through the slot. Detailed two-load ABI and observed IOHID cast evidence: metaclass-slot-bindings-20261101.json."
+    },
+    {
+      "original": "0xfffffe0007f07488",
+      "native_symbol": "__ZN7OSArray9metaClassE",
+      "addend": 0,
+      "evidence": "Exact original constant pointer slot points to original OSArray::gMetaClass already identified in the actual map. The unique native OSArray::metaClass pointer slot points to the unique native OSArray::gMetaClass. Apple OSDefineMetaClassWithInit declares const OSMetaClass * const Class::metaClass = &Class::gMetaClass. Bind the variable slot, not the object, because consumers load through the slot. Detailed two-load ABI and observed IOHID cast evidence: metaclass-slot-bindings-20261101.json."
+    }
   ]
 }

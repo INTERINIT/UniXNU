@@ -32,6 +32,438 @@
       "native_symbol": "__ZNK5IOCPU19serializePropertiesEP11OSSerialize",
       "reviewed_original": "0xfffffe000b4c8844",
       "evidence": "iocpu-property-bindings-20261031.json"
+    },
+    {
+      "site": "0xfffffff008495cc0",
+      "expected_word": "0x1000000488d0b0",
+      "expected_target": "0xfffffff00b8910b0",
+      "native_symbol": "_vnop_getnamedstream_desc",
+      "reviewed_original": "0xfffffe000b8910b0",
+      "evidence": "apfs-vnop-descriptor-bindings-20261031.json"
+    },
+    {
+      "site": "0xfffffff008495cd0",
+      "expected_word": "0x1000000488d0f0",
+      "expected_target": "0xfffffff00b8910f0",
+      "native_symbol": "_vnop_makenamedstream_desc",
+      "reviewed_original": "0xfffffe000b8910f0",
+      "evidence": "apfs-vnop-descriptor-bindings-20261031.json"
+    },
+    {
+      "site": "0xfffffff008495ce0",
+      "expected_word": "0x1000000488d130",
+      "expected_target": "0xfffffff00b891130",
+      "native_symbol": "_vnop_removenamedstream_desc",
+      "reviewed_original": "0xfffffe000b891130",
+      "evidence": "apfs-vnop-descriptor-bindings-20261031.json"
+    },
+    {
+      "site": "0xfffffff0084909d8",
+      "expected_word": "0x1000000488d228",
+      "expected_target": "0xfffffff00b891228",
+      "native_symbol": "_vnop_create_desc",
+      "reviewed_original": "0xfffffe000b891228",
+      "evidence": "apfs-vnop-descriptor-bindings-20261031.json"
+    },
+    {
+      "site": "0xfffffff008495a40",
+      "expected_word": "0x1000000488d228",
+      "expected_target": "0xfffffff00b891228",
+      "native_symbol": "_vnop_create_desc",
+      "reviewed_original": "0xfffffe000b891228",
+      "evidence": "apfs-vnop-descriptor-bindings-20261031.json"
+    },
+    {
+      "site": "0xfffffff008495dc0",
+      "expected_word": "0x1000000488d228",
+      "expected_target": "0xfffffff00b891228",
+      "native_symbol": "_vnop_create_desc",
+      "reviewed_original": "0xfffffe000b891228",
+      "evidence": "apfs-vnop-descriptor-bindings-20261031.json"
+    },
+    {
+      "site": "0xfffffff0084969a8",
+      "expected_word": "0x1000000488d228",
+      "expected_target": "0xfffffff00b891228",
+      "native_symbol": "_vnop_create_desc",
+      "reviewed_original": "0xfffffe000b891228",
+      "evidence": "apfs-vnop-descriptor-bindings-20261031.json"
+    },
+    {
+      "site": "0xfffffff008495a50",
+      "expected_word": "0x1000000488d2a8",
+      "expected_target": "0xfffffff00b8912a8",
+      "native_symbol": "_vnop_mknod_desc",
+      "reviewed_original": "0xfffffe000b8912a8",
+      "evidence": "apfs-vnop-descriptor-bindings-20261031.json"
+    },
+    {
+      "site": "0xfffffff008495dd0",
+      "expected_word": "0x1000000488d2a8",
+      "expected_target": "0xfffffff00b8912a8",
+      "native_symbol": "_vnop_mknod_desc",
+      "reviewed_original": "0xfffffe000b8912a8",
+      "evidence": "apfs-vnop-descriptor-bindings-20261031.json"
+    },
+    {
+      "site": "0xfffffff0084969b8",
+      "expected_word": "0x1000000488d2a8",
+      "expected_target": "0xfffffff00b8912a8",
+      "native_symbol": "_vnop_mknod_desc",
+      "reviewed_original": "0xfffffe000b8912a8",
+      "evidence": "apfs-vnop-descriptor-bindings-20261031.json"
+    },
+    {
+      "site": "0xfffffff008490848",
+      "expected_word": "0x1000000488d2e8",
+      "expected_target": "0xfffffff00b8912e8",
+      "native_symbol": "_vnop_setattr_desc",
+      "reviewed_original": "0xfffffe000b8912e8",
+      "evidence": "apfs-vnop-descriptor-bindings-20261031.json"
+    },
+    {
+      "site": "0xfffffff008495aa0",
+      "expected_word": "0x1000000488d2e8",
+      "expected_target": "0xfffffff00b8912e8",
+      "native_symbol": "_vnop_setattr_desc",
+      "reviewed_original": "0xfffffe000b8912e8",
+      "evidence": "apfs-vnop-descriptor-bindings-20261031.json"
+    },
+    {
+      "site": "0xfffffff008495e10",
+      "expected_word": "0x1000000488d2e8",
+      "expected_target": "0xfffffff00b8912e8",
+      "native_symbol": "_vnop_setattr_desc",
+      "reviewed_original": "0xfffffe000b8912e8",
+      "evidence": "apfs-vnop-descriptor-bindings-20261031.json"
+    },
+    {
+      "site": "0xfffffff008496a08",
+      "expected_word": "0x1000000488d2e8",
+      "expected_target": "0xfffffff00b8912e8",
+      "native_symbol": "_vnop_setattr_desc",
+      "reviewed_original": "0xfffffe000b8912e8",
+      "evidence": "apfs-vnop-descriptor-bindings-20261031.json"
+    },
+    {
+      "site": "0xfffffff008490898",
+      "expected_word": "0x1000000488d328",
+      "expected_target": "0xfffffff00b891328",
+      "native_symbol": "_vnop_write_desc",
+      "reviewed_original": "0xfffffe000b891328",
+      "evidence": "apfs-vnop-descriptor-bindings-20261031.json"
+    },
+    {
+      "site": "0xfffffff008495960",
+      "expected_word": "0x1000000488d328",
+      "expected_target": "0xfffffff00b891328",
+      "native_symbol": "_vnop_write_desc",
+      "reviewed_original": "0xfffffe000b891328",
+      "evidence": "apfs-vnop-descriptor-bindings-20261031.json"
+    },
+    {
+      "site": "0xfffffff008495ae0",
+      "expected_word": "0x1000000488d328",
+      "expected_target": "0xfffffff00b891328",
+      "native_symbol": "_vnop_write_desc",
+      "reviewed_original": "0xfffffe000b891328",
+      "evidence": "apfs-vnop-descriptor-bindings-20261031.json"
+    },
+    {
+      "site": "0xfffffff008495e30",
+      "expected_word": "0x1000000488d328",
+      "expected_target": "0xfffffff00b891328",
+      "native_symbol": "_vnop_write_desc",
+      "reviewed_original": "0xfffffe000b891328",
+      "evidence": "apfs-vnop-descriptor-bindings-20261031.json"
+    },
+    {
+      "site": "0xfffffff008496a48",
+      "expected_word": "0x1000000488d328",
+      "expected_target": "0xfffffff00b891328",
+      "native_symbol": "_vnop_write_desc",
+      "reviewed_original": "0xfffffe000b891328",
+      "evidence": "apfs-vnop-descriptor-bindings-20261031.json"
+    },
+    {
+      "site": "0xfffffff007f85850",
+      "expected_word": "0x0010000000ecc4f0",
+      "expected_target": "0xfffffff007ed04f0",
+      "native_symbol": "__ZN5IOCPU9metaClassE",
+      "reviewed_original": "0xfffffe0007ed04f0",
+      "evidence": "metaclass-slot-bindings-20261101.json"
+    },
+    {
+      "site": "0xfffffff007f858a0",
+      "expected_word": "0x0010000000f03468",
+      "expected_target": "0xfffffff007f07468",
+      "native_symbol": "__ZN9IOService9metaClassE",
+      "reviewed_original": "0xfffffe0007f07468",
+      "evidence": "metaclass-slot-bindings-20261101.json"
+    },
+    {
+      "site": "0xfffffff007f87430",
+      "expected_word": "0x0010000000f03468",
+      "expected_target": "0xfffffff007f07468",
+      "native_symbol": "__ZN9IOService9metaClassE",
+      "reviewed_original": "0xfffffe0007f07468",
+      "evidence": "metaclass-slot-bindings-20261101.json"
+    },
+    {
+      "site": "0xfffffff0081530b8",
+      "expected_word": "0x0010000000f03468",
+      "expected_target": "0xfffffff007f07468",
+      "native_symbol": "__ZN9IOService9metaClassE",
+      "reviewed_original": "0xfffffe0007f07468",
+      "evidence": "metaclass-slot-bindings-20261101.json"
+    },
+    {
+      "site": "0xfffffff0082daa58",
+      "expected_word": "0x0010000000f03468",
+      "expected_target": "0xfffffff007f07468",
+      "native_symbol": "__ZN9IOService9metaClassE",
+      "reviewed_original": "0xfffffe0007f07468",
+      "evidence": "metaclass-slot-bindings-20261101.json"
+    },
+    {
+      "site": "0xfffffff008358618",
+      "expected_word": "0x0010000000f03468",
+      "expected_target": "0xfffffff007f07468",
+      "native_symbol": "__ZN9IOService9metaClassE",
+      "reviewed_original": "0xfffffe0007f07468",
+      "evidence": "metaclass-slot-bindings-20261101.json"
+    },
+    {
+      "site": "0xfffffff00836b620",
+      "expected_word": "0x0010000000f03468",
+      "expected_target": "0xfffffff007f07468",
+      "native_symbol": "__ZN9IOService9metaClassE",
+      "reviewed_original": "0xfffffe0007f07468",
+      "evidence": "metaclass-slot-bindings-20261101.json"
+    },
+    {
+      "site": "0xfffffff0083ae6c0",
+      "expected_word": "0x0010000000f03468",
+      "expected_target": "0xfffffff007f07468",
+      "native_symbol": "__ZN9IOService9metaClassE",
+      "reviewed_original": "0xfffffe0007f07468",
+      "evidence": "metaclass-slot-bindings-20261101.json"
+    },
+    {
+      "site": "0xfffffff00848d8d8",
+      "expected_word": "0x0010000000f03468",
+      "expected_target": "0xfffffff007f07468",
+      "native_symbol": "__ZN9IOService9metaClassE",
+      "reviewed_original": "0xfffffe0007f07468",
+      "evidence": "metaclass-slot-bindings-20261101.json"
+    },
+    {
+      "site": "0xfffffff0084a0170",
+      "expected_word": "0x0010000000f03468",
+      "expected_target": "0xfffffff007f07468",
+      "native_symbol": "__ZN9IOService9metaClassE",
+      "reviewed_original": "0xfffffe0007f07468",
+      "evidence": "metaclass-slot-bindings-20261101.json"
+    },
+    {
+      "site": "0xfffffff007f85880",
+      "expected_word": "0x0010000000f03470",
+      "expected_target": "0xfffffff007f07470",
+      "native_symbol": "__ZN8OSString9metaClassE",
+      "reviewed_original": "0xfffffe0007f07470",
+      "evidence": "metaclass-slot-bindings-20261101.json"
+    },
+    {
+      "site": "0xfffffff0080e1b60",
+      "expected_word": "0x0010000000f03470",
+      "expected_target": "0xfffffff007f07470",
+      "native_symbol": "__ZN8OSString9metaClassE",
+      "reviewed_original": "0xfffffe0007f07470",
+      "evidence": "metaclass-slot-bindings-20261101.json"
+    },
+    {
+      "site": "0xfffffff008123508",
+      "expected_word": "0x0010000000f03470",
+      "expected_target": "0xfffffff007f07470",
+      "native_symbol": "__ZN8OSString9metaClassE",
+      "reviewed_original": "0xfffffe0007f07470",
+      "evidence": "metaclass-slot-bindings-20261101.json"
+    },
+    {
+      "site": "0xfffffff0081364a0",
+      "expected_word": "0x0010000000f03470",
+      "expected_target": "0xfffffff007f07470",
+      "native_symbol": "__ZN8OSString9metaClassE",
+      "reviewed_original": "0xfffffe0007f07470",
+      "evidence": "metaclass-slot-bindings-20261101.json"
+    },
+    {
+      "site": "0xfffffff00827c6f0",
+      "expected_word": "0x0010000000f03470",
+      "expected_target": "0xfffffff007f07470",
+      "native_symbol": "__ZN8OSString9metaClassE",
+      "reviewed_original": "0xfffffe0007f07470",
+      "evidence": "metaclass-slot-bindings-20261101.json"
+    },
+    {
+      "site": "0xfffffff0082daa48",
+      "expected_word": "0x0010000000f03470",
+      "expected_target": "0xfffffff007f07470",
+      "native_symbol": "__ZN8OSString9metaClassE",
+      "reviewed_original": "0xfffffe0007f07470",
+      "evidence": "metaclass-slot-bindings-20261101.json"
+    },
+    {
+      "site": "0xfffffff00830a560",
+      "expected_word": "0x0010000000f03470",
+      "expected_target": "0xfffffff007f07470",
+      "native_symbol": "__ZN8OSString9metaClassE",
+      "reviewed_original": "0xfffffe0007f07470",
+      "evidence": "metaclass-slot-bindings-20261101.json"
+    },
+    {
+      "site": "0xfffffff0083339d8",
+      "expected_word": "0x0010000000f03470",
+      "expected_target": "0xfffffff007f07470",
+      "native_symbol": "__ZN8OSString9metaClassE",
+      "reviewed_original": "0xfffffe0007f07470",
+      "evidence": "metaclass-slot-bindings-20261101.json"
+    },
+    {
+      "site": "0xfffffff0083585f8",
+      "expected_word": "0x0010000000f03470",
+      "expected_target": "0xfffffff007f07470",
+      "native_symbol": "__ZN8OSString9metaClassE",
+      "reviewed_original": "0xfffffe0007f07470",
+      "evidence": "metaclass-slot-bindings-20261101.json"
+    },
+    {
+      "site": "0xfffffff00836b608",
+      "expected_word": "0x0010000000f03470",
+      "expected_target": "0xfffffff007f07470",
+      "native_symbol": "__ZN8OSString9metaClassE",
+      "reviewed_original": "0xfffffe0007f07470",
+      "evidence": "metaclass-slot-bindings-20261101.json"
+    },
+    {
+      "site": "0xfffffff0083ae6b0",
+      "expected_word": "0x0010000000f03470",
+      "expected_target": "0xfffffff007f07470",
+      "native_symbol": "__ZN8OSString9metaClassE",
+      "reviewed_original": "0xfffffe0007f07470",
+      "evidence": "metaclass-slot-bindings-20261101.json"
+    },
+    {
+      "site": "0xfffffff0083b6518",
+      "expected_word": "0x0010000000f03470",
+      "expected_target": "0xfffffff007f07470",
+      "native_symbol": "__ZN8OSString9metaClassE",
+      "reviewed_original": "0xfffffe0007f07470",
+      "evidence": "metaclass-slot-bindings-20261101.json"
+    },
+    {
+      "site": "0xfffffff00848d8c8",
+      "expected_word": "0x0010000000f03470",
+      "expected_target": "0xfffffff007f07470",
+      "native_symbol": "__ZN8OSString9metaClassE",
+      "reviewed_original": "0xfffffe0007f07470",
+      "evidence": "metaclass-slot-bindings-20261101.json"
+    },
+    {
+      "site": "0xfffffff0084a0160",
+      "expected_word": "0x0010000000f03470",
+      "expected_target": "0xfffffff007f07470",
+      "native_symbol": "__ZN8OSString9metaClassE",
+      "reviewed_original": "0xfffffe0007f07470",
+      "evidence": "metaclass-slot-bindings-20261101.json"
+    },
+    {
+      "site": "0xfffffff007f85860",
+      "expected_word": "0x0010000000f03488",
+      "expected_target": "0xfffffff007f07488",
+      "native_symbol": "__ZN7OSArray9metaClassE",
+      "reviewed_original": "0xfffffe0007f07488",
+      "evidence": "metaclass-slot-bindings-20261101.json"
+    },
+    {
+      "site": "0xfffffff0081234f0",
+      "expected_word": "0x0010000000f03488",
+      "expected_target": "0xfffffff007f07488",
+      "native_symbol": "__ZN7OSArray9metaClassE",
+      "reviewed_original": "0xfffffe0007f07488",
+      "evidence": "metaclass-slot-bindings-20261101.json"
+    },
+    {
+      "site": "0xfffffff0081530a0",
+      "expected_word": "0x0010000000f03488",
+      "expected_target": "0xfffffff007f07488",
+      "native_symbol": "__ZN7OSArray9metaClassE",
+      "reviewed_original": "0xfffffe0007f07488",
+      "evidence": "metaclass-slot-bindings-20261101.json"
+    },
+    {
+      "site": "0xfffffff0082daa30",
+      "expected_word": "0x0010000000f03488",
+      "expected_target": "0xfffffff007f07488",
+      "native_symbol": "__ZN7OSArray9metaClassE",
+      "reviewed_original": "0xfffffe0007f07488",
+      "evidence": "metaclass-slot-bindings-20261101.json"
+    },
+    {
+      "site": "0xfffffff00830a550",
+      "expected_word": "0x0010000000f03488",
+      "expected_target": "0xfffffff007f07488",
+      "native_symbol": "__ZN7OSArray9metaClassE",
+      "reviewed_original": "0xfffffe0007f07488",
+      "evidence": "metaclass-slot-bindings-20261101.json"
+    },
+    {
+      "site": "0xfffffff0083339c0",
+      "expected_word": "0x0010000000f03488",
+      "expected_target": "0xfffffff007f07488",
+      "native_symbol": "__ZN7OSArray9metaClassE",
+      "reviewed_original": "0xfffffe0007f07488",
+      "evidence": "metaclass-slot-bindings-20261101.json"
+    },
+    {
+      "site": "0xfffffff0083585c8",
+      "expected_word": "0x0010000000f03488",
+      "expected_target": "0xfffffff007f07488",
+      "native_symbol": "__ZN7OSArray9metaClassE",
+      "reviewed_original": "0xfffffe0007f07488",
+      "evidence": "metaclass-slot-bindings-20261101.json"
+    },
+    {
+      "site": "0xfffffff00836b5f0",
+      "expected_word": "0x0010000000f03488",
+      "expected_target": "0xfffffff007f07488",
+      "native_symbol": "__ZN7OSArray9metaClassE",
+      "reviewed_original": "0xfffffe0007f07488",
+      "evidence": "metaclass-slot-bindings-20261101.json"
+    },
+    {
+      "site": "0xfffffff008390790",
+      "expected_word": "0x0010000000f03488",
+      "expected_target": "0xfffffff007f07488",
+      "native_symbol": "__ZN7OSArray9metaClassE",
+      "reviewed_original": "0xfffffe0007f07488",
+      "evidence": "metaclass-slot-bindings-20261101.json"
+    },
+    {
+      "site": "0xfffffff0083b64f8",
+      "expected_word": "0x0010000000f03488",
+      "expected_target": "0xfffffff007f07488",
+      "native_symbol": "__ZN7OSArray9metaClassE",
+      "reviewed_original": "0xfffffe0007f07488",
+      "evidence": "metaclass-slot-bindings-20261101.json"
+    },
+    {
+      "site": "0xfffffff00848d8b8",
+      "expected_word": "0x0010000000f03488",
+      "expected_target": "0xfffffff007f07488",
+      "native_symbol": "__ZN7OSArray9metaClassE",
+      "reviewed_original": "0xfffffe0007f07488",
+      "evidence": "metaclass-slot-bindings-20261101.json"
     }
   ]
 }
