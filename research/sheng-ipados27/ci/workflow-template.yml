@@ -10,6 +10,10 @@ on:
           - prepare
           - policies
           - gpu
+      research_ref:
+        description: Research fork revision to execute
+        default: research/sheng-ipados27
+        required: true
 permissions:
   contents: read
 concurrency:
@@ -26,8 +30,16 @@ jobs:
       NOBOOT: '1'
       UNIXNU_UNIQUE_CHIP_ID: ${{ secrets.UNIXNU_UNIQUE_CHIP_ID }}
       GH_TOKEN: ${{ github.token }}
+      UNIXNU_RESEARCH_BUILD_ROOT: ${{ github.workspace }}
     steps:
       - uses: actions/checkout@v4
+      - name: Check out canonical research code
+        uses: actions/checkout@v4
+        with:
+          repository: INTERINIT/UniXNU
+          ref: ${{ inputs.research_ref }}
+          path: research-source
+          persist-credentials: false
       - uses: actions/setup-python@v5
         with:
           python-version: '3.13'
@@ -46,7 +58,7 @@ jobs:
           restore-keys: |
             ipados27-r1-${{ runner.arch }}-
       - name: Build requested host phase
-        run: python scripts/cloud27.py '${{ inputs.stage }}'
+        run: python research-source/research/sheng-ipados27/ci/scripts/cloud27.py '${{ inputs.stage }}'
       - uses: actions/upload-artifact@v4
         if: always()
         with:
