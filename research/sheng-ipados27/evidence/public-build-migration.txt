@@ -1,0 +1,19 @@
+Public compute migration, 2026-10-31
+
+The private retry41177006931 did not execute build steps. GitHub rejected the job at the account billing/spending gate.
+Standard GitHub-hosted runners are free for public repositories. macos-26 is the standard arm64 runner.
+References:
+https://docs.github.com/en/actions/concepts/billing-and-usage
+https://github.blog/changelog/2026-02-26-macos-26-is-now-generally-available-for-github-hosted-runners/
+
+Build execution moves to the existing public INTERINIT/UniXNU research branch.
+The earlier CI repository remains private: its history once contained the device/platform identifier, and an early successful policy run saved an overly broad cache after creating the signing-key directory. No private-key material was found committed to Git; historical cache contents were not downloaded in this audit.
+The public workflow deliberately imports no old build caches and has manual dispatch only.
+
+Fixed inputs are a SHA-pinned AES-256-GCM ZIP. Its98 entries contain the verified run41173083070 reusable files, run41166392969 public verification policies and official vendor input. The current exact bundle passed full local authentication/member-hash/extraction checks; known device identifier and PEM-private-key markers were absent.
+Input encrypted SHA256: f905fe8118680b3bc72cc7aa8da52af869610a379e27e48d6d77f66d81abebff
+The encryption key and platform identifier are repository secrets, not Git content.
+The eventual ADT/boot contains the platform identifier, so the entire result/log artifact is encrypted before upload. Only encrypted bytes and their digest report are uploaded.
+
+Offline controls:3 authenticated input controls,1 encrypted output roundtrip/tamper control, actual98-file input extraction, static input checks and actionlint passed.
+The new real kernel link and final boot are still unverified. No device operations are part of this workflow.

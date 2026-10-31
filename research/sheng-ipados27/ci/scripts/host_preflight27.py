@@ -14,7 +14,7 @@ import sys
 
 RESEARCH = Path(__file__).resolve().parents[2]
 VENDOR_SHA = "a846d86dc6fc471a879ec02f8c8d87ee28dc1329e819f03629662fe0409ff520"
-SCRIPTS = ("cloud27", "data_stage27", "seed27", "policy27", "target27", "source_storage27", "gpu_watchdog27", "firmware_stage27", "payload_stage27", "reuse_artifacts27", "resume_package27", "host_preflight27")
+SCRIPTS = ("cloud27", "data_stage27", "seed27", "policy27", "target27", "source_storage27", "gpu_watchdog27", "firmware_stage27", "payload_stage27", "reuse_artifacts27", "resume_package27", "load_inputs27", "seal_outputs27", "host_preflight27")
 TOOLS = ("git", "gh", "brew", "xcrun", "xcodebuild", "clang", "clang++", "make", "cmake", "ninja", "unifdef",
          "llvm-nm", "llvm-objcopy", "ld.lld", "mformat", "mcopy", "dtc", "fdtget", "fdtput", "iasl",
          "qemu-system-aarch64", "openssl", "glslc", "spirv-val", "rustup", "hdiutil", "diskutil", "codesign")
@@ -82,16 +82,24 @@ def mac_tools(root):
     require(re.fullmatch(r"(?:0x)?[0-9a-fA-F]{1,16}", os.environ.get("UNIXNU_UNIQUE_CHIP_ID", "")),
             "The private platform seed secret is absent or malformed")
     pin = json.loads((RESEARCH / "evidence/root-policies-24A446.json").read_text(encoding="utf-8"))
-    document = json.loads(command(["gh", "api", "repos/" + pin["repository"] + "/actions/runs/" + str(pin["run_id"]) + "/artifacts"]))
-    artifacts = [item for item in document["artifacts"] if item["name"] == pin["artifact"] and item.get("expired") is False]
-    require(len(artifacts) == 1, "The pinned successful policy artifact is absent, expired or ambiguous")
+    supplied = root / "resources/root-policies-24A446"
+    if supplied.exists():
+        require(all((supplied / name).is_file() and (supplied / name).stat().st_size == item["bytes"]
+                    and sha(supplied / name) == item["sha256"] for name, item in pin["files"].items()),
+                "Supplied policies differ from the immutable successful policy artifact")
+        policy_access = "authenticated_local_copy"
+    else:
+        document = json.loads(command(["gh", "api", "repos/" + pin["repository"] + "/actions/runs/" + str(pin["run_id"]) + "/artifacts"]))
+        artifacts = [item for item in document["artifacts"] if item["name"] == pin["artifact"] and item.get("expired") is False]
+        require(len(artifacts) == 1, "The pinned successful policy artifact is absent, expired or ambiguous")
+        policy_access = "passed"
     github_path = os.environ.get("GITHUB_PATH")
     if github_path:
         with Path(github_path).open("a", encoding="utf-8") as stream:
             stream.write("\n".join(path_prefixes) + "\n")
     return {"tools": paths, "path_prefixes": path_prefixes,
             "xcode": command(["xcodebuild", "-version"]), "iphoneos_sdk": sdk_version,
-            "arm64e_ios27_sdk_syntax_probe": "passed", "policy_artifact_read_access": "passed",
+            "arm64e_ios27_sdk_syntax_probe": "passed", "policy_artifact_read_access": policy_access,
             "private_platform_seed_present": True, "disk_free_bytes": shutil.disk_usage(root).free}
 
 

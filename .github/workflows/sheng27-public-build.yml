@@ -1,0 +1,59 @@
+name: sheng27 public native and payload build
+run-name: sheng27 native and payload (reused inputs)
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: sheng27-public-build
+  cancel-in-progress: false
+jobs:
+  build:
+    runs-on: macos-26
+    timeout-minutes: 180
+    env:
+      DEVELOPER_DIR: /Applications/Xcode_26.6.app/Contents/Developer
+      HOMEBREW_NO_AUTO_UPDATE: '1'
+      PYTHONUNBUFFERED: '1'
+      NOBOOT: '1'
+      GH_TOKEN: ${{ github.token }}
+      UNIXNU_RESEARCH_BUILD_ROOT: ${{ github.workspace }}
+      UNIXNU_UNIQUE_CHIP_ID: ${{ secrets.UNIXNU_UNIQUE_CHIP_ID }}
+      INPUTS27_KEY: ${{ secrets.INPUTS27_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Install authenticated bundle library
+        run: python -m pip install cryptography==50.0.2 cffi==2.1.1 pycparser==3.12
+      - name: Restore encrypted fixed inputs
+        run: |
+          curl --fail --location --retry 2 'https://github.com/INTERINIT/UniXNU/releases/download/sheng27-inputs-41173083070/inputs27-run41173083070.enc' --output "$RUNNER_TEMP/inputs27.enc"
+          python research/sheng-ipados27/ci/scripts/load_inputs27.py --bundle "$RUNNER_TEMP/inputs27.enc" --root "$GITHUB_WORKSPACE" --expected-sha256 f905fe8118680b3bc72cc7aa8da52af869610a379e27e48d6d77f66d81abebff
+      - name: Install host build dependencies
+        run: brew install acpica qemu cmake ninja unifdef llvm lld mtools dtc openssl@3 glslang shaderc spirv-tools vulkan-headers rustup blacktop/tap/ipsw
+      - name: Mask platform identity variants and validate actual tools
+        run: |
+          python - <<'PY'
+          import os
+          value = os.environ['UNIXNU_UNIQUE_CHIP_ID']
+          number = int(value, 16)
+          for variant in {value.upper(), f'{number:08x}', f'{number:08X}', f'{number:016x}', f'{number:016X}', str(number)}:
+              print('::add-mask::' + variant)
+          PY
+          python research/sheng-ipados27/ci/scripts/host_preflight27.py --root . --output result27/host-preflight27.json
+      - name: Build repaired native kernel and final payload
+        run: python research/sheng-ipados27/ci/scripts/cloud27.py package-reuse
+      - name: Encrypt results and logs
+        if: always()
+        run: python research/sheng-ipados27/ci/scripts/seal_outputs27.py --root . --output encrypted-result27
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: sheng27-encrypted-host-result
+          path: encrypted-result27/
+          retention-days: 3
+          if-no-files-found: error
