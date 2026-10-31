@@ -7,12 +7,14 @@
    再确认 Erase iPadOS Data and boot。新 Data 只初始化这一次。
 
 以后启动
-双击 Boot.cmd，再选 iPadOS 27.0.1 - GPU and persistent Data。
+先手动进入 FASTBOOT 并连接 USB，再双击 Boot.cmd，
+然后选择 iPadOS 27.0.1 - GPU and persistent Data。
 这只从 RAM 启动，不重刷根卷、不清除 Data；不要反复选择 First install。
 请保留包内的 install-state.json，它记录本次安装。
 
 菜单默认停在 Tools，需手动选择系统项。
 GPU／Metal 和持久化 Data 已启用，实际启动、图形和外设可用性仍需实机测试。
+当前内核仍有未映射引用，可能在启动中停止；构建成功不代表已在平板上启动成功。
 
 Check.cmd 可单独检查电脑上的包文件，不连接或操作平板。
 出现错误时，保留脚本显示的日志和最后画面，不要反复运行 Flash.cmd。

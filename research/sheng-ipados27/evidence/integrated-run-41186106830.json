@@ -1,0 +1,65 @@
+{
+  "run_id": 41186106830,
+  "repository": "INTERINIT/UniXNU",
+  "url": "https://github.com/INTERINIT/UniXNU/actions/runs/41186106830",
+  "source_commit": "e1e938ee5354913d958282d158b3582dea9cdf08",
+  "conclusion": "success",
+  "phase_status": "host_verified",
+  "phases": {
+    "data": {
+      "status": "passed",
+      "elapsed_seconds": 0.218,
+      "reused": true,
+      "fresh_build": false,
+      "source_run": 41173083070
+    },
+    "native": {
+      "status": "passed",
+      "elapsed_seconds": 856.291,
+      "reused": false,
+      "fresh_build": true
+    },
+    "gpu": {
+      "status": "passed",
+      "elapsed_seconds": 0.097,
+      "reused": true,
+      "fresh_build": false,
+      "source_run": 41173083070
+    },
+    "firmware": {
+      "status": "passed",
+      "elapsed_seconds": 40.244,
+      "reused": true,
+      "fresh_build": false,
+      "source_run": 41173083070,
+      "fresh_source_preparation": true
+    },
+    "payload": {
+      "status": "passed",
+      "elapsed_seconds": 6.779,
+      "reused": false,
+      "fresh_build": true
+    }
+  },
+  "boot_bytes": 185589760,
+  "boot_sha256": "a47871a65a672048a7fce50a4a19a6fdafa6ba6220833e3bb52cdc289ea275eb",
+  "userdata_sparse_bytes": 15349546184,
+  "userdata_sparse_sha256": "dcc41a9467c84b8dcd02b57b1ef0594e86a3593b32acb4b99af13952c7f348a4",
+  "sparse_storage_mode": "hardlink",
+  "root_policy_bundle_sha256": "e11ecf51470d0c06d014878991329540aa729eabd88c73b47967cd516b51009d",
+  "package_assembled": true,
+  "package_check_passed": true,
+  "kernel_build_qualification": {
+    "mapping_complete": false,
+    "allow_missing": true,
+    "runtime_qualified": false,
+    "loadable": false
+  },
+  "unresolved_pointer_references": 60,
+  "panic_fallback_function_references": 53,
+  "hardware_tested": false,
+  "device_operations": false,
+  "reference17_preserved": true,
+  "extra_CI_preflight_gates": false,
+  "updated_utc": "2026-10-31T09:13:46.485587+00:00"
+}

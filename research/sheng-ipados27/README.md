@@ -5,18 +5,24 @@ This branch tracks the work to boot iPadOS 27.0.1 (24A446) on Xiaomi Pad 6S Pro
 The first iPadOS 27 hardware candidate is intended to include the matching
 Metal/GPU stack and a new persistent Data volume.
 
-**No iPadOS 27 boot, GPU rendering or persistent Data has been verified on our
-tablet yet. A complete flashable package has not been produced.**
+**A complete experimental package has been assembled and checked on Windows.
+No iPadOS 27 boot, GPU rendering or persistent Data has been verified on our
+tablet yet. The emitted kernel still has incomplete mappings.**
 
-2026-10-31 checkpoint: cloud retries have stopped, and research checks are now
-manual only. The 27 build runner recorded 3 successful, 8 failed and 2 cancelled
-runs, with none active. Successful phases are input preparation, full root-media
-authentication and the new firmware. See `evidence/checkpoint-20261031.json`.
+2026-10-31: public Actions run
+[41186106830](https://github.com/INTERINIT/UniXNU/actions/runs/41186106830)
+completed successfully from `e1e938ee5354913d958282d158b3582dea9cdf08`.
+Native kernel and payload were built in that run; Data, GPU and firmware reused
+the passed outputs of run 41173083070. The actual boot, complete root policies
+and existing sparse media were paired into the Windows package, and its local
+`check` command passed. No device operation was performed.
 
-The next authorized run is one combined `package` workflow after consolidated
-offline script, dependency-contract and workflow-lint checks. It records
-independent phase failures in one result set and gates payload assembly on all
-prerequisites. No automatic rerun or tablet operation is part of preparation.
+The current kernel report records 60 unresolved pointer references and 53
+function references redirected to the diagnostic panic fallback. It retains
+`mapping_complete=false`, `allow_missing=true`, `runtime_qualified=false` and
+`loadable=false`; host build success does not establish hardware bootability.
+See `evidence/integrated-run-41186106830.json`. Builds remain manually dispatched;
+the package is waiting for the user's hardware test.
 
 ## Source baseline
 
@@ -50,18 +56,20 @@ must not be substituted for the 27 bindings.
   both OS and SystemOS produced the exact pinned raw APFS hashes. Both images
   passed real C/RSA signature and every-4K-block authentication on macOS.
 - SoC overlay: affected Apple `start.s` and `bsd_init.c` patch contexts checked
-  in arch/SoC/OS/device order. This is not a complete kernel build result.
+  in arch/SoC/OS/device order. The later combined run also compiled and linked
+  the native kernel with the recorded overlay.
 - Host prepare and policy phases passed in the private build runner. The new
   firmware subsequently passed package/FD compilation, FV checks, both real
   BootShim QEMU cases, and official empty-container round-trip checks. Source
-  kernel, GPU and complete boot assembly remain separate checkpoints.
+  kernel and complete boot were subsequently produced by run 41186106830.
 - Small userdata transport tests passed real RSA verification, v2 layout,
   zero-fill, tamper and truncation controls. They do not qualify Apple images
   or hardware boot.
 - The Windows assembler produced a 15,349,546,184-byte sparse image spanning
   the full 249,497,890,816-byte target geometry with RAW/FILL chunks only.
-  Readback verified both volumes and policy-table objects. Final boot policy
-  header binding and live device checks are still required before deployment.
+  Readback verified both volumes and policy-table objects. Actual final boot
+  policy headers were matched to the full signed tables during assembly.
+  Hardware deployment has not been attempted.
 
 ## Layout
 
