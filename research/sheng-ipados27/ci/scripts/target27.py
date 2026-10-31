@@ -205,7 +205,12 @@ def prepare_reference_builder(main, ctx, output):
     storage.write_text(storage_text.replace(hook, '#if defined(XNU_SOURCE_STORAGE) && XNU_SOURCE_STORAGE\\n' + hook + '#endif\\n', 1),
                        encoding='utf-8', newline='\\n')
 '''
-    text = text.replace(manifest_marker, header_fix + manifest_marker)
+    exports_helper = Path(__file__).with_name("reference_exports27.py").resolve()
+    text = text.replace("import subprocess\n", "import subprocess\nimport sys\n", 1)
+    exports_fix = ("    # Reference export adapter: " + sha(exports_helper) + "\n"
+                   "    subprocess.run([sys.executable, " + repr(str(exports_helper)) +
+                   ", '--source', str(source), '--report', str(output / 'platform-exports.json')], check=True)\n")
+    text = text.replace(manifest_marker, header_fix + exports_fix + manifest_marker)
     fingerprint, count = source_identity(ctx.tree / ".cache/xnu-work")
     recipe = hashlib.sha256(text.encode()).hexdigest()
     identity = hashlib.sha256((fingerprint + ":" + recipe + ":" +

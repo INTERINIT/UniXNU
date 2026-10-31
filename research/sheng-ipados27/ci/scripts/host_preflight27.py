@@ -14,7 +14,7 @@ import sys
 
 RESEARCH = Path(__file__).resolve().parents[2]
 VENDOR_SHA = "a846d86dc6fc471a879ec02f8c8d87ee28dc1329e819f03629662fe0409ff520"
-SCRIPTS = ("cloud27", "data_stage27", "seed27", "policy27", "target27", "source_storage27", "adreno_fetch27", "ath12k_sources27", "driver_alias27", "gpu_watchdog27", "firmware_stage27", "payload_stage27", "reuse_artifacts27", "resume_package27", "load_inputs27", "seal_outputs27", "host_preflight27")
+SCRIPTS = ("cloud27", "data_stage27", "seed27", "policy27", "target27", "source_storage27", "reference_exports27", "adreno_fetch27", "ath12k_sources27", "driver_alias27", "gpu_watchdog27", "firmware_stage27", "payload_stage27", "reuse_artifacts27", "resume_package27", "load_inputs27", "seal_outputs27", "host_preflight27")
 TOOLS = ("git", "gh", "brew", "xcrun", "xcodebuild", "clang", "clang++", "make", "cmake", "ninja", "unifdef",
          "llvm-nm", "llvm-objcopy", "ld.lld", "mformat", "mcopy", "dtc", "fdtget", "fdtput", "iasl",
          "qemu-system-aarch64", "openssl", "glslc", "spirv-val", "rustup", "hdiutil", "diskutil", "codesign")

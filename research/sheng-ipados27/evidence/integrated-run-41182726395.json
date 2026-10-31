@@ -1,0 +1,53 @@
+{
+  "run_id": 41182726395,
+  "repo": "INTERINIT/UniXNU",
+  "url": "https://github.com/INTERINIT/UniXNU/actions/runs/41182726395",
+  "source_commit": "ce89361c307211cc2fdd8e749e93c5bfd4d6e2f7",
+  "conclusion": "failure",
+  "actual_error": "Undefined symbols for architecture arm64e at RELEASE reference link",
+  "phases": {
+    "data": {
+      "status": "passed",
+      "elapsed_seconds": 0.372,
+      "reused": true,
+      "fresh_build": false,
+      "source_run": 41173083070
+    },
+    "native": {
+      "status": "failed",
+      "error_type": "CalledProcessError",
+      "traceback": "package-native-failure.log",
+      "elapsed_seconds": 929.0,
+      "reused": false,
+      "fresh_build": true
+    },
+    "gpu": {
+      "status": "passed",
+      "elapsed_seconds": 0.346,
+      "reused": true,
+      "fresh_build": false,
+      "source_run": 41173083070
+    },
+    "firmware": {
+      "status": "passed",
+      "elapsed_seconds": 46.616,
+      "reused": true,
+      "fresh_build": false,
+      "source_run": 41173083070,
+      "fresh_source_preparation": true
+    },
+    "payload": {
+      "status": "blocked",
+      "dependencies": [
+        "native"
+      ],
+      "reused": false,
+      "fresh_build": true
+    }
+  },
+  "complete_boot_built": false,
+  "device_operations": false,
+  "repair": "Remove only the67 absent Apple-platform export-list entries from the isolated RELEASE reference source",
+  "ordinary_undefined_call_errors_preserved": true,
+  "full_native_source_unchanged": true
+}

@@ -4,6 +4,7 @@ import ast
 import json
 from pathlib import Path
 import sys
+import subprocess
 import tempfile
 from types import SimpleNamespace
 import unittest
@@ -97,6 +98,13 @@ class NativeRecipeTests(unittest.TestCase):
             storage = source / "bsd/kern/bsd_init.c"
             storage.parent.mkdir(parents=True)
             storage.write_text("\tvfsinit();\n" + hook, encoding="utf-8")
+            spec = importlib.util.spec_from_file_location("reference_exports_test", RESEARCH / "ci/scripts/reference_exports27.py")
+            exports = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(exports)
+            for name, symbols in exports.UNAVAILABLE_EXPORTS.items():
+                path = source / name
+                path.parent.mkdir(parents=True, exist_ok=True)
+                path.write_text("_retained_export\n" + "\n".join(symbols) + "\n", encoding="utf-8")
             local, _, _ = target.prepare_reference_builder(MAIN, SimpleNamespace(tree=root / "tree"), output)
             snapshot = next(node for node in ast.parse(local.read_text()).body if isinstance(node, ast.If))
             start = next(i for i, node in enumerate(snapshot.body) if isinstance(node, ast.Assign)
@@ -104,13 +112,16 @@ class NativeRecipeTests(unittest.TestCase):
             end = next(i for i, node in enumerate(snapshot.body) if isinstance(node, ast.Assign)
                        and any(isinstance(name, ast.Name) and name.id == "manifest" for name in node.targets))
             code = compile(ast.Module(body=snapshot.body[start:end], type_ignores=[]), str(local), "exec")
-            exec(code, {"source": source})
+            namespace = {"source": source, "output": output, "sys": sys, "subprocess": subprocess}
+            exec(code, namespace)
             result = exception.read_text(encoding="utf-8")
             added = 'extern int      proc_pid(struct proc *p);\n'
             self.assertEqual(result.replace(added, ""), fixture)
             self.assertEqual(storage.read_text(encoding="utf-8"), "\tvfsinit();\n#if defined(XNU_SOURCE_STORAGE) && XNU_SOURCE_STORAGE\n" + hook + "#endif\n")
+            for name in exports.UNAVAILABLE_EXPORTS:
+                self.assertEqual((source / name).read_text(encoding="utf-8"), "_retained_export\n")
             with self.assertRaisesRegex(ValueError, "Review changed"):
-                exec(code, {"source": source})
+                exec(code, namespace)
 
     def test_empty_reference_source_refused(self):
         with tempfile.TemporaryDirectory() as temporary:
