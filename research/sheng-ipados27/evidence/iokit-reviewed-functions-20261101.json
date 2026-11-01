@@ -1,0 +1,921 @@
+{
+  "kind": "reviewed-original-to-native-IOKit-function-identities",
+  "created_utc": "2026-10-31T16:33:24.663874+00:00",
+  "scope": "Published source/binary identity evidence; the recorded read-only audit did not apply a binding or qualify a hardware boot.",
+  "inputs": {
+    "original_kernelcache": "kernelcache.decompressed",
+    "original_kernelcache_sha256": "38e6d9fa5f789b8228f4617ef4c6d2a3fd8ab564abdc9b62920f1db53fc1780a",
+    "actual_candidate": "kernel-entry-probe.macho",
+    "actual_candidate_sha256": "5f98c47afae938b0a30dcd342932413536471fbb7820f44a90bee8e69ba6607a",
+    "entry": "com.apple.kernel",
+    "collection_slide": "0x1f000000000",
+    "actual_collection_base": "0xfffffff007004000",
+    "actual_kernel_map": "kernel.map.json"
+  },
+  "functions": [
+    {
+      "original_address": "0xfffffe000b430ab8",
+      "original_function_bytes": 284,
+      "original_function_sha256": "9f6253b1b5e80456121d9b3b8b17a6e1d688fb9168f4534f2385de9ce3ff26eb",
+      "native_symbol": "__ZN9IOService12Start_InvokeE5IORPCP15OSMetaClassBasePFiS2_PS_E",
+      "actual_final_native_address": "0xfffffff00b40e854",
+      "native_function_bytes": 220,
+      "native_function_sha256": "d35890446b2061e10538ceddd07c3391607d762eeace608202c782c6f39aca84",
+      "actual_retained_chain_sites": [
+        {
+          "original_slot": "0xfffffe00083583a0",
+          "output_slot": "0xfffffff0083583a0",
+          "file_offset": "0x13543a0",
+          "consumers": [
+            "com.apple.iokit.IOHIDFamily"
+          ],
+          "original_target": "0xfffffe000b430ab8",
+          "original_raw_qword": "0x801100000442cab8",
+          "actual_raw_qword": "0x8011000004699a64",
+          "actual_target": "0xfffffff00b69da64",
+          "actual_symbol": [
+            "_unixnu_fileset_unmapped"
+          ],
+          "auth": 1,
+          "key": 0,
+          "diversity": 0,
+          "address_diversity": 1,
+          "next_step": 2,
+          "proposed_target": "0xfffffff00b40e854",
+          "proposed_raw_qword": "0x801100000440a854",
+          "proposal_only_not_applied": true
+        },
+        {
+          "original_slot": "0xfffffe00083ae3f8",
+          "output_slot": "0xfffffff0083ae3f8",
+          "file_offset": "0x13aa3f8",
+          "consumers": [
+            "com.apple.iokit.IOStorageFamily"
+          ],
+          "original_target": "0xfffffe000b430ab8",
+          "original_raw_qword": "0x801100000442cab8",
+          "actual_raw_qword": "0x8011000004699a64",
+          "actual_target": "0xfffffff00b69da64",
+          "actual_symbol": [
+            "_unixnu_fileset_unmapped"
+          ],
+          "auth": 1,
+          "key": 0,
+          "diversity": 0,
+          "address_diversity": 1,
+          "next_step": 2,
+          "proposed_target": "0xfffffff00b40e854",
+          "proposed_raw_qword": "0x801100000440a854",
+          "proposal_only_not_applied": true
+        }
+      ],
+      "binding_identity_reviewed": true,
+      "artifact_modified": false,
+      "evidence": {
+        "method": "exact RPC reply 128-bit fingerprint, message layout, object type, callback ABI, and official IIG declaration; no neighbor-address inference",
+        "original_reply_literal_address": "0xfffffe000700fe30",
+        "native_reply_literal_address": "0xfffffff0071a7250",
+        "native_reply_load_site": "0xfffffff00b40e8e8",
+        "reply_literal_hex": "f293d6e6dd766fab0800000000000000",
+        "reply_msgid": "0xab6f76dde6d693f2",
+        "request_min_bytes": "0x6c",
+        "reply_min_bytes": "0x3c",
+        "mach_descriptor_count": 2,
+        "rpc_content_object_count": 2,
+        "provider_argument_offset": "0x20",
+        "expected_provider_type": "IOService",
+        "callback_signature": "kern_return_t (*)(OSMetaClassBase *, IOService *)",
+        "handler_pac_diversity": "0xe4fe",
+        "incoming_registers": {
+          "x0": "indirect IORPC aggregate",
+          "x1": "OSMetaClassBase target",
+          "x2": "handler function pointer"
+        },
+        "source": {
+          "repo": "apple-oss-distributions/xnu",
+          "commit": "ac9718fb1af618d5ce8678d0dc6e8a58f252216f",
+          "path": "iokit/DriverKit/IOService.iig",
+          "github_blob_sha1": "4180871282feb0da245d596f442f97557c73d2da",
+          "reviewed_lines": [
+            125,
+            126,
+            136,
+            137
+          ],
+          "url": "https://github.com/apple-oss-distributions/xnu/blob/ac9718fb1af618d5ce8678d0dc6e8a58f252216f/iokit/DriverKit/IOService.iig",
+          "retrieval": "GitHub contents API at exact commit; base64 decoded in memory, not neighboring-address inference"
+        }
+      }
+    },
+    {
+      "original_address": "0xfffffe000b430bd4",
+      "original_function_bytes": 284,
+      "original_function_sha256": "59c06597b20d5b3fdc135bfcd9ef07ad1d190a3fdecf763d15908a108aab69c3",
+      "native_symbol": "__ZN9IOService11Stop_InvokeE5IORPCP15OSMetaClassBasePFiS2_PS_E",
+      "actual_final_native_address": "0xfffffff00b40e930",
+      "native_function_bytes": 220,
+      "native_function_sha256": "33fdf8f3f282cdb57f0ef22ec60f2acda653380e08dcaa89c6fc7ba4bf4f2eaa",
+      "actual_retained_chain_sites": [
+        {
+          "original_slot": "0xfffffe0008358398",
+          "output_slot": "0xfffffff008358398",
+          "file_offset": "0x1354398",
+          "consumers": [
+            "com.apple.iokit.IOHIDFamily"
+          ],
+          "original_target": "0xfffffe000b430bd4",
+          "original_raw_qword": "0x801100000442cbd4",
+          "actual_raw_qword": "0x8011000004699a64",
+          "actual_target": "0xfffffff00b69da64",
+          "actual_symbol": [
+            "_unixnu_fileset_unmapped"
+          ],
+          "auth": 1,
+          "key": 0,
+          "diversity": 0,
+          "address_diversity": 1,
+          "next_step": 2,
+          "proposed_target": "0xfffffff00b40e930",
+          "proposed_raw_qword": "0x801100000440a930",
+          "proposal_only_not_applied": true
+        },
+        {
+          "original_slot": "0xfffffe00083ae3f0",
+          "output_slot": "0xfffffff0083ae3f0",
+          "file_offset": "0x13aa3f0",
+          "consumers": [
+            "com.apple.iokit.IOStorageFamily"
+          ],
+          "original_target": "0xfffffe000b430bd4",
+          "original_raw_qword": "0x801100000442cbd4",
+          "actual_raw_qword": "0x8011000004699a64",
+          "actual_target": "0xfffffff00b69da64",
+          "actual_symbol": [
+            "_unixnu_fileset_unmapped"
+          ],
+          "auth": 1,
+          "key": 0,
+          "diversity": 0,
+          "address_diversity": 1,
+          "next_step": 2,
+          "proposed_target": "0xfffffff00b40e930",
+          "proposed_raw_qword": "0x801100000440a930",
+          "proposal_only_not_applied": true
+        }
+      ],
+      "binding_identity_reviewed": true,
+      "artifact_modified": false,
+      "evidence": {
+        "method": "exact RPC reply 128-bit fingerprint, message layout, object type, callback ABI, and official IIG declaration; no neighbor-address inference",
+        "original_reply_literal_address": "0xfffffe000700fe20",
+        "native_reply_literal_address": "0xfffffff0071a7240",
+        "native_reply_load_site": "0xfffffff00b40e9c4",
+        "reply_literal_hex": "a59f451c0415e7980800000000000000",
+        "reply_msgid": "0x98e715041c459fa5",
+        "request_min_bytes": "0x6c",
+        "reply_min_bytes": "0x3c",
+        "mach_descriptor_count": 2,
+        "rpc_content_object_count": 2,
+        "provider_argument_offset": "0x20",
+        "expected_provider_type": "IOService",
+        "callback_signature": "kern_return_t (*)(OSMetaClassBase *, IOService *)",
+        "handler_pac_diversity": "0xe4fe",
+        "incoming_registers": {
+          "x0": "indirect IORPC aggregate",
+          "x1": "OSMetaClassBase target",
+          "x2": "handler function pointer"
+        },
+        "source": {
+          "repo": "apple-oss-distributions/xnu",
+          "commit": "ac9718fb1af618d5ce8678d0dc6e8a58f252216f",
+          "path": "iokit/DriverKit/IOService.iig",
+          "github_blob_sha1": "4180871282feb0da245d596f442f97557c73d2da",
+          "reviewed_lines": [
+            125,
+            126,
+            136,
+            137
+          ],
+          "url": "https://github.com/apple-oss-distributions/xnu/blob/ac9718fb1af618d5ce8678d0dc6e8a58f252216f/iokit/DriverKit/IOService.iig",
+          "retrieval": "GitHub contents API at exact commit; base64 decoded in memory, not neighboring-address inference"
+        }
+      }
+    },
+    {
+      "original_address": "0xfffffe000b4bf8fc",
+      "original_function_bytes": 104,
+      "original_function_sha256": "e1145b90652116cea9fc82b560440790c586468582b963ea89b5a5dd6997f1e3",
+      "native_symbol": "__ZN21IOSubMemoryDescriptor8redirectEP4taskb",
+      "actual_final_native_address": "0xfffffff00b48d834",
+      "native_function_bytes": 140,
+      "native_function_sha256": "a1ddd9a67b172a4e6ff982e60fef23d0ceae18392fb10e4b026ff676db3232e8",
+      "actual_retained_chain_sites": [
+        {
+          "original_slot": "0xfffffe000832acc0",
+          "output_slot": "0xfffffff00832acc0",
+          "file_offset": "0x1326cc0",
+          "consumers": [
+            "com.apple.iokit.IOGPUFamily"
+          ],
+          "original_target": "0xfffffe000b4bf8fc",
+          "original_raw_qword": "0x8011ff36044bb8fc",
+          "actual_raw_qword": "0x8011ff3604699a64",
+          "actual_target": "0xfffffff00b69da64",
+          "actual_symbol": [
+            "_unixnu_fileset_unmapped"
+          ],
+          "auth": 1,
+          "key": 0,
+          "diversity": 65334,
+          "address_diversity": 1,
+          "next_step": 2,
+          "proposed_target": "0xfffffff00b48d834",
+          "proposed_raw_qword": "0x8011ff3604489834",
+          "proposal_only_not_applied": true
+        },
+        {
+          "original_slot": "0xfffffe00083aaa08",
+          "output_slot": "0xfffffff0083aaa08",
+          "file_offset": "0x13a6a08",
+          "consumers": [
+            "com.apple.iokit.IOStorageFamily"
+          ],
+          "original_target": "0xfffffe000b4bf8fc",
+          "original_raw_qword": "0x8011ff36044bb8fc",
+          "actual_raw_qword": "0x8011ff3604699a64",
+          "actual_target": "0xfffffff00b69da64",
+          "actual_symbol": [
+            "_unixnu_fileset_unmapped"
+          ],
+          "auth": 1,
+          "key": 0,
+          "diversity": 65334,
+          "address_diversity": 1,
+          "next_step": 2,
+          "proposed_target": "0xfffffff00b48d834",
+          "proposed_raw_qword": "0x8011ff3604489834",
+          "proposal_only_not_applied": true
+        }
+      ],
+      "binding_identity_reviewed": true,
+      "artifact_modified": false,
+      "evidence": {
+        "method": "same independently named IOSubMemoryDescriptor vtable, all 38 PAC layouts match and terminate together; same exact slot and compatible field accesses; official declaration and implementation",
+        "original_vtable": "0xfffffe0007ecd498",
+        "native_vtable": "0xfffffff007e56de8",
+        "native_vtable_symbol": "__ZTV21IOSubMemoryDescriptor",
+        "original_table_identity_in_actual_map": {
+          "original": "0xfffffe0007ecd498",
+          "name": "__ZTV21IOSubMemoryDescriptor",
+          "how": "reference-data"
+        },
+        "slot_index_zero_based_after_itanium_header": 31,
+        "complete_table_method_count": 38,
+        "all38_pac_metadata_equal": true,
+        "both_tables_end_at38": true,
+        "same_instance_field_offsets": {
+          "_parent": "0x60",
+          "reserved": "0x10"
+        },
+        "signature": "IOReturn redirect(task_t safeTask, bool doRedirect)",
+        "sources": [
+          {
+            "repo": "apple-oss-distributions/xnu",
+            "commit": "ac9718fb1af618d5ce8678d0dc6e8a58f252216f",
+            "path": "iokit/Kernel/IOSubMemoryDescriptor.cpp",
+            "github_blob_sha1": "5c807d1623886d1a19ad820f3dd0caa857424b17",
+            "reviewed_lines": [
+              38,
+              39,
+              42,
+              44,
+              219,
+              220,
+              224,
+              228,
+              229,
+              230,
+              231,
+              232,
+              235
+            ],
+            "url": "https://github.com/apple-oss-distributions/xnu/blob/ac9718fb1af618d5ce8678d0dc6e8a58f252216f/iokit/Kernel/IOSubMemoryDescriptor.cpp",
+            "retrieval": "GitHub contents API at exact commit; base64 decoded in memory, not neighboring-address inference"
+          },
+          {
+            "repo": "apple-oss-distributions/xnu",
+            "commit": "ac9718fb1af618d5ce8678d0dc6e8a58f252216f",
+            "path": "iokit/IOKit/IOSubMemoryDescriptor.h",
+            "github_blob_sha1": "48e5ccf2295b591b77722b90929fcb43d164911f",
+            "reviewed_lines": [
+              89,
+              90,
+              111
+            ],
+            "url": "https://github.com/apple-oss-distributions/xnu/blob/ac9718fb1af618d5ce8678d0dc6e8a58f252216f/iokit/IOKit/IOSubMemoryDescriptor.h",
+            "retrieval": "GitHub contents API at exact commit; base64 decoded in memory, not neighboring-address inference"
+          }
+        ],
+        "parent_virtual_dispatch": {
+          "byte_offset": "0xf8",
+          "slot": 31,
+          "auth_diversity": "0xff36"
+        }
+      }
+    },
+    {
+      "original_address": "0xfffffe000b4bf9c4",
+      "original_function_bytes": 128,
+      "original_function_sha256": "8be7539e78a18c917315acc2b5bf1f2d5d782b4e2176db1a681b212fd5c5841c",
+      "native_symbol": "__ZN21IOSubMemoryDescriptor16getPreparationIDEv",
+      "actual_final_native_address": "0xfffffff00b48dd08",
+      "native_function_bytes": 164,
+      "native_function_sha256": "4febe379fed94c7f07cdfb33aca36f67d1c631f69429958b5d7f2b3c9ca00a57",
+      "actual_retained_chain_sites": [
+        {
+          "original_slot": "0xfffffe000832ac68",
+          "output_slot": "0xfffffff00832ac68",
+          "file_offset": "0x1326c68",
+          "consumers": [
+            "com.apple.iokit.IOGPUFamily"
+          ],
+          "original_target": "0xfffffe000b4bf9c4",
+          "original_raw_qword": "0x80119e3f044bb9c4",
+          "actual_raw_qword": "0x80119e3f04699a64",
+          "actual_target": "0xfffffff00b69da64",
+          "actual_symbol": [
+            "_unixnu_fileset_unmapped"
+          ],
+          "auth": 1,
+          "key": 0,
+          "diversity": 40511,
+          "address_diversity": 1,
+          "next_step": 2,
+          "proposed_target": "0xfffffff00b48dd08",
+          "proposed_raw_qword": "0x80119e3f04489d08",
+          "proposal_only_not_applied": true
+        },
+        {
+          "original_slot": "0xfffffe00083aa9b0",
+          "output_slot": "0xfffffff0083aa9b0",
+          "file_offset": "0x13a69b0",
+          "consumers": [
+            "com.apple.iokit.IOStorageFamily"
+          ],
+          "original_target": "0xfffffe000b4bf9c4",
+          "original_raw_qword": "0x80119e3f044bb9c4",
+          "actual_raw_qword": "0x80119e3f04699a64",
+          "actual_target": "0xfffffff00b69da64",
+          "actual_symbol": [
+            "_unixnu_fileset_unmapped"
+          ],
+          "auth": 1,
+          "key": 0,
+          "diversity": 40511,
+          "address_diversity": 1,
+          "next_step": 2,
+          "proposed_target": "0xfffffff00b48dd08",
+          "proposed_raw_qword": "0x80119e3f04489d08",
+          "proposal_only_not_applied": true
+        }
+      ],
+      "binding_identity_reviewed": true,
+      "artifact_modified": false,
+      "evidence": {
+        "method": "same independently named IOSubMemoryDescriptor vtable, all 38 PAC layouts match and terminate together; same exact slot and compatible field accesses; official declaration and implementation",
+        "original_vtable": "0xfffffe0007ecd498",
+        "native_vtable": "0xfffffff007e56de8",
+        "native_vtable_symbol": "__ZTV21IOSubMemoryDescriptor",
+        "original_table_identity_in_actual_map": {
+          "original": "0xfffffe0007ecd498",
+          "name": "__ZTV21IOSubMemoryDescriptor",
+          "how": "reference-data"
+        },
+        "slot_index_zero_based_after_itanium_header": 20,
+        "complete_table_method_count": 38,
+        "all38_pac_metadata_equal": true,
+        "both_tables_end_at38": true,
+        "same_instance_field_offsets": {
+          "_parent": "0x60",
+          "reserved": "0x10"
+        },
+        "signature": "uint64_t getPreparationID(void)",
+        "sources": [
+          {
+            "repo": "apple-oss-distributions/xnu",
+            "commit": "ac9718fb1af618d5ce8678d0dc6e8a58f252216f",
+            "path": "iokit/Kernel/IOSubMemoryDescriptor.cpp",
+            "github_blob_sha1": "5c807d1623886d1a19ad820f3dd0caa857424b17",
+            "reviewed_lines": [
+              38,
+              39,
+              42,
+              44,
+              219,
+              220,
+              224,
+              228,
+              229,
+              230,
+              231,
+              232,
+              235
+            ],
+            "url": "https://github.com/apple-oss-distributions/xnu/blob/ac9718fb1af618d5ce8678d0dc6e8a58f252216f/iokit/Kernel/IOSubMemoryDescriptor.cpp",
+            "retrieval": "GitHub contents API at exact commit; base64 decoded in memory, not neighboring-address inference"
+          },
+          {
+            "repo": "apple-oss-distributions/xnu",
+            "commit": "ac9718fb1af618d5ce8678d0dc6e8a58f252216f",
+            "path": "iokit/IOKit/IOSubMemoryDescriptor.h",
+            "github_blob_sha1": "48e5ccf2295b591b77722b90929fcb43d164911f",
+            "reviewed_lines": [
+              89,
+              90,
+              111
+            ],
+            "url": "https://github.com/apple-oss-distributions/xnu/blob/ac9718fb1af618d5ce8678d0dc6e8a58f252216f/iokit/IOKit/IOSubMemoryDescriptor.h",
+            "retrieval": "GitHub contents API at exact commit; base64 decoded in memory, not neighboring-address inference"
+          }
+        ],
+        "same_reserved_field_offsets": {
+          "kernReserved[0]": "0x28",
+          "preparationID": "0x20"
+        }
+      }
+    }
+  ],
+  "original_full_IOSubMemoryDescriptor_vtable_pac_evidence": [
+    {
+      "slot": 0,
+      "original_target": "0xfffffe000b4bfc30",
+      "native_target": "0xfffffff00b48d64c",
+      "native_symbols": [
+        "__ZN21IOSubMemoryDescriptorD1Ev"
+      ],
+      "auth": 1,
+      "key": 0,
+      "diversity": 14193,
+      "address_diversity": 1
+    },
+    {
+      "slot": 1,
+      "original_target": "0xfffffe000b4bfb78",
+      "native_target": "0xfffffff00b48d654",
+      "native_symbols": [
+        "__ZN21IOSubMemoryDescriptorD0Ev"
+      ],
+      "auth": 1,
+      "key": 0,
+      "diversity": 22199,
+      "address_diversity": 1
+    },
+    {
+      "slot": 2,
+      "original_target": "0xfffffe000b3d5d40",
+      "native_target": "0xfffffff00b3b6bf8",
+      "native_symbols": [
+        "__ZNK8OSObject7releaseEi"
+      ],
+      "auth": 1,
+      "key": 0,
+      "diversity": 47778,
+      "address_diversity": 1
+    },
+    {
+      "slot": 3,
+      "original_target": "0xfffffe000b3d5d34",
+      "native_target": "0xfffffff00b3b68b8",
+      "native_symbols": [
+        "__ZNK8OSObject14getRetainCountEv"
+      ],
+      "auth": 1,
+      "key": 0,
+      "diversity": 13831,
+      "address_diversity": 1
+    },
+    {
+      "slot": 4,
+      "original_target": "0xfffffe000b3d5d04",
+      "native_target": "0xfffffff00b3b6b70",
+      "native_symbols": [
+        "__ZNK8OSObject6retainEv"
+      ],
+      "auth": 1,
+      "key": 0,
+      "diversity": 11850,
+      "address_diversity": 1
+    },
+    {
+      "slot": 5,
+      "original_target": "0xfffffe000b3d5cd4",
+      "native_target": "0xfffffff00b3b6b40",
+      "native_symbols": [
+        "__ZNK8OSObject7releaseEv"
+      ],
+      "auth": 1,
+      "key": 0,
+      "diversity": 14983,
+      "address_diversity": 1
+    },
+    {
+      "slot": 6,
+      "original_target": "0xfffffe000b3d5b4c",
+      "native_target": "0xfffffff00b3b6c2c",
+      "native_symbols": [
+        "__ZNK8OSObject9serializeEP11OSSerialize"
+      ],
+      "auth": 1,
+      "key": 0,
+      "diversity": 35241,
+      "address_diversity": 1
+    },
+    {
+      "slot": 7,
+      "original_target": "0xfffffe000b4bfb68",
+      "native_target": "0xfffffff00b48d6b0",
+      "native_symbols": [
+        "__ZNK21IOSubMemoryDescriptor12getMetaClassEv"
+      ],
+      "auth": 1,
+      "key": 0,
+      "diversity": 65532,
+      "address_diversity": 1
+    },
+    {
+      "slot": 8,
+      "original_target": "0xfffffe000b3d29e8",
+      "native_target": "0xfffffff00b3b4338",
+      "native_symbols": [
+        "__ZNK15OSMetaClassBase9isEqualToEPKS_"
+      ],
+      "auth": 1,
+      "key": 0,
+      "diversity": 64628,
+      "address_diversity": 1
+    },
+    {
+      "slot": 9,
+      "original_target": "0xfffffe000b3d5abc",
+      "native_target": "0xfffffff00b3b6938",
+      "native_symbols": [
+        "__ZNK8OSObject12taggedRetainEPKv"
+      ],
+      "auth": 1,
+      "key": 0,
+      "diversity": 22069,
+      "address_diversity": 1
+    },
+    {
+      "slot": 10,
+      "original_target": "0xfffffe000b3d5a8c",
+      "native_target": "0xfffffff00b3b69c8",
+      "native_symbols": [
+        "__ZNK8OSObject13taggedReleaseEPKv"
+      ],
+      "auth": 1,
+      "key": 0,
+      "diversity": 48736,
+      "address_diversity": 1
+    },
+    {
+      "slot": 11,
+      "original_target": "0xfffffe000b3d5934",
+      "native_target": "0xfffffff00b3b69f8",
+      "native_symbols": [
+        "__ZNK8OSObject13taggedReleaseEPKvi"
+      ],
+      "auth": 1,
+      "key": 0,
+      "diversity": 13029,
+      "address_diversity": 1
+    },
+    {
+      "slot": 12,
+      "original_target": "0xfffffe000b4367d8",
+      "native_target": "0xfffffff00b415c14",
+      "native_symbols": [
+        "__ZN18IOMemoryDescriptor8DispatchE5IORPC"
+      ],
+      "auth": 1,
+      "key": 0,
+      "diversity": 37385,
+      "address_diversity": 1
+    },
+    {
+      "slot": 13,
+      "original_target": "0xfffffe000b3d5928",
+      "native_target": "0xfffffff00b3b6f10",
+      "native_symbols": [
+        "__ZN8OSObject4initEv"
+      ],
+      "auth": 1,
+      "key": 0,
+      "diversity": 19050,
+      "address_diversity": 1
+    },
+    {
+      "slot": 14,
+      "original_target": "0xfffffe000b4bfb14",
+      "native_target": "0xfffffff00b48dae0",
+      "native_symbols": [
+        "__ZN21IOSubMemoryDescriptor4freeEv"
+      ],
+      "auth": 1,
+      "key": 0,
+      "diversity": 60869,
+      "address_diversity": 1
+    },
+    {
+      "slot": 15,
+      "original_target": "0xfffffe000b4b26b4",
+      "native_target": "0xfffffff00b4812d4",
+      "native_symbols": [
+        "__ZN18IOMemoryDescriptor15initWithOptionsEPvjjP4taskjP8IOMapper"
+      ],
+      "auth": 1,
+      "key": 0,
+      "diversity": 65094,
+      "address_diversity": 1
+    },
+    {
+      "slot": 16,
+      "original_target": "0xfffffe000b4bfae4",
+      "native_target": "0xfffffff00b48dc10",
+      "native_symbols": [
+        "__ZN21IOSubMemoryDescriptor12setPurgeableEjPj"
+      ],
+      "auth": 1,
+      "key": 0,
+      "diversity": 9404,
+      "address_diversity": 1
+    },
+    {
+      "slot": 17,
+      "original_target": "0xfffffe000b4b2110",
+      "native_target": "0xfffffff00b485734",
+      "native_symbols": [
+        "__ZN18IOMemoryDescriptor16performOperationEjyy"
+      ],
+      "auth": 1,
+      "key": 0,
+      "diversity": 63851,
+      "address_diversity": 1
+    },
+    {
+      "slot": 18,
+      "original_target": "0xfffffe000b4b1c48",
+      "native_target": "0xfffffff00b484b84",
+      "native_symbols": [
+        "__ZNK18IOMemoryDescriptor19dmaCommandOperationEjPvj"
+      ],
+      "auth": 1,
+      "key": 0,
+      "diversity": 43175,
+      "address_diversity": 1
+    },
+    {
+      "slot": 19,
+      "original_target": "0xfffffe000b4bfa44",
+      "native_target": "0xfffffff00b48db54",
+      "native_symbols": [
+        "__ZN21IOSubMemoryDescriptor18getPhysicalSegmentEyPyj"
+      ],
+      "auth": 1,
+      "key": 0,
+      "diversity": 25754,
+      "address_diversity": 1
+    },
+    {
+      "slot": 20,
+      "original_target": "0xfffffe000b4bf9c4",
+      "native_target": "0xfffffff00b48dd08",
+      "native_symbols": [
+        "__ZN21IOSubMemoryDescriptor16getPreparationIDEv"
+      ],
+      "auth": 1,
+      "key": 0,
+      "diversity": 40511,
+      "address_diversity": 1
+    },
+    {
+      "slot": 21,
+      "original_target": "0xfffffe000b4b1c1c",
+      "native_target": "0xfffffff00b482608",
+      "native_symbols": [
+        "__ZNK18IOMemoryDescriptor12getDirectionEv"
+      ],
+      "auth": 1,
+      "key": 0,
+      "diversity": 47701,
+      "address_diversity": 1
+    },
+    {
+      "slot": 22,
+      "original_target": "0xfffffe000b4b1c10",
+      "native_target": "0xfffffff00b482618",
+      "native_symbols": [
+        "__ZNK18IOMemoryDescriptor9getLengthEv"
+      ],
+      "auth": 1,
+      "key": 0,
+      "diversity": 45970,
+      "address_diversity": 1
+    },
+    {
+      "slot": 23,
+      "original_target": "0xfffffe000b4b1c04",
+      "native_target": "0xfffffff00b482624",
+      "native_symbols": [
+        "__ZN18IOMemoryDescriptor6setTagEj"
+      ],
+      "auth": 1,
+      "key": 0,
+      "diversity": 57806,
+      "address_diversity": 1
+    },
+    {
+      "slot": 24,
+      "original_target": "0xfffffe000b4b1bf8",
+      "native_target": "0xfffffff00b482630",
+      "native_symbols": [
+        "__ZN18IOMemoryDescriptor6getTagEv"
+      ],
+      "auth": 1,
+      "key": 0,
+      "diversity": 17785,
+      "address_diversity": 1
+    },
+    {
+      "slot": 25,
+      "original_target": "0xfffffe000b4b19c0",
+      "native_target": "0xfffffff00b482e74",
+      "native_symbols": [
+        "__ZN18IOMemoryDescriptor9readBytesEyPvy"
+      ],
+      "auth": 1,
+      "key": 0,
+      "diversity": 64512,
+      "address_diversity": 1
+    },
+    {
+      "slot": 26,
+      "original_target": "0xfffffe000b4b16fc",
+      "native_target": "0xfffffff00b483024",
+      "native_symbols": [
+        "__ZN18IOMemoryDescriptor10writeBytesEyPKvy"
+      ],
+      "auth": 1,
+      "key": 0,
+      "diversity": 20603,
+      "address_diversity": 1
+    },
+    {
+      "slot": 27,
+      "original_target": "0xfffffe000b4bf994",
+      "native_target": "0xfffffff00b48dc68",
+      "native_symbols": [
+        "__ZN21IOSubMemoryDescriptor7prepareEj"
+      ],
+      "auth": 1,
+      "key": 0,
+      "diversity": 62899,
+      "address_diversity": 1
+    },
+    {
+      "slot": 28,
+      "original_target": "0xfffffe000b4bf964",
+      "native_target": "0xfffffff00b48dc98",
+      "native_symbols": [
+        "__ZN21IOSubMemoryDescriptor8completeEj"
+      ],
+      "auth": 1,
+      "key": 0,
+      "diversity": 37509,
+      "address_diversity": 1
+    },
+    {
+      "slot": 29,
+      "original_target": "0xfffffe000b4b1690",
+      "native_target": "0xfffffff00b48a020",
+      "native_symbols": [
+        "__ZN18IOMemoryDescriptor3mapEj"
+      ],
+      "auth": 1,
+      "key": 0,
+      "diversity": 16086,
+      "address_diversity": 1
+    },
+    {
+      "slot": 30,
+      "original_target": "0xfffffe000b4b0968",
+      "native_target": "0xfffffff00b489e18",
+      "native_symbols": [
+        "__ZN18IOMemoryDescriptor10setMappingEP4taskyj"
+      ],
+      "auth": 1,
+      "key": 0,
+      "diversity": 47895,
+      "address_diversity": 1
+    },
+    {
+      "slot": 31,
+      "original_target": "0xfffffe000b4bf8fc",
+      "native_target": "0xfffffff00b48d834",
+      "native_symbols": [
+        "__ZN21IOSubMemoryDescriptor8redirectEP4taskb"
+      ],
+      "auth": 1,
+      "key": 0,
+      "diversity": 65334,
+      "address_diversity": 1
+    },
+    {
+      "slot": 32,
+      "original_target": "0xfffffe000b4bf8bc",
+      "native_target": "0xfffffff00b48dcc8",
+      "native_symbols": [
+        "__ZN21IOSubMemoryDescriptor11makeMappingEP18IOMemoryDescriptorP4taskyjyy"
+      ],
+      "auth": 1,
+      "key": 0,
+      "diversity": 62296,
+      "address_diversity": 1
+    },
+    {
+      "slot": 33,
+      "original_target": "0xfffffe000b4af934",
+      "native_target": "0xfffffff00b48a980",
+      "native_symbols": [
+        "__ZN18IOMemoryDescriptor10addMappingEP11IOMemoryMap"
+      ],
+      "auth": 1,
+      "key": 0,
+      "diversity": 3285,
+      "address_diversity": 1
+    },
+    {
+      "slot": 34,
+      "original_target": "0xfffffe000b4af8f4",
+      "native_target": "0xfffffff00b48aa40",
+      "native_symbols": [
+        "__ZN18IOMemoryDescriptor13removeMappingEP11IOMemoryMap"
+      ],
+      "auth": 1,
+      "key": 0,
+      "diversity": 7285,
+      "address_diversity": 1
+    },
+    {
+      "slot": 35,
+      "original_target": "0xfffffe000b4af8e4",
+      "native_target": "0xfffffff00b489144",
+      "native_symbols": [
+        "__ZN18IOMemoryDescriptor5doMapEP7_vm_mapPyjyy"
+      ],
+      "auth": 1,
+      "key": 0,
+      "diversity": 12769,
+      "address_diversity": 1
+    },
+    {
+      "slot": 36,
+      "original_target": "0xfffffe000b4af7c0",
+      "native_target": "0xfffffff00b489154",
+      "native_symbols": [
+        "__ZN18IOMemoryDescriptor7doUnmapEP7_vm_mapyy"
+      ],
+      "auth": 1,
+      "key": 0,
+      "diversity": 54999,
+      "address_diversity": 1
+    },
+    {
+      "slot": 37,
+      "original_target": "0xfffffe000b4bf7bc",
+      "native_target": "0xfffffff00b48d9bc",
+      "native_symbols": [
+        "__ZN21IOSubMemoryDescriptor12initSubRangeEP18IOMemoryDescriptoryyj"
+      ],
+      "auth": 1,
+      "key": 0,
+      "diversity": 46,
+      "address_diversity": 1
+    }
+  ],
+  "limits": [
+    "Reviewed identities and entry ABI do not establish complete private class layout equivalence or successful runtime invocation.",
+    "Current retained imports still point to unixnu_fileset_unmapped; proposed words are evidence only and have not been applied by this audit.",
+    "No mappings were inferred solely from adjacent addresses or machine-code length."
+  ],
+  "kernel_modified": false,
+  "device_operations": false,
+  "cloud_operations": false,
+  "publication": {
+    "source_report_file": "iokit-reviewed-functions.json",
+    "source_report_sha256": "44e5257de7cb6965e49223949c394e3d365e6daf184982af7e1cfb567fe48d77",
+    "local_absolute_paths_removed": true,
+    "native_addresses_apply_to_inspected_old_candidate_only": true,
+    "new_emissions_require_symbol_resolution": true
+  }
+}

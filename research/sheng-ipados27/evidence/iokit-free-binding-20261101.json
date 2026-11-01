@@ -1,0 +1,365 @@
+{
+  "kind": "reviewed-original-to-native-IOSubMemoryDescriptor-free-identity",
+  "created_utc": "2026-11-01T04:12:11.262452+00:00",
+  "scope": "Published source/binary identity evidence; the recorded read-only audit did not apply a binding or qualify a hardware boot.",
+  "inputs": {
+    "original_path": "kernelcache.decompressed",
+    "original_sha256": "38e6d9fa5f789b8228f4617ef4c6d2a3fd8ab564abdc9b62920f1db53fc1780a",
+    "actual_old_candidate_path": "kernel-entry-probe.macho",
+    "actual_old_candidate_sha256": "5f98c47afae938b0a30dcd342932413536471fbb7820f44a90bee8e69ba6607a",
+    "native_entry": "com.apple.kernel"
+  },
+  "reviewed_identity": {
+    "original": "0xfffffe000b4bfb14",
+    "original_size": 84,
+    "original_sha256": "a867ac9e5d13c3e46118985fd97e6468eb4b4f25c192a9c7e6df6e709d6f8bb2",
+    "native_symbol": "__ZN21IOSubMemoryDescriptor4freeEv",
+    "signature": "void IOSubMemoryDescriptor::free(void)",
+    "identity_supported": true,
+    "binding_applied": false
+  },
+  "original_function": {
+    "address": "0xfffffe000b4bfb14",
+    "size": 84,
+    "sha256": "a867ac9e5d13c3e46118985fd97e6468eb4b4f25c192a9c7e6df6e709d6f8bb2",
+    "bytes_hex": "5f2403d5083040f9480200b47f2303d5f44fbea9fd7b01a9fd430091100140f9f10308aa31b4f9f2301ac1da098e42f8f30300aae00308aaf050e7f230093fd7e00313aafd7b41a9f44fc2a8ff2303d5d7caff17",
+    "instructions": [
+      {
+        "address": "0xfffffe000b4bfb14",
+        "mnemonic": "bti",
+        "operands": "c"
+      },
+      {
+        "address": "0xfffffe000b4bfb18",
+        "mnemonic": "ldr",
+        "operands": "x8, [x0, #0x60]"
+      },
+      {
+        "address": "0xfffffe000b4bfb1c",
+        "mnemonic": "cbz",
+        "operands": "x8, #0xfffffe000b4bfb64"
+      },
+      {
+        "address": "0xfffffe000b4bfb20",
+        "mnemonic": "pacibsp",
+        "operands": ""
+      },
+      {
+        "address": "0xfffffe000b4bfb24",
+        "mnemonic": "stp",
+        "operands": "x20, x19, [sp, #-0x20]!"
+      },
+      {
+        "address": "0xfffffe000b4bfb28",
+        "mnemonic": "stp",
+        "operands": "x29, x30, [sp, #0x10]"
+      },
+      {
+        "address": "0xfffffe000b4bfb2c",
+        "mnemonic": "add",
+        "operands": "x29, sp, #0x10"
+      },
+      {
+        "address": "0xfffffe000b4bfb30",
+        "mnemonic": "ldr",
+        "operands": "x16, [x8]"
+      },
+      {
+        "address": "0xfffffe000b4bfb34",
+        "mnemonic": "mov",
+        "operands": "x17, x8"
+      },
+      {
+        "address": "0xfffffe000b4bfb38",
+        "mnemonic": "movk",
+        "operands": "x17, #0xcda1, lsl #48"
+      },
+      {
+        "address": "0xfffffe000b4bfb3c",
+        "mnemonic": "autda",
+        "operands": "x16, x17"
+      },
+      {
+        "address": "0xfffffe000b4bfb40",
+        "mnemonic": "ldr",
+        "operands": "x9, [x16, #0x28]!"
+      },
+      {
+        "address": "0xfffffe000b4bfb44",
+        "mnemonic": "mov",
+        "operands": "x19, x0"
+      },
+      {
+        "address": "0xfffffe000b4bfb48",
+        "mnemonic": "mov",
+        "operands": "x0, x8"
+      },
+      {
+        "address": "0xfffffe000b4bfb4c",
+        "mnemonic": "movk",
+        "operands": "x16, #0x3a87, lsl #48"
+      },
+      {
+        "address": "0xfffffe000b4bfb50",
+        "mnemonic": "blraa",
+        "operands": "x9, x16"
+      },
+      {
+        "address": "0xfffffe000b4bfb54",
+        "mnemonic": "mov",
+        "operands": "x0, x19"
+      },
+      {
+        "address": "0xfffffe000b4bfb58",
+        "mnemonic": "ldp",
+        "operands": "x29, x30, [sp, #0x10]"
+      },
+      {
+        "address": "0xfffffe000b4bfb5c",
+        "mnemonic": "ldp",
+        "operands": "x20, x19, [sp], #0x20"
+      },
+      {
+        "address": "0xfffffe000b4bfb60",
+        "mnemonic": "autibsp",
+        "operands": ""
+      },
+      {
+        "address": "0xfffffe000b4bfb64",
+        "mnemonic": "b",
+        "operands": "#0xfffffe000b4b26c0"
+      }
+    ]
+  },
+  "native_function": {
+    "address": "0xfffffff00b48dae0",
+    "size": 116,
+    "sha256": "398319ea860ee51ecb4900545bdd1c36e7cfa0cb6cd014f9f1d9ee122a303e6f",
+    "bytes_hex": "5f2403d5083040f9480200b47f2303d5f44fbea9fd7b01a9fd430091100140f9f10308aa31b4f9f2301ac1da098e42f8f30300aae00308aaf050e7f230093fd7e00313aafd7b41a9f44fc2a8ff2303d5414efeb021201091300c48f8d1071eca5100f0b6208e38d4f10301aab1b8fdf2110a1fd7",
+    "instructions": [
+      {
+        "address": "0xfffffff00b48dae0",
+        "mnemonic": "bti",
+        "operands": "c"
+      },
+      {
+        "address": "0xfffffff00b48dae4",
+        "mnemonic": "ldr",
+        "operands": "x8, [x0, #0x60]"
+      },
+      {
+        "address": "0xfffffff00b48dae8",
+        "mnemonic": "cbz",
+        "operands": "x8, #0xfffffff00b48db30"
+      },
+      {
+        "address": "0xfffffff00b48daec",
+        "mnemonic": "pacibsp",
+        "operands": ""
+      },
+      {
+        "address": "0xfffffff00b48daf0",
+        "mnemonic": "stp",
+        "operands": "x20, x19, [sp, #-0x20]!"
+      },
+      {
+        "address": "0xfffffff00b48daf4",
+        "mnemonic": "stp",
+        "operands": "x29, x30, [sp, #0x10]"
+      },
+      {
+        "address": "0xfffffff00b48daf8",
+        "mnemonic": "add",
+        "operands": "x29, sp, #0x10"
+      },
+      {
+        "address": "0xfffffff00b48dafc",
+        "mnemonic": "ldr",
+        "operands": "x16, [x8]"
+      },
+      {
+        "address": "0xfffffff00b48db00",
+        "mnemonic": "mov",
+        "operands": "x17, x8"
+      },
+      {
+        "address": "0xfffffff00b48db04",
+        "mnemonic": "movk",
+        "operands": "x17, #0xcda1, lsl #48"
+      },
+      {
+        "address": "0xfffffff00b48db08",
+        "mnemonic": "autda",
+        "operands": "x16, x17"
+      },
+      {
+        "address": "0xfffffff00b48db0c",
+        "mnemonic": "ldr",
+        "operands": "x9, [x16, #0x28]!"
+      },
+      {
+        "address": "0xfffffff00b48db10",
+        "mnemonic": "mov",
+        "operands": "x19, x0"
+      },
+      {
+        "address": "0xfffffff00b48db14",
+        "mnemonic": "mov",
+        "operands": "x0, x8"
+      },
+      {
+        "address": "0xfffffff00b48db18",
+        "mnemonic": "movk",
+        "operands": "x16, #0x3a87, lsl #48"
+      },
+      {
+        "address": "0xfffffff00b48db1c",
+        "mnemonic": "blraa",
+        "operands": "x9, x16"
+      },
+      {
+        "address": "0xfffffff00b48db20",
+        "mnemonic": "mov",
+        "operands": "x0, x19"
+      },
+      {
+        "address": "0xfffffff00b48db24",
+        "mnemonic": "ldp",
+        "operands": "x29, x30, [sp, #0x10]"
+      },
+      {
+        "address": "0xfffffff00b48db28",
+        "mnemonic": "ldp",
+        "operands": "x20, x19, [sp], #0x20"
+      },
+      {
+        "address": "0xfffffff00b48db2c",
+        "mnemonic": "autibsp",
+        "operands": ""
+      },
+      {
+        "address": "0xfffffff00b48db30",
+        "mnemonic": "adrp",
+        "operands": "x1, #0xfffffff007e56000"
+      },
+      {
+        "address": "0xfffffff00b48db34",
+        "mnemonic": "add",
+        "operands": "x1, x1, #0x408"
+      },
+      {
+        "address": "0xfffffff00b48db38",
+        "mnemonic": "ldr",
+        "operands": "x16, [x1, #0x80]!"
+      },
+      {
+        "address": "0xfffffff00b48db3c",
+        "mnemonic": "eor",
+        "operands": "x17, x30, x30, lsl #1"
+      },
+      {
+        "address": "0xfffffff00b48db40",
+        "mnemonic": "tbz",
+        "operands": "x17, #0x3e, #0xfffffff00b48db48"
+      },
+      {
+        "address": "0xfffffff00b48db44",
+        "mnemonic": "brk",
+        "operands": "#0xc471"
+      },
+      {
+        "address": "0xfffffff00b48db48",
+        "mnemonic": "mov",
+        "operands": "x17, x1"
+      },
+      {
+        "address": "0xfffffff00b48db4c",
+        "mnemonic": "movk",
+        "operands": "x17, #0xedc5, lsl #48"
+      },
+      {
+        "address": "0xfffffff00b48db50",
+        "mnemonic": "braa",
+        "operands": "x16, x17"
+      }
+    ],
+    "defined_symbols": [
+      "__ZN21IOSubMemoryDescriptor4freeEv"
+    ]
+  },
+  "vtable_evidence": {
+    "original_vtable": "0xfffffe0007ecd498",
+    "native_vtable": "0xfffffff007e56de8",
+    "native_vtable_symbol": "__ZTV21IOSubMemoryDescriptor",
+    "slot_index_zero_based_after_itanium_header": 14,
+    "auth": 1,
+    "key": 0,
+    "diversity": 60869,
+    "address_diversity": 1,
+    "complete_table_method_count": 38,
+    "all38_pac_metadata_equal": true,
+    "original_table_identity_in_prior_actual_map": "reference-data",
+    "related_full38_evidence": "iokit-reviewed-functions.json"
+  },
+  "source_and_machine_contract": {
+    "this_argument": "x0",
+    "return_type": "void",
+    "parent_field_offset_on_both": "0x60",
+    "when_parent_nonnull": "Call _parent->release() through virtual byte offset0x28; both actual sequences use PAC diversity0x3a87.",
+    "always_after_parent_release": "Tail-dispatch to IOMemoryDescriptor::free on the original this pointer. Original is direct BL/B and native uses the authenticated canonical base-class vtable; no implementation or type check is skipped.",
+    "not_setOwnership": "Its full source behavior and exact vtable identity identify free, not the adjacent nonvirtual setOwnership API."
+  },
+  "primary_source": {
+    "repo": "apple-oss-distributions/xnu",
+    "commit": "ac9718fb1af618d5ce8678d0dc6e8a58f252216f",
+    "path": "iokit/Kernel/IOSubMemoryDescriptor.cpp",
+    "github_blob_sha1": "5c807d1623886d1a19ad820f3dd0caa857424b17",
+    "lines": [
+      109,
+      117
+    ],
+    "url": "https://github.com/apple-oss-distributions/xnu/blob/ac9718fb1af618d5ce8678d0dc6e8a58f252216f/iokit/Kernel/IOSubMemoryDescriptor.cpp#L109",
+    "definition": "void IOSubMemoryDescriptor::free(void) { if (_parent) { _parent->release(); } super::free(); }",
+    "read_via": "GitHub contents API at exact pin, decoded in memory"
+  },
+  "actual_retained_chain_sites": [
+    {
+      "original_slot": "0xfffffe000832ac38",
+      "output_slot": "0xfffffff00832ac38",
+      "file_offset": "0x1326c38",
+      "consumers": [
+        "com.apple.iokit.IOGPUFamily"
+      ],
+      "actual_raw_qword": "0x8011edc504699a64",
+      "actual_target": "0xfffffff00b69da64",
+      "actual_target_symbols": [
+        "_unixnu_fileset_unmapped"
+      ],
+      "auth": 1,
+      "key": 0,
+      "diversity": 60869,
+      "address_diversity": 1,
+      "next_step": 2,
+      "native_symbol": "__ZN21IOSubMemoryDescriptor4freeEv",
+      "review_native_address": "0xfffffff00b48dae0",
+      "proposal_only_not_applied": true
+    }
+  ],
+  "limits": [
+    "The actual native address is from the old diagnostic image only. Resolve the exact symbol and chain at the newly emitted image before any candidate change.",
+    "This proves method entry identity and the observed release/base-free contract, not all private class ABI or hardware execution.",
+    "No local patch was applied and no additional Actions run was requested."
+  ],
+  "device_operations": false,
+  "actions_operations": false,
+  "kernel_modified": false,
+  "source_modified": false,
+  "reference17_modified": false,
+  "publication": {
+    "source_report_file": "iokit-free-review-20261101.json",
+    "source_report_sha256": "841a913b06839ce9688a97ddf47c4b3f738ea9fa00b95743c33ec3fb704703a8",
+    "local_absolute_paths_removed": true,
+    "native_addresses_apply_to_inspected_old_candidate_only": true,
+    "new_emissions_require_symbol_resolution": true
+  }
+}

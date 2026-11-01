@@ -1,0 +1,487 @@
+{
+  "kind": "source-and-binary-backed-remaining-device-tree-pointer-variable-identity",
+  "created_utc": "2026-11-01T04:19:30.244368+00:00",
+  "scope": "Published source/binary identity evidence; the recorded read-only audit did not apply a binding or qualify a hardware boot.",
+  "inputs": {
+    "original_kernelcache": "kernelcache.decompressed",
+    "original_kernelcache_sha256": "38e6d9fa5f789b8228f4617ef4c6d2a3fd8ab564abdc9b62920f1db53fc1780a",
+    "actual_old_candidate": "kernel-entry-probe.macho",
+    "actual_old_candidate_sha256": "5f98c47afae938b0a30dcd342932413536471fbb7820f44a90bee8e69ba6607a",
+    "native_entry": "com.apple.kernel"
+  },
+  "data": [
+    {
+      "original": "0xfffffe000b9293b8",
+      "native_symbol": "_gIODTPHandleKey",
+      "addend": 0,
+      "identity_supported": true,
+      "type": "const OSSymbol *",
+      "width_bytes": 8,
+      "mutable_pointer_variable": true,
+      "bind_to_variable_slot": true,
+      "must_not_bind_to_runtime_OSSymbol_object": true,
+      "must_not_bind_to_literal_AAPL_phandle": true,
+      "evidence": "Both original and actual native IODeviceTreeAlloc pass the unique literal AAPL,phandle to OSSymbol::withCStringNoCopy and store the returned x0 into these respective globals. Official pinned source names this precise pointer variable gIODTPHandleKey. IODTInterruptControllerName loads the same global into its symbol argument. All three retained consumers use GOT->variable-slot->runtime-OSSymbol* with two loads.",
+      "review_native_variable_address": "0xfffffff00b93c0d8",
+      "original_storage": {
+        "section": {
+          "segment": "__DATA",
+          "name": "__common",
+          "va": 18446741874879954944,
+          "size": 507272
+        },
+        "file_backed": false,
+        "file_offset": null,
+        "initial_file_bytes_hex": null,
+        "width_from_source_arm64_pointer_bytes": 8
+      },
+      "native_storage": {
+        "section": {
+          "segment": "__DATA",
+          "name": "__common",
+          "va": 18446744005183524864,
+          "size": 912136
+        },
+        "file_backed": false,
+        "file_offset": null,
+        "initial_file_bytes_hex": null,
+        "width_from_source_arm64_pointer_bytes": 8
+      },
+      "actual_retained_chain_sites": [
+        {
+          "consumer": "com.apple.driver.AppleARMPlatform",
+          "original_slot": "0xfffffe0007f85940",
+          "output_slot": "0xfffffff007f85940",
+          "file_offset": "0xf81940",
+          "original_raw_qword": "0x00100000049253b8",
+          "actual_raw_qword": "0x00100000049253b8",
+          "current_target": "0xfffffff00b9293b8",
+          "auth": 0,
+          "key": null,
+          "diversity": null,
+          "address_diversity": null,
+          "next_step": 2,
+          "native_symbol": "_gIODTPHandleKey",
+          "review_native_variable_address": "0xfffffff00b93c0d8",
+          "proposed_target": "0xfffffff00b93c0d8",
+          "proposed_raw_qword_for_this_old_candidate_only": "0x00100000049380d8",
+          "original_consumer_load_witness": {
+            "address": "0xfffffe00086c3444",
+            "bytes_hex": "08c6ffd008a144f9010140f9100040f9f10300aa31b4f9f2301ac1da",
+            "sha256": "6f071ccfa08ee902551ac93829ee5797da78a66c5a54ec6a5e84d0d61ffd6f59",
+            "instructions": [
+              {
+                "address": "0xfffffe00086c3444",
+                "mnemonic": "adrp",
+                "operands": "x8, #0xfffffe0007f85000"
+              },
+              {
+                "address": "0xfffffe00086c3448",
+                "mnemonic": "ldr",
+                "operands": "x8, [x8, #0x940]"
+              },
+              {
+                "address": "0xfffffe00086c344c",
+                "mnemonic": "ldr",
+                "operands": "x1, [x8]"
+              },
+              {
+                "address": "0xfffffe00086c3450",
+                "mnemonic": "ldr",
+                "operands": "x16, [x0]"
+              },
+              {
+                "address": "0xfffffe00086c3454",
+                "mnemonic": "mov",
+                "operands": "x17, x0"
+              },
+              {
+                "address": "0xfffffe00086c3458",
+                "mnemonic": "movk",
+                "operands": "x17, #0xcda1, lsl #48"
+              },
+              {
+                "address": "0xfffffe00086c345c",
+                "mnemonic": "autda",
+                "operands": "x16, x17"
+              }
+            ]
+          },
+          "indirection": "first load reads GOT containing address of mutable native pointer variable; second load reads its runtime OSSymbol* value",
+          "proposal_only_not_applied": true
+        },
+        {
+          "consumer": "com.apple.iokit.IOAVFamily",
+          "original_slot": "0xfffffe00082daac0",
+          "output_slot": "0xfffffff0082daac0",
+          "file_offset": "0x12d6ac0",
+          "original_raw_qword": "0x00100000049253b8",
+          "actual_raw_qword": "0x00100000049253b8",
+          "current_target": "0xfffffff00b9293b8",
+          "auth": 0,
+          "key": null,
+          "diversity": null,
+          "address_diversity": null,
+          "next_step": 2,
+          "native_symbol": "_gIODTPHandleKey",
+          "review_native_variable_address": "0xfffffff00b93c0d8",
+          "proposed_target": "0xfffffff00b93c0d8",
+          "proposed_raw_qword_for_this_old_candidate_only": "0x00100000049380d8",
+          "original_consumer_load_witness": {
+            "address": "0xfffffe0009f49a54",
+            "bytes_hex": "881cffb0086145f9000140f9e10314aae20313aafd7b41a9f44fc2a8",
+            "sha256": "c7d1e39bc2752f4ae081562327259f9e2692f6da2ca9d70432b083de2ea7b0f2",
+            "instructions": [
+              {
+                "address": "0xfffffe0009f49a54",
+                "mnemonic": "adrp",
+                "operands": "x8, #0xfffffe00082da000"
+              },
+              {
+                "address": "0xfffffe0009f49a58",
+                "mnemonic": "ldr",
+                "operands": "x8, [x8, #0xac0]"
+              },
+              {
+                "address": "0xfffffe0009f49a5c",
+                "mnemonic": "ldr",
+                "operands": "x0, [x8]"
+              },
+              {
+                "address": "0xfffffe0009f49a60",
+                "mnemonic": "mov",
+                "operands": "x1, x20"
+              },
+              {
+                "address": "0xfffffe0009f49a64",
+                "mnemonic": "mov",
+                "operands": "x2, x19"
+              },
+              {
+                "address": "0xfffffe0009f49a68",
+                "mnemonic": "ldp",
+                "operands": "x29, x30, [sp, #0x10]"
+              },
+              {
+                "address": "0xfffffe0009f49a6c",
+                "mnemonic": "ldp",
+                "operands": "x20, x19, [sp], #0x20"
+              }
+            ]
+          },
+          "indirection": "first load reads GOT containing address of mutable native pointer variable; second load reads its runtime OSSymbol* value",
+          "proposal_only_not_applied": true
+        },
+        {
+          "consumer": "com.apple.iokit.IOHDCPFamily",
+          "original_slot": "0xfffffe000833c360",
+          "output_slot": "0xfffffff00833c360",
+          "file_offset": "0x1338360",
+          "original_raw_qword": "0x00100000049253b8",
+          "actual_raw_qword": "0x00100000049253b8",
+          "current_target": "0xfffffff00b9293b8",
+          "auth": 0,
+          "key": null,
+          "diversity": null,
+          "address_diversity": null,
+          "next_step": 2,
+          "native_symbol": "_gIODTPHandleKey",
+          "review_native_variable_address": "0xfffffff00b93c0d8",
+          "proposed_target": "0xfffffff00b93c0d8",
+          "proposed_raw_qword_for_this_old_candidate_only": "0x00100000049380d8",
+          "original_consumer_load_witness": {
+            "address": "0xfffffe000a17d728",
+            "bytes_hex": "e80dfff008b141f9000140f9e10317aa020080d283380094a00700b4",
+            "sha256": "67d69824492a1871492a21fb980930af8611ec18300008f540535cc5bd333866",
+            "instructions": [
+              {
+                "address": "0xfffffe000a17d728",
+                "mnemonic": "adrp",
+                "operands": "x8, #0xfffffe000833c000"
+              },
+              {
+                "address": "0xfffffe000a17d72c",
+                "mnemonic": "ldr",
+                "operands": "x8, [x8, #0x360]"
+              },
+              {
+                "address": "0xfffffe000a17d730",
+                "mnemonic": "ldr",
+                "operands": "x0, [x8]"
+              },
+              {
+                "address": "0xfffffe000a17d734",
+                "mnemonic": "mov",
+                "operands": "x1, x23"
+              },
+              {
+                "address": "0xfffffe000a17d738",
+                "mnemonic": "mov",
+                "operands": "x2, #0"
+              },
+              {
+                "address": "0xfffffe000a17d73c",
+                "mnemonic": "bl",
+                "operands": "#0xfffffe000a18b948"
+              },
+              {
+                "address": "0xfffffe000a17d740",
+                "mnemonic": "cbz",
+                "operands": "x0, #0xfffffe000a17d834"
+              }
+            ]
+          },
+          "indirection": "first load reads GOT containing address of mutable native pointer variable; second load reads its runtime OSSymbol* value",
+          "proposal_only_not_applied": true
+        }
+      ]
+    }
+  ],
+  "initializer_contract": {
+    "original_literal_address": "0xfffffe00070cf5ca",
+    "native_literal_address": "0xfffffff007304874",
+    "literal": "AAPL,phandle",
+    "factory_native_symbol": "__ZN8OSSymbol17withCStringNoCopyEPKc",
+    "actual_native_factory_address": "0xfffffff00b3e7dc8",
+    "original_initialization": {
+      "address": "0xfffffe000b44424c",
+      "bytes_hex": "40e4fdf000281791cc39ff97282700b000dd01f9e0e3fd90004c2a91",
+      "sha256": "94c88e45af27cf90860296c652dced01fdd14687af897d0ffa1240ad99e1ba14",
+      "instructions": [
+        {
+          "address": "0xfffffe000b44424c",
+          "mnemonic": "adrp",
+          "operands": "x0, #0xfffffe00070cf000"
+        },
+        {
+          "address": "0xfffffe000b444250",
+          "mnemonic": "add",
+          "operands": "x0, x0, #0x5ca"
+        },
+        {
+          "address": "0xfffffe000b444254",
+          "mnemonic": "bl",
+          "operands": "#0xfffffe000b412984"
+        },
+        {
+          "address": "0xfffffe000b444258",
+          "mnemonic": "adrp",
+          "operands": "x8, #0xfffffe000b929000"
+        },
+        {
+          "address": "0xfffffe000b44425c",
+          "mnemonic": "str",
+          "operands": "x0, [x8, #0x3b8]"
+        },
+        {
+          "address": "0xfffffe000b444260",
+          "mnemonic": "adrp",
+          "operands": "x0, #0xfffffe00070c0000"
+        },
+        {
+          "address": "0xfffffe000b444264",
+          "mnemonic": "add",
+          "operands": "x0, x0, #0xa93"
+        }
+      ]
+    },
+    "native_initialization": {
+      "address": "0xfffffff00b4237bc",
+      "bytes_hex": "00f7fdb000d021918111ff97c82800b0006d00f900f7fdb000042291",
+      "sha256": "a7d92291d6c130edb1218a01bcb524a0f6baef54cfb04bab219f2236daa745c8",
+      "instructions": [
+        {
+          "address": "0xfffffff00b4237bc",
+          "mnemonic": "adrp",
+          "operands": "x0, #0xfffffff007304000"
+        },
+        {
+          "address": "0xfffffff00b4237c0",
+          "mnemonic": "add",
+          "operands": "x0, x0, #0x874"
+        },
+        {
+          "address": "0xfffffff00b4237c4",
+          "mnemonic": "bl",
+          "operands": "#0xfffffff00b3e7dc8"
+        },
+        {
+          "address": "0xfffffff00b4237c8",
+          "mnemonic": "adrp",
+          "operands": "x8, #0xfffffff00b93c000"
+        },
+        {
+          "address": "0xfffffff00b4237cc",
+          "mnemonic": "str",
+          "operands": "x0, [x8, #0xd8]"
+        },
+        {
+          "address": "0xfffffff00b4237d0",
+          "mnemonic": "adrp",
+          "operands": "x0, #0xfffffff007304000"
+        },
+        {
+          "address": "0xfffffff00b4237d4",
+          "mnemonic": "add",
+          "operands": "x0, x0, #0x881"
+        }
+      ]
+    },
+    "both_factory_results_stored_into_global": true,
+    "native_constructor_result_not_available_statically": true
+  },
+  "global_use_contract": {
+    "source_function": "IODTInterruptControllerName(IORegistryEntry *)",
+    "original": {
+      "address": "0xfffffe000b446854",
+      "bytes_hex": "082700f001dd41f9100040f9f10300aa31b4f9f2301ac1da",
+      "sha256": "cd4bf8a05504c7564ddbb6074c9d5a067bd167243f58683879a6d6d77067722f",
+      "instructions": [
+        {
+          "address": "0xfffffe000b446854",
+          "mnemonic": "adrp",
+          "operands": "x8, #0xfffffe000b929000"
+        },
+        {
+          "address": "0xfffffe000b446858",
+          "mnemonic": "ldr",
+          "operands": "x1, [x8, #0x3b8]"
+        },
+        {
+          "address": "0xfffffe000b44685c",
+          "mnemonic": "ldr",
+          "operands": "x16, [x0]"
+        },
+        {
+          "address": "0xfffffe000b446860",
+          "mnemonic": "mov",
+          "operands": "x17, x0"
+        },
+        {
+          "address": "0xfffffe000b446864",
+          "mnemonic": "movk",
+          "operands": "x17, #0xcda1, lsl #48"
+        },
+        {
+          "address": "0xfffffe000b446868",
+          "mnemonic": "autda",
+          "operands": "x16, x17"
+        }
+      ]
+    },
+    "native": {
+      "address": "0xfffffff00b4257e0",
+      "bytes_hex": "a82800f0016d40f9100040f9f10300aa31b4f9f2301ac1da",
+      "sha256": "acac116cd6fd76e883c48a275cc68a342e235ea04bb4331992bb69fa669ee59c",
+      "instructions": [
+        {
+          "address": "0xfffffff00b4257e0",
+          "mnemonic": "adrp",
+          "operands": "x8, #0xfffffff00b93c000"
+        },
+        {
+          "address": "0xfffffff00b4257e4",
+          "mnemonic": "ldr",
+          "operands": "x1, [x8, #0xd8]"
+        },
+        {
+          "address": "0xfffffff00b4257e8",
+          "mnemonic": "ldr",
+          "operands": "x16, [x0]"
+        },
+        {
+          "address": "0xfffffff00b4257ec",
+          "mnemonic": "mov",
+          "operands": "x17, x0"
+        },
+        {
+          "address": "0xfffffff00b4257f0",
+          "mnemonic": "movk",
+          "operands": "x17, #0xcda1, lsl #48"
+        },
+        {
+          "address": "0xfffffff00b4257f4",
+          "mnemonic": "autda",
+          "operands": "x16, x17"
+        }
+      ]
+    },
+    "purpose": "Pass canonical OSSymbol* for AAPL,phandle to GetUInt32/getProperty; do not substitute a C-string or object address for the pointer-variable address."
+  },
+  "primary_source": {
+    "repository": "apple-oss-distributions/xnu",
+    "commit": "ac9718fb1af618d5ce8678d0dc6e8a58f252216f",
+    "path": "iokit/Kernel/IODeviceTreeSupport.cpp",
+    "github_blob_sha1": "ee5edb3a44691bdbd6bca5f536aa0bb9075d03d5",
+    "declaration_line": 93,
+    "initialization_lines": [
+      160,
+      161
+    ],
+    "use_line": 590,
+    "declaration": "const OSSymbol *gIODTPHandleKey;",
+    "initialization": "gIODTPHandleKey = OSSymbol::withCStringNoCopy(\"AAPL,phandle\");",
+    "url": "https://github.com/apple-oss-distributions/xnu/blob/ac9718fb1af618d5ce8678d0dc6e8a58f252216f/iokit/Kernel/IODeviceTreeSupport.cpp#L93",
+    "read_via": "GitHub contents API at exact commit, base64 decoded in memory"
+  },
+  "remaining_unknown_data": [
+    {
+      "original": "0xfffffe00070446a8",
+      "references": 1,
+      "consumers": {
+        "com.apple.driver.AppleARMWatchdogTimer": 1
+      },
+      "identity": "unknown",
+      "binding_allowed": false,
+      "native_symbol": null,
+      "reason": "No exact source-backed variable identity and replacement ABI has been established; retained as unknown."
+    },
+    {
+      "original": "0xfffffe000b8b3ce8",
+      "references": 1,
+      "consumers": {
+        "com.apple.iokit.IOHIDFamily": 1
+      },
+      "identity": "unknown",
+      "binding_allowed": false,
+      "native_symbol": null,
+      "reason": "No exact source-backed variable identity and replacement ABI has been established; retained as unknown."
+    },
+    {
+      "original": "0xfffffe000b8bda38",
+      "references": 1,
+      "consumers": {
+        "com.apple.security.sandbox": 1
+      },
+      "identity": "unknown",
+      "binding_allowed": false,
+      "native_symbol": null,
+      "reason": "No exact source-backed variable identity and replacement ABI has been established; retained as unknown."
+    }
+  ],
+  "counts": {
+    "new_reviewed_variables": 1,
+    "reviewed_retained_references": 3,
+    "remaining_unknown_variables": 3,
+    "remaining_unknown_references": 3
+  },
+  "limits": [
+    "The native variable address and proposed words refer only to the inspected old diagnostic. Resolve the exact symbol and chain on each newly emitted candidate.",
+    "This establishes the canonical pointer-slot identity, not a static OSSymbol object layout. The native initializer creates the real native OSSymbol at runtime.",
+    "The three listed unknown globals remain unknown. No Image4 or other global has been guessed.",
+    "No new complete-map or hardware success claim is made."
+  ],
+  "source_modified": false,
+  "fixture_modified": false,
+  "kernel_modified": false,
+  "device_operations": false,
+  "actions_operations": false,
+  "reference17_modified": false,
+  "publication": {
+    "source_report_file": "remaining-data-bindings.json",
+    "source_report_sha256": "bba127d30c5fc168b878b9035d6b57794e9a350eb83ef9412844b28543e01d33",
+    "local_absolute_paths_removed": true,
+    "native_addresses_apply_to_inspected_old_candidate_only": true,
+    "new_emissions_require_symbol_resolution": true
+  }
+}

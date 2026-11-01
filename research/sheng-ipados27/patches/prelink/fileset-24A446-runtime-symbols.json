@@ -31,6 +31,48 @@
       "original_sha256": "49d1e76b881dd6b4adb868582b7836f8d691c36aff50461032833a3169db2e2c",
       "native_symbol": "__ZNK5IOCPU19serializePropertiesEP11OSSerialize",
       "evidence": "Paired original and native IOCPU vtables identify the same virtual method slot; pinned Apple iokit/Kernel/IOCPU.cpp defines its ABI. Original get/set wrappers null-check and tail-call the already identified IORegistryEntry implementation; serializeProperties copies/serializes the property dictionary. The native methods preserve CPU-state behavior. See iocpu-property-bindings-20261031.json; runtime getProperty call at IORegistryEntry::init+0x1cc hit the retained AppleARMPlatform vtable slot with discriminator0x82eb."
+    },
+    {
+      "original": "0xfffffe000af6dc88",
+      "original_size": 20,
+      "original_sha256": "6a28371ea3ec3c228feeb1c557116812b1d542111e6695b1e4dc3885f5bc5b73",
+      "native_symbol": "_throttle_lowpri_window",
+      "evidence": "Pinned Apple source returns current_uthread()->uu_lowpri_window; this is a one-byte bool at uthread+0x161 in both actual original cross-function accesses and actual native accessor. The original inlines current-thread and uthread addressing; the native uses its own current_uthread implementation and native struct thread size. No adjacent-address naming assumption or constant-return replacement. Exact int(void) API, independent original/native uthread field-use chain and full original function digest are recorded in throttle-lowpri-window-binding-20261101.json."
+    },
+    {
+      "original": "0xfffffe000b4bfb14",
+      "original_size": 84,
+      "original_sha256": "a867ac9e5d13c3e46118985fd97e6468eb4b4f25c192a9c7e6df6e709d6f8bb2",
+      "native_symbol": "__ZN21IOSubMemoryDescriptor4freeEv",
+      "evidence": "The independently paired complete IOSubMemoryDescriptor vtable identifies free at slot14 with the same PAC metadata. Both implementations release the parent at +0x60 through byte slot0x28 and then call IOMemoryDescriptor::free; pinned Apple source declares void free(void). See iokit-free-binding-20261101.json; no release or type check is replaced."
+    },
+    {
+      "original": "0xfffffe000b430ab8",
+      "original_size": 284,
+      "original_sha256": "9f6253b1b5e80456121d9b3b8b17a6e1d688fb9168f4534f2385de9ce3ff26eb",
+      "native_symbol": "__ZN9IOService12Start_InvokeE5IORPCP15OSMetaClassBasePFiS2_PS_E",
+      "evidence": "exact RPC reply 128-bit fingerprint, message layout, object type, callback ABI, and official IIG declaration; no neighbor-address inference. The source declarations, complete original/native bodies and retained import chains are recorded in iokit-reviewed-functions-20261101.json."
+    },
+    {
+      "original": "0xfffffe000b430bd4",
+      "original_size": 284,
+      "original_sha256": "59c06597b20d5b3fdc135bfcd9ef07ad1d190a3fdecf763d15908a108aab69c3",
+      "native_symbol": "__ZN9IOService11Stop_InvokeE5IORPCP15OSMetaClassBasePFiS2_PS_E",
+      "evidence": "exact RPC reply 128-bit fingerprint, message layout, object type, callback ABI, and official IIG declaration; no neighbor-address inference. The source declarations, complete original/native bodies and retained import chains are recorded in iokit-reviewed-functions-20261101.json."
+    },
+    {
+      "original": "0xfffffe000b4bf8fc",
+      "original_size": 104,
+      "original_sha256": "e1145b90652116cea9fc82b560440790c586468582b963ea89b5a5dd6997f1e3",
+      "native_symbol": "__ZN21IOSubMemoryDescriptor8redirectEP4taskb",
+      "evidence": "same independently named IOSubMemoryDescriptor vtable, all 38 PAC layouts match and terminate together; same exact slot and compatible field accesses; official declaration and implementation. The source declarations, complete original/native bodies and retained import chains are recorded in iokit-reviewed-functions-20261101.json."
+    },
+    {
+      "original": "0xfffffe000b4bf9c4",
+      "original_size": 128,
+      "original_sha256": "8be7539e78a18c917315acc2b5bf1f2d5d782b4e2176db1a681b212fd5c5841c",
+      "native_symbol": "__ZN21IOSubMemoryDescriptor16getPreparationIDEv",
+      "evidence": "same independently named IOSubMemoryDescriptor vtable, all 38 PAC layouts match and terminate together; same exact slot and compatible field accesses; official declaration and implementation. The source declarations, complete original/native bodies and retained import chains are recorded in iokit-reviewed-functions-20261101.json."
     }
   ],
   "data": [
@@ -99,6 +141,12 @@
       "native_symbol": "__ZN7OSArray9metaClassE",
       "addend": 0,
       "evidence": "Exact original constant pointer slot points to original OSArray::gMetaClass already identified in the actual map. The unique native OSArray::metaClass pointer slot points to the unique native OSArray::gMetaClass. Apple OSDefineMetaClassWithInit declares const OSMetaClass * const Class::metaClass = &Class::gMetaClass. Bind the variable slot, not the object, because consumers load through the slot. Detailed two-load ABI and observed IOHID cast evidence: metaclass-slot-bindings-20261101.json."
+    },
+    {
+      "original": "0xfffffe000b9293b8",
+      "native_symbol": "_gIODTPHandleKey",
+      "addend": 0,
+      "evidence": "Both original and actual native IODeviceTreeAlloc pass the unique literal AAPL,phandle to OSSymbol::withCStringNoCopy and store the returned x0 into these respective globals. Official pinned source names this precise pointer variable gIODTPHandleKey. IODTInterruptControllerName loads the same global into its symbol argument. All three retained consumers use GOT->variable-slot->runtime-OSSymbol* with two loads. Bind the 8-byte variable slot, never the runtime symbol object or literal. See device-tree-phandle-binding-20261101.json."
     }
   ]
 }

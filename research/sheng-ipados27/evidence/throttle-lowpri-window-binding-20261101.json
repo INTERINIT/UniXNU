@@ -1,0 +1,417 @@
+{
+  "kind": "reviewed-APFS-throttle-lowpri-window-function-identity",
+  "created_utc": "2026-11-01T04:10:25.182404+00:00",
+  "scope": "Published source/binary identity evidence; the recorded read-only audit did not apply a binding or qualify a hardware boot.",
+  "inputs": {
+    "original_path": "kernelcache.decompressed",
+    "original_sha256": "38e6d9fa5f789b8228f4617ef4c6d2a3fd8ab564abdc9b62920f1db53fc1780a",
+    "actual_candidate_path": "kernel-entry-probe.macho",
+    "actual_candidate_sha256": "5f98c47afae938b0a30dcd342932413536471fbb7820f44a90bee8e69ba6607a",
+    "native_entry": "com.apple.kernel",
+    "native_address_scope": "Actual old diagnostic candidate only. A new build must resolve the native symbol again; never transplant this address."
+  },
+  "reviewed_identity": {
+    "original": "0xfffffe000af6dc88",
+    "original_size": 20,
+    "original_sha256": "6a28371ea3ec3c228feeb1c557116812b1d542111e6695b1e4dc3885f5bc5b73",
+    "native_symbol": "_throttle_lowpri_window",
+    "signature": "int throttle_lowpri_window(void)",
+    "identity_supported": true,
+    "evidence": "Pinned Apple source returns current_uthread()->uu_lowpri_window; this is a one-byte bool at uthread+0x161 in both actual original cross-function accesses and actual native accessor. The original inlines current-thread and uthread addressing; the native uses its own current_uthread implementation and native struct thread size. No adjacent-address naming assumption or constant-return replacement.",
+    "binding_applied": false
+  },
+  "original_accessor": {
+    "address": "0xfffffe000af6dc88",
+    "size": 20,
+    "sha256": "6a28371ea3ec3c228feeb1c557116812b1d542111e6695b1e4dc3885f5bc5b73",
+    "bytes_hex": "5f2403d588d038d508055d3900010012c0035fd6",
+    "instructions": [
+      {
+        "address": "0xfffffe000af6dc88",
+        "mnemonic": "bti",
+        "operands": "c"
+      },
+      {
+        "address": "0xfffffe000af6dc8c",
+        "mnemonic": "mrs",
+        "operands": "x8, tpidr_el1"
+      },
+      {
+        "address": "0xfffffe000af6dc90",
+        "mnemonic": "ldrb",
+        "operands": "w8, [x8, #0x741]"
+      },
+      {
+        "address": "0xfffffe000af6dc94",
+        "mnemonic": "and",
+        "operands": "w0, w8, #1"
+      },
+      {
+        "address": "0xfffffe000af6dc98",
+        "mnemonic": "ret",
+        "operands": ""
+      }
+    ]
+  },
+  "native_accessor": {
+    "address": "0xfffffff00afb041c",
+    "size": 32,
+    "sha256": "a5b45072846964aea464db48d09a47f8f5434dd7b0a7f6af126eb5882ee05d88",
+    "bytes_hex": "7f2303d5fd7bbfa9fd03009188540a940884453900010012fd7bc1a8ff0f5fd6",
+    "instructions": [
+      {
+        "address": "0xfffffff00afb041c",
+        "mnemonic": "pacibsp",
+        "operands": ""
+      },
+      {
+        "address": "0xfffffff00afb0420",
+        "mnemonic": "stp",
+        "operands": "x29, x30, [sp, #-0x10]!"
+      },
+      {
+        "address": "0xfffffff00afb0424",
+        "mnemonic": "mov",
+        "operands": "x29, sp"
+      },
+      {
+        "address": "0xfffffff00afb0428",
+        "mnemonic": "bl",
+        "operands": "#0xfffffff00b245648"
+      },
+      {
+        "address": "0xfffffff00afb042c",
+        "mnemonic": "ldrb",
+        "operands": "w8, [x0, #0x161]"
+      },
+      {
+        "address": "0xfffffff00afb0430",
+        "mnemonic": "and",
+        "operands": "w0, w8, #1"
+      },
+      {
+        "address": "0xfffffff00afb0434",
+        "mnemonic": "ldp",
+        "operands": "x29, x30, [sp], #0x10"
+      },
+      {
+        "address": "0xfffffff00afb0438",
+        "mnemonic": "retab",
+        "operands": ""
+      }
+    ],
+    "defined_symbols": [
+      "_throttle_lowpri_window"
+    ]
+  },
+  "original_native_field_resolution": {
+    "original_thread_to_uthread": "0x5e0",
+    "native_thread_to_uthread": "0x698",
+    "uthread_uu_lowpri_window_byte_offset": "0x161",
+    "original_combined_thread_byte_offset": "0x741",
+    "arithmetic_original_0x5e0_plus_0x161_equals_0x741": true,
+    "native_effective_thread_offset": "0x7f9",
+    "return_normalization": "AND w0, loaded_byte, #1 returns the stored C bool as int on both sides",
+    "native_layout_must_remain_native": true
+  },
+  "native_helpers": {
+    "_current_uthread": {
+      "address": "0xfffffff00b245648",
+      "size": 40,
+      "sha256": "273a253fd97ec6b27b211f4b89f49a915a1eed688f4301e08cb1af5503587a16",
+      "bytes_hex": "7f2303d5fd7bbfa9fd030091bae1f297fd7bc1a8ff2303d5d0071eca5000f0b6208e38d408b2ec17",
+      "instructions": [
+        {
+          "address": "0xfffffff00b245648",
+          "mnemonic": "pacibsp",
+          "operands": ""
+        },
+        {
+          "address": "0xfffffff00b24564c",
+          "mnemonic": "stp",
+          "operands": "x29, x30, [sp, #-0x10]!"
+        },
+        {
+          "address": "0xfffffff00b245650",
+          "mnemonic": "mov",
+          "operands": "x29, sp"
+        },
+        {
+          "address": "0xfffffff00b245654",
+          "mnemonic": "bl",
+          "operands": "#0xfffffff00aefdd3c"
+        },
+        {
+          "address": "0xfffffff00b245658",
+          "mnemonic": "ldp",
+          "operands": "x29, x30, [sp], #0x10"
+        },
+        {
+          "address": "0xfffffff00b24565c",
+          "mnemonic": "autibsp",
+          "operands": ""
+        },
+        {
+          "address": "0xfffffff00b245660",
+          "mnemonic": "eor",
+          "operands": "x16, x30, x30, lsl #1"
+        },
+        {
+          "address": "0xfffffff00b245664",
+          "mnemonic": "tbz",
+          "operands": "x16, #0x3e, #0xfffffff00b24566c"
+        },
+        {
+          "address": "0xfffffff00b245668",
+          "mnemonic": "brk",
+          "operands": "#0xc471"
+        },
+        {
+          "address": "0xfffffff00b24566c",
+          "mnemonic": "b",
+          "operands": "#0xfffffff00ad71e8c"
+        }
+      ],
+      "defined_symbols": [
+        "_current_uthread"
+      ]
+    },
+    "_current_thread": {
+      "address": "0xfffffff00aefdd3c",
+      "size": 12,
+      "sha256": "615633785e3003f7fa3af59d0405ee664ff6c53fde585d7da7e160f658a05750",
+      "bytes_hex": "5f2403d580d038d5c0035fd6",
+      "instructions": [
+        {
+          "address": "0xfffffff00aefdd3c",
+          "mnemonic": "bti",
+          "operands": "c"
+        },
+        {
+          "address": "0xfffffff00aefdd40",
+          "mnemonic": "mrs",
+          "operands": "x0, tpidr_el1"
+        },
+        {
+          "address": "0xfffffff00aefdd44",
+          "mnemonic": "ret",
+          "operands": ""
+        }
+      ],
+      "defined_symbols": [
+        "_current_act",
+        "_current_thread"
+      ]
+    },
+    "_get_bsdthread_info": {
+      "address": "0xfffffff00ad71e8c",
+      "size": 12,
+      "sha256": "b663ca1ef431e7941e9161f95cababd72ccc6527f4a50eb0ac203fc9d21bdcbf",
+      "bytes_hex": "5f2403d500601a91c0035fd6",
+      "instructions": [
+        {
+          "address": "0xfffffff00ad71e8c",
+          "mnemonic": "bti",
+          "operands": "c"
+        },
+        {
+          "address": "0xfffffff00ad71e90",
+          "mnemonic": "add",
+          "operands": "x0, x0, #0x698"
+        },
+        {
+          "address": "0xfffffff00ad71e94",
+          "mnemonic": "ret",
+          "operands": ""
+        }
+      ],
+      "defined_symbols": [
+        "_get_bsdthread_info"
+      ]
+    }
+  },
+  "original_get_bsdthread_info_cross_anchor": {
+    "address": "0xfffffe000adbb10c",
+    "size": 12,
+    "sha256": "d76a51c90f34dda49814b96bceff45efdd28de6ff103f22e91662152a34abba4",
+    "bytes_hex": "5f2403d500801791c0035fd6",
+    "instructions": [
+      {
+        "address": "0xfffffe000adbb10c",
+        "mnemonic": "bti",
+        "operands": "c"
+      },
+      {
+        "address": "0xfffffe000adbb110",
+        "mnemonic": "add",
+        "operands": "x0, x0, #0x5e0"
+      },
+      {
+        "address": "0xfffffe000adbb114",
+        "mnemonic": "ret",
+        "operands": ""
+      }
+    ],
+    "identity_label_from_actual_map": "reference-order; not relied upon alone for the accessor identity"
+  },
+  "cross_function_field_evidence": [
+    {
+      "original_function": "0xfffffe000af68ea8",
+      "native_symbol": "_throttle_info_reset_window",
+      "original_size": 180,
+      "original_sha256": "a53df8a68e71447f6bf619df2dd0cf633b18b34e4447aecc1f548c8342af2386",
+      "instructions_of_interest": [
+        {
+          "address": "0xfffffe000af68ec0",
+          "mnemonic": "ldr",
+          "operands": "x19, [x0, #0x158]"
+        },
+        {
+          "address": "0xfffffe000af68ecc",
+          "mnemonic": "mrs",
+          "operands": "x8, tpidr_el1"
+        },
+        {
+          "address": "0xfffffe000af68ed0",
+          "mnemonic": "add",
+          "operands": "x0, x8, #0x5e0"
+        },
+        {
+          "address": "0xfffffe000af68ed4",
+          "mnemonic": "ldr",
+          "operands": "x19, [x0, #0x158]"
+        },
+        {
+          "address": "0xfffffe000af68f40",
+          "mnemonic": "str",
+          "operands": "xzr, [x0, #0x158]"
+        },
+        {
+          "address": "0xfffffe000af68f44",
+          "mnemonic": "strb",
+          "operands": "wzr, [x0, #0x161]"
+        },
+        {
+          "address": "0xfffffe000af68f48",
+          "mnemonic": "strb",
+          "operands": "wzr, [x0, #0x164]"
+        }
+      ],
+      "source_identity": "Same source routine releases uu_throttle_info, then clears uu_throttle_info, uu_lowpri_window and uu_throttle_bc."
+    },
+    {
+      "original_function": "0xfffffe000af6d5bc",
+      "native_symbol": "_throttle_lowpri_io_will_be_throttled",
+      "original_size": 240,
+      "original_sha256": "247f3d79d6f0aebc2fed07fe65e69e0d91f6911e428e779ea868461db83a660b",
+      "original_thread_relative_fields": {
+        "uu_throttle_info": "0x738 = 0x5e0+0x158",
+        "uu_lowpri_window": "0x741 = 0x5e0+0x161",
+        "uu_throttle_bc": "0x744 = 0x5e0+0x164"
+      },
+      "native_uthread_relative_fields": {
+        "uu_throttle_info": "0x158",
+        "uu_lowpri_window": "0x161",
+        "uu_throttle_bc": "0x164"
+      },
+      "interpretation": "Independent complex routine preserves the same pointer/lowpri-window/BC field relationship and behavior. This disambiguates the target byte from neighboring bools."
+    }
+  ],
+  "actual_retained_chain_sites": [
+    {
+      "original_slot": "0xfffffe000849fb60",
+      "output_slot": "0xfffffff00849fb60",
+      "file_offset": "0x149bb60",
+      "consumers": [
+        "com.apple.filesystems.apfs"
+      ],
+      "actual_raw_qword": "0x8011000004699a64",
+      "actual_target": "0xfffffff00b69da64",
+      "actual_target_symbols": [
+        "_unixnu_fileset_unmapped"
+      ],
+      "auth": 1,
+      "key": 0,
+      "diversity": 0,
+      "address_diversity": 1,
+      "next_step": 2,
+      "proposed_native_symbol": "_throttle_lowpri_window",
+      "review_native_address": "0xfffffff00afb041c",
+      "proposed_raw_qword_for_this_old_candidate_only": "0x8011000003fac41c",
+      "proposal_only_not_applied": true
+    }
+  ],
+  "primary_sources": [
+    {
+      "repository": "apple-oss-distributions/xnu",
+      "commit": "ac9718fb1af618d5ce8678d0dc6e8a58f252216f",
+      "path": "bsd/miscfs/specfs/spec_vnops.c",
+      "github_blob_sha1": "cff3a9a0366a5225023dfe0e798eaa43c55fe5b6",
+      "lines": [
+        2558,
+        2562
+      ],
+      "url": "https://github.com/apple-oss-distributions/xnu/blob/ac9718fb1af618d5ce8678d0dc6e8a58f252216f/bsd/miscfs/specfs/spec_vnops.c#L2558",
+      "finding": "The exact named int(void) API returns current_uthread()->uu_lowpri_window.",
+      "read_via": "GitHub contents API at exact commit; base64 decoded in memory"
+    },
+    {
+      "repository": "apple-oss-distributions/xnu",
+      "commit": "ac9718fb1af618d5ce8678d0dc6e8a58f252216f",
+      "path": "bsd/sys/user.h",
+      "github_blob_sha1": "9516e4fe63cbcc8012943ee30e60c1332a1aa10f",
+      "lines": [
+        235,
+        244
+      ],
+      "url": "https://github.com/apple-oss-distributions/xnu/blob/ac9718fb1af618d5ce8678d0dc6e8a58f252216f/bsd/sys/user.h#L235",
+      "finding": "uu_lowpri_window is bool, between signed uu_on_throttlelist and the other separately protected booleans; uu_throttle_info precedes the flags.",
+      "read_via": "GitHub contents API at exact commit; base64 decoded in memory"
+    },
+    {
+      "repository": "apple-oss-distributions/xnu",
+      "commit": "ac9718fb1af618d5ce8678d0dc6e8a58f252216f",
+      "path": "bsd/kern/kern_proc.c",
+      "github_blob_sha1": "dfb3a45064614be24b7fed96d0a05e0dbdb36d41",
+      "lines": [
+        2079,
+        2083
+      ],
+      "url": "https://github.com/apple-oss-distributions/xnu/blob/ac9718fb1af618d5ce8678d0dc6e8a58f252216f/bsd/kern/kern_proc.c#L2079",
+      "finding": "current_uthread delegates to get_bsdthread_info(current_thread()).",
+      "read_via": "GitHub contents API at exact commit; base64 decoded in memory"
+    },
+    {
+      "repository": "apple-oss-distributions/xnu",
+      "commit": "ac9718fb1af618d5ce8678d0dc6e8a58f252216f",
+      "path": "osfmk/kern/bsd_kern.c",
+      "github_blob_sha1": "70bdafc899ff32ba0c36974de56c55870a042943",
+      "lines": [
+        220,
+        224
+      ],
+      "url": "https://github.com/apple-oss-distributions/xnu/blob/ac9718fb1af618d5ce8678d0dc6e8a58f252216f/osfmk/kern/bsd_kern.c#L220",
+      "finding": "get_bsdthread_info adds sizeof(struct thread); original and native need their own structure sizes.",
+      "read_via": "GitHub contents API at exact commit; base64 decoded in memory"
+    }
+  ],
+  "limits": [
+    "The stripped original has no symbol definition naming this function. Identity combines exact API semantics, independent field-use relationships and actual native symbols, rather than a neighboring-address guess.",
+    "Only this accessor entry ABI and field meaning are reviewed; this does not claim every private uthread/thread field or APFS ABI is compatible.",
+    "The proposed encoded word is recorded for the inspected old diagnostic only. Future builds must bind by _throttle_lowpri_window and preserve their actual PAC/chain metadata.",
+    "No runtime APFS success or hardware boot qualification is claimed."
+  ],
+  "original_20byte_sequence_occurrences_in_cache": 1,
+  "device_operations": false,
+  "actions_operations": false,
+  "kernel_modified": false,
+  "source_modified": false,
+  "reference17_modified": false,
+  "publication": {
+    "source_report_file": "accessor-review-20261101.json",
+    "source_report_sha256": "85d16075ee35befcb47cf0628fcf8bbb3823374c3e7e5f0ba58126f527e8314b",
+    "local_absolute_paths_removed": true,
+    "native_addresses_apply_to_inspected_old_candidate_only": true,
+    "new_emissions_require_symbol_resolution": true
+  }
+}

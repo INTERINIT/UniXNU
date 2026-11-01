@@ -159,11 +159,22 @@ def storage_adapter():
 def native_bootstrap(ctx, modules, output):
     """Real source kernel for the source-driver export audit, without display/GPU."""
     from unixnu import kernel
+    config_path = Path(ctx.config_path)
+    config_bytes = config_path.read_bytes()
     config, specs, recipe = copy.deepcopy(ctx.config), ctx.component_specs, ctx.board["kernel"]["archives"]
     try:
-        ctx.config["XNU_NATIVE_LEGACY_DISPLAY"] = False
-        ctx.config["XNU_NATIVE_ADRENO"] = False
-        ctx.config["XNU_BOOT_PROGRESS"] = False
+        # Current Context.need_config() rereads this file for every build step.
+        # Keep the bootstrap switches visible to the real archive environment.
+        text = config_bytes.decode("utf-8")
+        for key in ("XNU_NATIVE_LEGACY_DISPLAY", "XNU_NATIVE_ADRENO", "XNU_BOOT_PROGRESS"):
+            pattern = rf"^(?:CONFIG_{key}=[^\r\n]*|# CONFIG_{key} is not set)\r?$"
+            line = "CONFIG_" + key + "=n"
+            if re.search(pattern, text, re.M):
+                text = re.sub(pattern, line, text, flags=re.M)
+            else:
+                text += ("" if text.endswith("\n") else "\n") + line + "\n"
+        config_path.write_text(text, encoding="utf-8", newline="\n")
+        ctx.need_config()
         ctx.component_specs, ctx.board["kernel"]["archives"] = bootstrap_recipe(ctx)
         adapter = storage_adapter()
         adapter.apply(ctx.tree, output)
@@ -176,6 +187,7 @@ def native_bootstrap(ctx, modules, output):
         shutil.copy2(native, output / "native-bootstrap.macho")
         (output / "native-bootstrap.json").write_text(json.dumps({"sha256": sha(native), "purpose": "source-driver export audit only", "source_storage": storage, "hardware_tested": False}, indent=2))
     finally:
+        config_path.write_bytes(config_bytes)
         ctx.config, ctx.component_specs, ctx.board["kernel"]["archives"] = config, specs, recipe
 
 

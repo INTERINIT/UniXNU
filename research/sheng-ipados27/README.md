@@ -1,9 +1,24 @@
 # sheng iPadOS 27 research
 
 This branch tracks the work to boot iPadOS 27.0.1 (24A446) on Xiaomi Pad 6S Pro
-(`sheng`, SM8550). It preserves the working iPadOS 17 case as a reference.
-The first iPadOS 27 hardware candidate is intended to include the matching
+(`sheng`, SM8550). The user retired the iPadOS 17 route on 2026-11-01;
+no further 17 builds or package restoration are planned. Historical text evidence
+remains in this branch, while the old binary packages are selected for cleanup.
+The next iPadOS 27 hardware candidate is intended to include the matching
 Metal/GPU stack and a new persistent Data volume.
+
+The user deferred further builds while trying another OS. The next delivery must
+support installation from scratch; a prior on-device root/Data installation
+receipt must not be assumed to remain valid after that change. Run 41271906828
+passed Data reuse and fresh firmware, then stopped on native bootstrap config
+rereading and a missing `glslangValidator`. The scoped config fix and declared
+`glslang`, `shaderc`, and `vulkan-headers` dependencies are saved but have not been
+through another Mac build. No retry or device operation was performed afterward.
+
+`scripts/Remove-iPadOS17.ps1` contains the reviewed 17-only cleanup targets.
+It previews by default and requires `-Delete` to remove them. Automatic approval
+rejected the deletion commands with `blocked by policy`, so cleanup was not
+executed by the agent. The current cleanup plan is retained on the workstation.
 
 **The original experimental package has been assembled and checked on Windows.
 Full iPadOS 27 startup, GPU rendering and persistent Data have not been verified
@@ -188,8 +203,8 @@ large original inputs and build products outside Git and identify them by
 source URL, build, size and SHA-256. Never commit device identifiers, tokens,
 owner private signing keys, original firmware blobs, IPSWs or live Data.
 
-The preserved 17 boot resources remain on the local workstation; the reference
-reports are available here. They are not a backup of the tablet's live Data.
+The 17 binary references are retired and selected for deletion. Their historical
+reports remain here; they are not a backup of the tablet's live Data.
 Replacing userdata with 27 is authorized for this case and replaces the old
 on-device 17 root/Data. Each new seed needs its actual UUID in the matching
 kernel. Initialize new Data once, then omit reset arguments on normal boots.

@@ -1,0 +1,30 @@
+{
+  "scope": "Host-only plans from actual archived baseline/fix4; no Mach-O generation, patch, build, cloud or device operation. Counts concern only reviewed identities.",
+  "actual_input_controls_passed": 3,
+  "actual_complete_function_boundaries_and_sha_passed": 10,
+  "fixture_functions": 10,
+  "fixture_data": 12,
+  "fixture_sha256": "7fae72ee08833ef8af4c09f3edaab0a11f027e4012e065913ad03545faece995",
+  "helper_sha256": "467599d26f3129410a42048a4fd5fbcea07ad2fafd65e8e3a45fdee634c595a1",
+  "cases": {
+    "baseline": {
+      "kernel_sha256": "e23c8972975f31d0b4890fe42828ee9fd30395d8d6a0eabbaaea0178a26fd786",
+      "plan_sha256": "319fa933b4394238f2482c2b653cffa81e251480c9411122df2467f7f72a94a4",
+      "bindings": 71,
+      "already_correct": 0,
+      "preserved_existing": 0,
+      "unresolved": 0
+    },
+    "fix4": {
+      "kernel_sha256": "5f98c47afae938b0a30dcd342932413536471fbb7820f44a90bee8e69ba6607a",
+      "plan_sha256": "a24aaa76a97e13e9fba3b7cfc447cecdfcf30ffa2352f3bc64367cfcf8ffaadc",
+      "bindings": 13,
+      "already_correct": 58,
+      "preserved_existing": 0,
+      "unresolved": 0
+    }
+  },
+  "kernel_modified": false,
+  "device_operations": false,
+  "hardware_tested": false
+}

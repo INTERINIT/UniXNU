@@ -3,6 +3,7 @@ import importlib.util
 import ast
 import copy
 import json
+import os
 from pathlib import Path
 import shlex
 import sys
@@ -11,6 +12,7 @@ import tempfile
 import tomllib
 from types import SimpleNamespace
 import unittest
+from unittest import mock
 
 MAIN = Path(__file__).resolve().parents[3]
 RESEARCH = Path(__file__).resolve().parents[1]
@@ -37,6 +39,64 @@ def actual_plan():
 
 
 class NativeRecipeTests(unittest.TestCase):
+    def test_bootstrap_overrides_survive_actual_context_reread_and_restore(self):
+        from unixnu import kernel
+        from unixnu.config import Context, parse_config
+        adapter = target.storage_adapter()
+        identity = "94143051-A2CC-4A69-A7AC-A35798CB9782"
+        original = ("# Keep original comments and line endings\r\n"
+                    "CONFIG_XNU_NATIVE_LEGACY_DISPLAY=y\r\n"
+                    "CONFIG_XNU_NATIVE_ADRENO=y\r\n"
+                    "CONFIG_XNU_BUILD_ARCHIVES=y\r\n"
+                    f'CONFIG_XNU_OWNER_DATA_VOLUME_UUID="{identity}"\r\n').encode()
+        for fail in (False, True):
+            with self.subTest(build_fails=fail), tempfile.TemporaryDirectory() as temporary:
+                root = Path(temporary)
+                ctx = Context.__new__(Context)
+                ctx.tree = root / "tree"
+                ctx.tree.mkdir()
+                ctx.config_path = root / ".config"
+                ctx.config_path.write_bytes(original)
+                ctx.config = parse_config(original.decode())
+                specs, recipe = ["normal specs"], ["normal recipe"]
+                ctx.component_specs = specs
+                ctx.board = {"kernel": {"archives": recipe, "prelink": {}}}
+                output = root / "result"
+                output.mkdir()
+
+                def build(context, modules):
+                    # The real xnu_env calls the new Context.need_config again.
+                    for _ in range(2):
+                        env = kernel.xnu_env(context)
+                        for key in ("XNU_NATIVE_LEGACY_DISPLAY", "XNU_NATIVE_ADRENO", "XNU_BOOT_PROGRESS"):
+                            self.assertEqual(env[key], "0")
+                        self.assertEqual(env["XNU_OWNER_DATA_VOLUME_UUID"], identity)
+                    self.assertEqual(os.environ[adapter.BOOTSTRAP_ENV], "1")
+                    if fail:
+                        raise RuntimeError("simulated native build failure")
+                    native = context.tree / target.NATIVE_KERNEL
+                    native.parent.mkdir(parents=True)
+                    native.write_bytes(b"offline native output")
+
+                wrapped = SimpleNamespace(apply=mock.Mock(), export_bootstrap_mode=adapter.export_bootstrap_mode,
+                                          verify_archive_sources=mock.Mock(return_value={"bootstrap": True}))
+                with mock.patch.object(target, "storage_adapter", return_value=wrapped), \
+                        mock.patch.object(target, "bootstrap_recipe", return_value=(["bootstrap specs"], ["bootstrap recipe"])), \
+                        mock.patch.object(kernel, "build", side_effect=build), \
+                        mock.patch.dict(os.environ, {adapter.BOOTSTRAP_ENV: "0"}):
+                    if fail:
+                        with self.assertRaisesRegex(RuntimeError, "simulated native"):
+                            target.native_bootstrap(ctx, [], output)
+                    else:
+                        target.native_bootstrap(ctx, [], output)
+                        self.assertEqual((output / "native-bootstrap.macho").read_bytes(), b"offline native output")
+                    self.assertEqual(os.environ[adapter.BOOTSTRAP_ENV], "0")
+                self.assertEqual(ctx.config_path.read_bytes(), original)
+                self.assertEqual(ctx.need_config(), parse_config(original.decode()))
+                self.assertEqual(ctx.config["XNU_OWNER_DATA_VOLUME_UUID"], identity)
+                self.assertIs(ctx.component_specs, specs)
+                self.assertIs(ctx.board["kernel"]["archives"], recipe)
+
     def test_new_board_keeps_existing_owner_policies_and_data_uuid(self):
         board = tomllib.loads((DEVICE / "board.toml").read_text(encoding="utf-8"))
         original = copy.deepcopy(board["kernel"]["archives"])
