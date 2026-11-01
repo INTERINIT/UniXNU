@@ -52,7 +52,20 @@ PATCHES = [ROOT / 'drivers/AdrenoMetal/bridge/patches' / name for name in [
     '0019-allocation-sites.patch',
     # A written texture over host pages stays in place at any size: Turnip loads and stores a linear host image of partial tile blocks
     # over its texels alone (patches/mesa/turnip-render-mode-for-attachment-memory.patch); its shadow merged every pass back through 94 MB.
-    '0020-written-host-page-textures-in-place-at-any-size.patch']]
+    '0020-written-host-page-textures-in-place-at-any-size.patch',
+    # A dedicated block of images whose image went stays spare for the next one of its pool (Core Animation's memoryless attachments,
+    # backed at their first pass, were each a new 40-112 MiB allocation), freed after 10 s, when a block cannot be made, or under memory
+    # pressure; room in the pools is kept by a thread of the device's, not in the creation call that asked for it.
+    '0021-spare-image-blocks-and-room-keeper.patch',
+    # stage_trace.rs: each command buffer's stages from its commit to its completion (commit, lowering, recording, the scheduler's
+    # holds, each submission, the completion waiter) and the scheduler's sleeps and wakes, read by the frontend (nmb_stage_ring_read).
+    '0022-command-buffer-stage-trace.patch',
+    # The threads that bring command buffers to their handlers run at the user-interactive class and the compile threads at least at
+    # the user-initiated class on iOS too, not on macOS alone: on the iPad they ran at the default class and woke up to 50 ms late.
+    '0023-quality-of-service-on-ios.patch',
+    # The host's diagnostics switch (SHENG_DIAG, from the boot argument sheng-diag=1): without it the stage ring and the allocation sites
+    # keep nothing. The stage ring also marks the steps inside a batch's submission (SubmitStep: placed, gathered, vkQueueSubmit, changes).
+    '0024-diagnostics-switch-and-submit-steps.patch']]
 
 
 def git_tree(*steps):

@@ -76,7 +76,15 @@ def main():
     build_id = os.environ.get('UNIXNU_IPSW_BUILD')
     if not build_id:
         parser.error('UNIXNU_IPSW_BUILD is not set; run through unixnu build kernel')
-    policies = (args.policy_dir or tree / f'build/verified-root-{build_id}').resolve()
+    policies = (args.policy_dir or tree / f'build/verified-root-{build_id}')
+    if not args.policy_dir and not policies.is_dir():
+        # A clean checkout ships the signed headers in the assembled tree (scripts/policies, copied
+        # from the device repository); the full block tables stay a local input of the userdata image.
+        shipped = sorted(tree.glob(f'scripts/policies/*{build_id}'))
+        if len(shipped) != 1:
+            parser.error(f'no policy directory for {build_id}: pass --policy-dir or ship scripts/policies/*{build_id}')
+        policies = shipped[0]
+    policies = policies.resolve()
     # The resolved build tree links the device package as kits/sheng, while an
     # explicit device repository keeps package/ and drivers/ side by side.
     package_dirs = [device / 'package']
@@ -127,12 +135,21 @@ def main():
                 verification['image_sha256'] != digest or verification['volume_uuid'] != identity or
                 verification['trusted_key_sha256'] != hashlib.sha256(key).hexdigest()):
             parser.error(f'{path.parent.name}: require complete verification of the actual {build_id} image')
-        data = path.read_bytes()
-        if len(data) < 544 or data[56:88].hex() != digest:
-            parser.error(f'{path}: manifest does not describe the selected image')
         # With the tables in userdata only the 544-byte signed header goes into the boot image;
         # NativeUfs reads "<window>.vroot" from the root image and vr_open checks it against the header.
-        manifests.append(data[:544] if tables_in_userdata else data)
+        # A policy directory may ship manifest.header.bin, the header without the block tables: every
+        # check below still runs on it, and the full tables stay a local input of the userdata image.
+        header = path.with_name('manifest.header.bin')
+        if tables_in_userdata and header.is_file():
+            data = header.read_bytes()
+            if len(data) != 544 or data[56:88].hex() != digest:
+                parser.error(f'{header}: policy header does not describe the selected image')
+            manifests.append(data)
+        else:
+            data = path.read_bytes()
+            if len(data) < 544 or data[56:88].hex() != digest:
+                parser.error(f'{path}: manifest does not describe the selected image')
+            manifests.append(data[:544] if tables_in_userdata else data)
     cursor = 32 + 16 * len(manifests)
     table = bytearray()
     for data in manifests:

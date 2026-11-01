@@ -102,7 +102,7 @@ def main():
     kernel_object = Path(record['directory']) / 'IOPlatformExpert.cpo'
     target.check_object(kernel_object.read_bytes(), 'Kernel compilation recipe')
     target.check_object((Path(c_record['directory']) / 'startup.o').read_bytes(), 'Kernel C compilation recipe')
-    kernel = tree / 'build/xnu/ios-obj/DEVELOPMENT_ARM64_BCM2837/mach.development.bcm2837.unstripped.noctf'
+    kernel = tree / 'build/xnu/ios-obj/DEVELOPMENT_ARM64_BCM2837/mach.development.bcm2837.unstripped'
     out = tree / 'build/sheng-source-drivers'
     out.mkdir(parents=True, exist_ok=True)
     manifest = out / 'report.json'
@@ -121,7 +121,13 @@ def main():
     # declarations missing from the source checkout; used inputs are hashed below.
     includes = ['-I', str(include), '-idirafter', str(sdk_kernel)]
     extra = ['-I', str(tree / '.cache/xnu-work/osfmk')]
-    firmware = (args.touch_firmware or device / '.cache/firmware/novatek/novatek_nt36532_n81a_fw_csot.bin').resolve()
+    # The pinned firmware of proprietary-files.txt: the extracting machine's cache first, the
+    # repository's copy (firmware/novatek) on a clean checkout.
+    firmware = Path(args.touch_firmware) if args.touch_firmware else next(
+        candidate for candidate in (device / '.cache/firmware/novatek/novatek_nt36532_n81a_fw_csot.bin',
+                                    device / 'firmware/novatek/novatek_nt36532_n81a_fw_csot.bin')
+        if candidate.is_file())
+    firmware = firmware.resolve()
     data = firmware.read_bytes()
     if not data:
         raise SystemExit(f'{firmware}: empty touch firmware')
@@ -174,7 +180,11 @@ def main():
         family_flags = ['-I', str(storage), '-I', str(generated), '-Wno-error']
         components['IOStorageFamily'] = [(storage / (name + '.cpp'), family_flags) for name in names]
         components['IOStorageFamily'].append((implementation, family_flags))
-    kernel_exports = nm(kernel, '-gU')
+    # A first build from a clean tree links the kernel only after the archive builders have
+    # run (the bootstrap pass stops at the link by design); the final kernel link is then the
+    # unresolved check. The report names the pending pass instead of listing every import.
+    kernel_linked = kernel.is_file()
+    kernel_exports = nm(kernel, '-gU') if kernel_linked else None
     entries = {}
     for component, sources in components.items():
         objects, details = [], []
@@ -224,13 +234,14 @@ def main():
                       Path(__file__), ROOT / 'scripts/prepare-storage-headers.py', ROOT / 'scripts/kernel_target.py')},
                   target=target.TRIPLE, recipe=str(recipe), recipe_sha256=sha(recipe),
                   c_recipe=str(c_recipe), c_recipe_sha256=sha(c_recipe),
-                  kernel=str(kernel), kernel_sha256=sha(kernel),
+                  kernel=str(kernel), kernel_sha256=sha(kernel) if kernel_linked else None,
+                  kernel_export_pass='linked' if kernel_linked else 'pending-final-link',
                   source_pins={name: pins[name] for name in ('IOStorageFamily', 'IOHIDFamily')},
                   sdk=str(sdk), components=entries,
                   storage_family_iig=generation,
                   touch_firmware=dict(path=str(firmware), sha256=sha(firmware), size=len(data)),
                   partial_link=dict(object=str(partial), sha256=sha(partial), passed=True),
-                  unresolved_after_native_kernel=sorted(nm(partial, '-u') - kernel_exports),
+                  unresolved_after_native_kernel=(sorted(nm(partial, '-u') - kernel_exports) if kernel_exports is not None else []),
                   compile_pass=True, link_qualified=False, runtime_qualified=False,
                   edge_gestures_qualified=False,
                   limitations=['Family imports have no target binding in this build.',
