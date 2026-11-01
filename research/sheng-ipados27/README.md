@@ -5,9 +5,10 @@ This branch tracks the work to boot iPadOS 27.0.1 (24A446) on Xiaomi Pad 6S Pro
 The first iPadOS 27 hardware candidate is intended to include the matching
 Metal/GPU stack and a new persistent Data volume.
 
-**A complete experimental package has been assembled and checked on Windows.
-No iPadOS 27 boot, GPU rendering or persistent Data has been verified on our
-tablet yet. The emitted kernel still has incomplete mappings.**
+**The original experimental package has been assembled and checked on Windows.
+Full iPadOS 27 startup, GPU rendering and persistent Data have not been verified
+on our tablet. The emitted kernel still has incomplete mappings. The merged
+upstream source target described below has not been built yet.**
 
 2026-10-31: public Actions run
 [41186106830](https://github.com/INTERINIT/UniXNU/actions/runs/41186106830)
@@ -37,9 +38,12 @@ The next observed VFS registration fault came from seven unbound vnode
 operation descriptors, which have been redirected to the canonical native
 objects. Startup then reached HID initialization and a required OSArray cast
 using an overwritten original metaclass pointer slot. Four reviewed metaclass
-pointer variables now correct35 retained imports in the next RAM candidate.
+pointer variables corrected 35 retained imports in the fourth RAM candidate.
 These changes bind the variables themselves, preserving the consumer's second
-load of the metaclass object and the existing type checks.
+load of the metaclass object and the existing type checks. That candidate crossed
+the HID cast failure and reached a new unmapped APFS function call: original
+accessor `0xfffffe000af6dc88`, return address `0xfffffff00ab19904`. Its source
+identity is still under investigation; it has not been replaced by a constant.
 Full OS startup is still unconfirmed. Root media and Data were not reflashed
 during diagnostics. See
 `evidence/hardware-entry-20261031.json`.
@@ -61,7 +65,40 @@ authentication metadata. The corresponding source-backed records in
 resolved prelink fixtures for future cloud builds. No cloud retry is required
 to test these local RAM-only candidates.
 
-## Source baseline
+## Merged upstream source target (2026-11-01)
+
+Official main was merged into this research branch after
+[UniXNU PR 130](https://github.com/UniXNU/UniXNU/pull/130) and
+[sheng PR 28](https://github.com/UniXNU/UniXNU-sheng/pull/28) integrated 27.
+Both the existing package and the upstream target use **27.0.1 / 24A446**.
+
+| Input | Revision for the next build |
+| --- | --- |
+| UniXNU main | `d3fe8522c81f9ee54c81383a570880a9ce3f4b88` |
+| UniXNU-sheng main | `3f00f45694ea390d2dd5358c09bde17ebe59a62a` |
+| SM8550 common | `a9f45dc60c035084b95463781538380f4c3606c9`, including its official xnu-12377 series |
+| DarwinBoot | `3c75734014cdab0acd9541e88057b7606ee7ae08` |
+| UEFI-sheng | `20ac23d5e0937106c2129303dfc931b3390ae660` |
+
+The updated workflow uses `package-upstream`: only the verified existing Data
+seed is reused; native kernel, GPU, firmware and payload are rebuilt. The
+original `reuse_artifacts27.py` source pins and hashes remain historical records
+for run 41173083070. They must not be relabelled as new upstream outputs.
+
+Keep the existing root policies and Data UUID. The official repository's
+same-version signed policy headers use a different owner anchor, so the research
+source-storage recipe explicitly selects our verified policy directory. This
+merge does not flash userdata or reset Data. The 58 old diagnostic slot bindings
+remain tied to the original emitted kernel; future prelink uses their reviewed
+symbol fixture instead of applying old slot addresses to a new kernel.
+
+XnuPrelink and DarwinBoot have new commit identities but identical source trees
+to their old pins. No new upstream mapping for the current APFS accessor was
+found. Main and sheng currently publish no complete image; the latest official
+package job failed because its RELEASE fileset reference was absent. Updating
+source does not establish hardware startup success.
+
+## Deployed package source baseline
 
 | Input | Revision |
 | --- | --- |
@@ -106,7 +143,7 @@ must not be substituted for the 27 bindings.
   the full 249,497,890,816-byte target geometry with RAW/FILL chunks only.
   Readback verified both volumes and policy-table objects. Actual final boot
   policy headers were matched to the full signed tables during assembly.
-  Hardware deployment has not been attempted.
+  The user deployed this root image. Later RAM diagnostics have not reflashed it.
 
 ## Layout
 

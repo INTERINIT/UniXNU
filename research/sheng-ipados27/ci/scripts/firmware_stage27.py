@@ -21,9 +21,9 @@ RESEARCH = Path(__file__).resolve().parents[2]
 SOURCE = RESEARCH / "scripts/firmware27_draft.py"
 PATCH_ROOT = RESEARCH / "patches/firmware"
 PINS = {
-    "MAIN_PIN": "793d6bddf7ea90678e3a61e2b2bd4350e5fdce16",
-    "DEVICE_PIN": "f47b27ad97e97bee945f8af34a8430e3abcf918c",
-    "DARWIN_PIN": "3e3a8a969e1177995984d8ed98c9dcc44e318265",
+    "MAIN_PIN": "d3fe8522c81f9ee54c81383a570880a9ce3f4b88",
+    "DEVICE_PIN": "3f00f45694ea390d2dd5358c09bde17ebe59a62a",
+    "DARWIN_PIN": "3c75734014cdab0acd9541e88057b7606ee7ae08",
     "UEFI_PIN": "20ac23d5e0937106c2129303dfc931b3390ae660",
     "PROFILE": "ipados-27.0.1-24A446",
 }

@@ -9,6 +9,7 @@ from pathlib import Path
 import shutil
 import subprocess
 import sys
+import tomllib
 
 
 SOURCE_RUN = 41173083070
@@ -143,4 +144,54 @@ def run(cloud, ctx):
     (cloud.RESULT / "package-phases27.json").write_text(json.dumps(report, indent=2) + "\n")
     if report["status"] != "host_verified":
         raise RuntimeError("Resumed native/payload failed; reused artifacts were not reclassified as fresh builds")
+    return report
+
+
+def run_upstream(cloud, ctx):
+    """Reuse only the original Data/policies; rebuild all code at the new pins."""
+    reuse = cloud.helper("reuse_artifacts27")
+    source = cloud.WORK / ("reuse-" + str(SOURCE_RUN)) / "result27"
+    require(source.is_dir(), "Restore the encrypted original Data inputs before the upstream package stage")
+    cloud.restore_policies(ctx)
+    data = cloud.helper("data_stage27")
+    profile = tomllib.loads((cloud.MAIN / "profiles/os" / reuse.PROFILE / "profile.toml").read_text())
+    seed, _ = reuse.check_data(source, ctx.tree / "build/verified-root-24A446", profile,
+                              ctx.tree / "drivers/DarwinBoot/Test/packed_ramdisk.py", data)
+    # No old GPU, FD, native kernel or their phase receipts enter result27.
+    # data() sees both complete cached seed files and can only reuse them or
+    # reject a changed recipe; it never enters fresh APFS seed creation here.
+    for name in DATA_FILES:
+        path = reuse.member(source, name)
+        expected = {"bytes": path.stat().st_size, "sha256": cloud.sha(path)}
+        copy_checked(path, ctx.work / "data-seed" / name, expected, cloud.sha)
+    state = {}
+
+    def data_reuse():
+        state["seed"] = cloud.data(cloud.context())
+        require(state["seed"]["packed_sha256"] == seed["packed_sha256"]
+                and state["seed"]["volume_uuid"] == seed["volume_uuid"],
+                "Upstream packaging changed the original Data seed or UUID")
+
+    report = cloud.package_phases({
+        "data": data_reuse,
+        "native": lambda: cloud.native("kernel", cloud.context(), seed=state["seed"]),
+        "gpu": lambda: cloud.helper("target27").gpu(cloud.MAIN, cloud.context(),
+                                                  cloud.RESULT / "ipsw-trust27.bundle", cloud.RESULT),
+        "firmware": lambda: cloud.helper("firmware_stage27").run(
+            cloud.MAIN, cloud.DEVICE, cloud.RESULT, cloud.ROOT, ctx=cloud.context()),
+        "payload": lambda: cloud.helper("payload_stage27").run(
+            cloud.MAIN, cloud.DEVICE, cloud.RESULT, cloud.ROOT, ctx=cloud.context(),
+            uefi=cloud.DEVICE / "uefi-sheng", execute=True,
+            unique_chip_id=os.environ.get("UNIXNU_UNIQUE_CHIP_ID")),
+    }, cloud.RESULT)
+    for name, phase in report["phases"].items():
+        phase["reused"] = name == "data" and phase["status"] == "passed"
+        phase["fresh_build"] = name != "data" and phase["status"] == "passed"
+        if phase["reused"]:
+            phase["source_run"] = SOURCE_RUN
+    report["source_pins"] = cloud.PINS
+    report["data_volume_uuid"] = seed["volume_uuid"]
+    (cloud.RESULT / "package-phases27.json").write_text(json.dumps(report, indent=2) + "\n")
+    if report["status"] != "host_verified":
+        raise RuntimeError("Upstream package phases failed; only the original Data was reused")
     return report

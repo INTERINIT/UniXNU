@@ -110,7 +110,8 @@ class StorageBootstrapTests(unittest.TestCase):
         log = (DEVICE / "package/BootLog.c").read_text()
         for name in ("boot_diag_scan", "boot_diag_stream", "boot_diag_shot_tick"):
             self.assertRegex(log, r"extern[^\n]*\b" + name + r"\([^\n]*__attribute__\(\(weak_import\)\)")
-        self.assertIn('if (&boot_diag_scan && &boot_diag_stream)', log)
+        self.assertTrue(any(re.search(r'if\s*\([^\n]*&boot_diag_scan\s*&&\s*&boot_diag_stream', line)
+                            for line in log.splitlines()), "Diagnostic calls retain both weak-import checks")
 
     def test_actual_catalog_and_target_restore_full_build_after_failure(self):
         # Failure injection checks the caller's finally block. It supplies no
@@ -158,6 +159,7 @@ class StorageBootstrapTests(unittest.TestCase):
             self.assertIs(ctx.component_specs, specs)
             self.assertIs(ctx.board["kernel"]["archives"], archives)
             self.assertNotIn(adapter.BOOTSTRAP_ENV, os.environ)
+            (ctx.tree / "kits/XnuPrelink/fixtures").mkdir(parents=True)
             with patch.object(kernel, "build", side_effect=stop_full), self.assertRaisesRegex(RuntimeError, "full compile not executed"):
                 target.full_kernel(DEVICE, ctx, modules)
             self.assertFalse(any(ctx.tree.rglob("*.macho")))

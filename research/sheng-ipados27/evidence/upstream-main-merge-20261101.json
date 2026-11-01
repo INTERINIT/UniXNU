@@ -1,0 +1,83 @@
+{
+  "schema_version": 1,
+  "date": "2026-11-01",
+  "request": "Merge official iPadOS 27 source changes while retaining the working research baseline and existing device Data",
+  "os": {
+    "version": "27.0.1",
+    "build": "24A446",
+    "product": "iPad17,3",
+    "version_changed": false
+  },
+  "source_merge": {
+    "before": "4db30dc",
+    "upstream": "d3fe8522c81f9ee54c81383a570880a9ce3f4b88",
+    "merge_commit": "b4ac6c4c7f042f6f2160e70955116d936860b4c4",
+    "branch": "research/sheng-ipados27",
+    "conflicts": 0,
+    "repository": "https://github.com/INTERINIT/UniXNU",
+    "checkpoint_branch": "checkpoint/research-before-upstream-20261101"
+  },
+  "device_source": {
+    "before": "f47b27ad97e97bee945f8af34a8430e3abcf918c",
+    "after": "3f00f45694ea390d2dd5358c09bde17ebe59a62a",
+    "branch": "research/sheng-ipados27",
+    "checkpoint_branch": "checkpoint/pre-official27-20261101",
+    "local_modifications": false
+  },
+  "selected_inputs": {
+    "soc": "a9f45dc60c035084b95463781538380f4c3606c9",
+    "darwinboot": "3c75734014cdab0acd9541e88057b7606ee7ae08",
+    "uefi": "20ac23d5e0937106c2129303dfc931b3390ae660",
+    "adreno_metal": "a0f0287be80a5d8aef5c6b97a6cab62129e152bd",
+    "adreno740": "a9a2cbb43b89d672e2921e19721a6438b738b17f",
+    "xnu_prelink": "b74ed7c74a07f0eb5f81089c660905ecc4cabb7f",
+    "apple_xnu": "ac9718fb1af618d5ce8678d0dc6e8a58f252216f"
+  },
+  "integration": [
+    "Use official xnu-12377 SoC patches instead of copying the historical local overlay.",
+    "Update matched source pins, source-storage and touch firmware source identities, and the upstream API fetch adapter.",
+    "Select the DEVELOPMENT .unstripped kernel sealed by the updated builder; retain the separate RELEASE .noctf fileset reference.",
+    "Keep source-storage on the original verified root-policy directory; official same-version signed headers use another owner anchor.",
+    "Keep the reviewed 4-function and 11-data runtime symbol fixture in future fileset prelink.",
+    "Keep 58 original diagnostic slot bindings tied to their original kernel; do not apply fixed old slots to a new link.",
+    "Retain the exact watchdog monotonic-clock patch at the updated selected AdrenoMetal revision; its source and patch hashes are unchanged.",
+    "Use package-upstream to reuse Data only and freshly build native, GPU, firmware and payload; install declared acpica and qemu dependencies.",
+    "Keep the old reuse_artifacts27 source pins and output hashes as historical provenance."
+  ],
+  "preserved_data": {
+    "volume_uuid": "94143051-A2CC-4A69-A7AC-A35798CB9782",
+    "packed_seed_sha256": "b8433fd0cc979fbc1584a256d5a677b005cffed7d6da620ed18f3e6e1ec50e72",
+    "root_manifest_sha256": "ebf57107c50274b8e05ce0c39a15901329e54e76d9ea351a4d637c3bd1639b07",
+    "owner_anchor_sha256": "e9d4304b8ec7253ade83bcc06e9e5c08c3df4312133f1ed037ad7a2397524886",
+    "actual_original_seed_and_policy_check_passed": true,
+    "new_data_seed_created": false,
+    "partition_written": false
+  },
+  "validation": {
+    "offline_adapter_and_pipeline_tests": "passed",
+    "payload_tests": "11 passed",
+    "entry_symbol_parser_tests": "2 passed",
+    "gpu_host_adapter_tests": "6 passed",
+    "firmware_wrapper_selftest": "passed",
+    "watchdog_source_tests": "3 passed",
+    "source_preservation": "entry probes, FAT window, crypto sealer, runtime import fixture and original slot bindings retained",
+    "reference17": "preserved on workstation",
+    "new_macos_build": false,
+    "new_Actions_dispatched": false,
+    "new_boot_image_built": false,
+    "hardware_ipados27_startup_qualified": false
+  },
+  "outstanding": {
+    "latest_apfs_original_accessor": "0xfffffe000af6dc88",
+    "new_upstream_accessor_binding_found": false,
+    "source_upgrade_alone_resolves_panic": "not established"
+  },
+  "persistent_fastboot_request": {
+    "current_fastboot_detected": true,
+    "default_changed": false,
+    "supported_persistent_switch_found": false,
+    "current_uefi_bootloader_reset_implemented": false,
+    "partition_written": false,
+    "note": "A one-time reboot and recovery fastbootd do not implement default original bootloader FASTBOOT. No unverified OEM command or boot-slot damage was used."
+  }
+}

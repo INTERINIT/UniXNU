@@ -14,6 +14,7 @@ import os
 from pathlib import Path
 import platform
 import re
+import shlex
 import shutil
 import stat
 import subprocess
@@ -21,8 +22,9 @@ import sys
 import uuid as uuidlib
 import tempfile
 
-MAIN_REV = "793d6bddf7ea90678e3a61e2b2bd4350e5fdce16"
-DEVICE_REV = "f47b27ad97e97bee945f8af34a8430e3abcf918c"
+MAIN_REV = "d3fe8522c81f9ee54c81383a570880a9ce3f4b88"
+DEVICE_REV = "3f00f45694ea390d2dd5358c09bde17ebe59a62a"
+NATIVE_KERNEL = "build/xnu/ios-obj/DEVELOPMENT_ARM64_BCM2837/mach.development.bcm2837.unstripped"
 HOST_CHECK_SHA256 = "7ab580b33aa544a0e8931679884d2aa717e5663d6d9ff52ee5cda90c128862c0"
 QUARTZCORE17_CONTROL = """with tempfile.TemporaryDirectory(prefix='quartzcore-driver-cache-', dir=out) as temporary:
     subprocess.run([sys.executable, ROOT / 'scripts/check-quartzcore-turnip-cache-host.py',
@@ -46,6 +48,33 @@ def run(command, cwd, env=None, log_path=None):
                                stdout=stream, stderr=subprocess.STDOUT)
         finally:
             print(Path(log_path).read_text(encoding="utf-8", errors="replace")[-40000:], end="", flush=True)
+
+
+def owner_policy_archives(ctx):
+    """Keep the research owner's existing policies when using the new board recipe."""
+    directory = ctx.tree / "build/verified-root-24A446"
+    archives = []
+    for entry in ctx.board["kernel"]["archives"]:
+        parts = shlex.split(entry)
+        if parts and Path(parts[0]).name == "build-sheng-source-storage.py":
+            retained = []
+            index = 0
+            while index < len(parts):
+                if parts[index] == "--policy-dir":
+                    index += 2
+                    continue
+                if not parts[index].startswith("--policy-dir="):
+                    retained.append(parts[index])
+                index += 1
+            entry = shlex.join([*retained, "--policy-dir", str(directory)])
+        archives.append(entry)
+    ctx.board["kernel"]["archives"] = archives
+
+
+def select_sealed_native_kernel(ctx):
+    """Prelink the development output sealed by the current official builder."""
+    ctx.board["kernel"]["prelink"]["kernel"] = NATIVE_KERNEL
+    return ctx.tree / NATIVE_KERNEL
 
 
 def context(main, device, seed_report):
@@ -87,6 +116,8 @@ def context(main, device, seed_report):
         for file in ("manifest.bin", "trusted-key.bin", "verification.json"):
             if not (directory / file).is_file():
                 raise ValueError("Parent policy preparation must create " + str(directory / file))
+    owner_policy_archives(ctx)
+    select_sealed_native_kernel(ctx)
     return ctx, modules
 
 
@@ -139,7 +170,7 @@ def native_bootstrap(ctx, modules, output):
         with adapter.export_bootstrap_mode():
             kernel.build(ctx, modules)
         storage = adapter.verify_archive_sources(ctx.tree, bootstrap=True)
-        native = ctx.tree / "build/xnu/ios-obj/DEVELOPMENT_ARM64_BCM2837/mach.development.bcm2837.unstripped.noctf"
+        native = select_sealed_native_kernel(ctx)
         if not native.is_file():
             raise ValueError("Native bootstrap produced no real Mach-O")
         shutil.copy2(native, output / "native-bootstrap.macho")

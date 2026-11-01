@@ -1,0 +1,44 @@
+{
+  "scope": "merge integration of watchdog source pin only; no compiled builds, Actions, device commands or real component-source edits",
+  "component": "AdrenoMetal",
+  "component_commit": "a0f0287be80a5d8aef5c6b97a6cab62129e152bd",
+  "previous_component_commit": "7e0d3d2ebaecd736784de0baa09254b7f63bc150",
+  "source": "NativeTurnipSmoke.h",
+  "source_git_blob": "8450ee7182fe60e61725ef1ac4c68c290c23d482",
+  "source_url": "https://github.com/UniXNU/AdrenoMetal/blob/a0f0287be80a5d8aef5c6b97a6cab62129e152bd/NativeTurnipSmoke.h",
+  "source_git_lf_sha256": "4ad86aa579652ce980dd02a30f8b2e9c12cc98c21187cc071dcdb1b71d313c2d",
+  "source_git_lf_bytes": 35349,
+  "new_git_lf_source_matches_previously_reviewed_source": true,
+  "fix_already_upstream": false,
+  "old_loop_instances": 1,
+  "source_mach_absolute_time_occurrences": 0,
+  "patched_source_sha256": "a613f68aa36294481f286a4cf92d4eb3ed5967fae72607a1a12aedbd7dbc884b",
+  "patch_file": "patches/gpu/watchdog-monotonic.patch",
+  "patch_sha256": "b362dd5ed3d5e3b204fa9227127abc0608672b98d20a36250c1b3229f77f547e",
+  "patch_unchanged": true,
+  "helper_sha256": "8636eef7ed577e7914a5a13b1188a8da62742bbe56c1c637eae3709a890eb04b",
+  "behavior_preserved": {
+    "actual_monotonic_clock": "mach_absolute_time plus checked mach_timebase_info",
+    "checkpoint_seconds": [
+      15,
+      45,
+      90
+    ],
+    "sampler_and_stack_observation": "unchanged",
+    "real_host_stall_seconds": 17,
+    "real_host_assertions": "unchanged",
+    "independent_source_edits": "still refused",
+    "repeated_patch_application": "idempotent"
+  },
+  "validation": {
+    "command": "python ci/scripts/test_gpu_watchdog27.py --source drivers/AdrenoMetal/NativeTurnipSmoke.h",
+    "tests_run": 3,
+    "result": "passed",
+    "existing_tests_only": true,
+    "git_diff_check": "passed",
+    "actual_Mac_Cpp_control_executed": false,
+    "actual_17_second_stack_stall_executed": false,
+    "hardware_tested": false
+  },
+  "note": "Windows raw checkout uses CRLF and hashes differently; clean git source and read_text normalize to the exact reviewed LF contents. No source checksum was relaxed."
+}

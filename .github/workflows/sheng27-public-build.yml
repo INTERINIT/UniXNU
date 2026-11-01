@@ -1,5 +1,5 @@
 name: sheng27 public native and payload build
-run-name: sheng27 native and payload (reused inputs)
+run-name: sheng27 upstream sources (preserved Data)
 on:
   workflow_dispatch:
 permissions:
@@ -34,7 +34,7 @@ jobs:
           curl --fail --location --retry 2 'https://github.com/INTERINIT/UniXNU/releases/download/sheng27-inputs-41173083070/inputs27-run41173083070.enc' --output "$RUNNER_TEMP/inputs27.enc"
           python research/sheng-ipados27/ci/scripts/load_inputs27.py --bundle "$RUNNER_TEMP/inputs27.enc" --root "$GITHUB_WORKSPACE" --expected-sha256 f905fe8118680b3bc72cc7aa8da52af869610a379e27e48d6d77f66d81abebff
       - name: Install host build dependencies
-        run: brew install cmake ninja unifdef llvm lld mtools dtc openssl@3
+        run: brew install cmake ninja unifdef llvm lld mtools dtc openssl@3 acpica qemu
       - name: Select build tools and mask platform identity
         run: |
           python - <<'PY'
@@ -49,8 +49,8 @@ jobs:
           done
           xcodebuild -version
           xcrun --sdk iphoneos --show-sdk-version
-      - name: Build repaired native kernel and final payload
-        run: python research/sheng-ipados27/ci/scripts/cloud27.py package-reuse
+      - name: Build upstream kernel, GPU, firmware and payload with preserved Data
+        run: python research/sheng-ipados27/ci/scripts/cloud27.py package-upstream
       - name: Encrypt results and logs
         if: always()
         run: python research/sheng-ipados27/ci/scripts/seal_outputs27.py --root . --output encrypted-result27

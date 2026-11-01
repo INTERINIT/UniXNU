@@ -1,11 +1,14 @@
 """Offline native dependency and comparison-recipe checks; never compiles XNU."""
 import importlib.util
 import ast
+import copy
 import json
 from pathlib import Path
+import shlex
 import sys
 import subprocess
 import tempfile
+import tomllib
 from types import SimpleNamespace
 import unittest
 
@@ -34,8 +37,37 @@ def actual_plan():
 
 
 class NativeRecipeTests(unittest.TestCase):
+    def test_new_board_keeps_existing_owner_policies_and_data_uuid(self):
+        board = tomllib.loads((DEVICE / "board.toml").read_text(encoding="utf-8"))
+        original = copy.deepcopy(board["kernel"]["archives"])
+        config = {"XNU_OWNER_DATA_VOLUME_UUID": "12345678-1234-5678-ABCD-123456789ABC"}
+        ctx = SimpleNamespace(tree=Path("uncreated research tree"), board=board, config=config)
+        target.owner_policy_archives(ctx)
+        storage = [shlex.split(item) for item in board["kernel"]["archives"]
+                   if shlex.split(item)[0] == "build-sheng-source-storage.py"]
+        self.assertEqual(len(storage), 1)
+        self.assertEqual(storage[0], ["build-sheng-source-storage.py", "--policy-dir",
+                                     str(ctx.tree / "build/verified-root-24A446")])
+        other = lambda values: [item for item in values if shlex.split(item)[0] != "build-sheng-source-storage.py"]
+        self.assertEqual(other(original), other(board["kernel"]["archives"]))
+        self.assertIs(ctx.config, config)
+        self.assertEqual(config["XNU_OWNER_DATA_VOLUME_UUID"], "12345678-1234-5678-ABCD-123456789ABC")
+        once = list(board["kernel"]["archives"])
+        target.owner_policy_archives(ctx)
+        self.assertEqual(board["kernel"]["archives"], once)
+
     def test_actual_catalog_full_and_bootstrap_dependency_plans(self):
         ctx, modules, full, bootstrap, tree = actual_plan()
+        profile = MAIN / "profiles/os/ipados-27.0.1-24A446/profile.toml"
+        original_profile = profile.read_bytes()
+        reference_arguments = list(ctx.board["kernel"]["prelink"]["extra_args"])
+        sealed = target.select_sealed_native_kernel(ctx)
+        self.assertEqual(sealed, tree / target.NATIVE_KERNEL)
+        self.assertEqual(ctx.board["kernel"]["prelink"]["kernel"], target.NATIVE_KERNEL)
+        self.assertTrue(str(sealed).endswith("mach.development.bcm2837.unstripped"))
+        self.assertEqual(ctx.board["kernel"]["prelink"]["extra_args"], reference_arguments)
+        self.assertIn("build/xnu/fileset-reference/mach.release.bcm2837.unstripped.noctf", reference_arguments)
+        self.assertEqual(profile.read_bytes(), original_profile)
         names = [item["id"] for kind, item in bootstrap if kind == "component"]
         self.assertEqual(names, ["ArmDTPlatform", "ArmCpu", "VirtioMmioBlock", "ShengUfs", "RamBlock"])
         self.assertNotIn("Adreno740", names)

@@ -22,7 +22,7 @@ WORK = ROOT / "work27"
 MAIN = WORK / "UniXNU"
 DEVICE = WORK / "UniXNU-sheng"
 RESULT = ROOT / "result27"
-PINS = {"UniXNU": "793d6bddf7ea90678e3a61e2b2bd4350e5fdce16", "UniXNU-sheng": "f47b27ad97e97bee945f8af34a8430e3abcf918c"}
+PINS = {"UniXNU": "d3fe8522c81f9ee54c81383a570880a9ce3f4b88", "UniXNU-sheng": "3f00f45694ea390d2dd5358c09bde17ebe59a62a"}
 CONFIG = "sheng_ipados27_defconfig"
 PROFILE = "ipados-27.0.1-24A446"
 
@@ -68,21 +68,15 @@ def prepare():
         clone(name)
     cli("defconfig", CONFIG)
     ctx = context()
-    target = ctx.profile_roots["soc"] / "patches/xnu-12377"
-    target.mkdir(exist_ok=True)
-    for name in ("series", "native-smp-secondary.patch", "sheng-platform-power.patch"):
-        source = CODE / "patches/sm8550-xnu12377" / name
-        destination = target / name
-        if destination.exists() and sha(destination) != sha(source):
-            raise ValueError("Unexpected SoC patch overlay: " + name)
-        shutil.copy2(source, destination)
+    # The new board feed supplies the official xnu12377 SoC series. Keep its
+    # source intact instead of copying the earlier locally adapted17 series.
     run("git", "-C", DEVICE, "submodule", "update", "--init", "--recursive", "--depth=1", "--jobs=4")
     cli("fetch")
     cli("tree")
     ctx = context()
     verified_root = (ctx.tree / "kits/VerifiedRoot").resolve()
     actual_verified = subprocess.check_output(["git", "-C", str(verified_root), "rev-parse", "HEAD"], text=True).strip()
-    if actual_verified != "ed368a8d4451f8670228f9025f1b45479509c789" or not any("vr_open_header" in path.read_text() for path in verified_root.rglob("*.h")):
+    if actual_verified != "974f043d0c71ba2e60331483a41c6c6d35274ee3" or not any("vr_open_header" in path.read_text() for path in verified_root.rglob("*.h")):
         raise ValueError("Require the reviewed header-only-policy VerifiedRoot gitlink")
     status = subprocess.check_output([sys.executable, str(MAIN / "unixnu"), "status", "-D", str(DEVICE), "--json"], text=True)
     (RESULT / "resolved-status.json").write_text(status)
@@ -112,7 +106,9 @@ def prepare():
     trust = struct.pack("<III", 2, 12, 12 + len(modules[0])) + b"".join(modules)
     (RESULT / "ipsw-trust27.bundle").write_bytes(trust)
     research_revision = subprocess.check_output(["git", "-C", str(CODE), "rev-parse", "HEAD"], text=True).strip()
-    report = {"source_pins": PINS, "research_revision": research_revision, "target": "iPadOS27.0.1 / 24A446 / iPad17,3 j820ap", "kernelcache_sha256": sha(kernelcache), "original_trust_sha256": hashlib.sha256(trust).hexdigest(), "verified_root_commit": actual_verified, "soc_overlay_audit": json.loads((CODE / "patches/sm8550-xnu12377/audit.json").read_text()), "device_operations": False, "hardware_tested": False}
+    soc = ctx.profile_roots["soc"]
+    soc_revision = subprocess.check_output(["git", "-C", str(soc), "rev-parse", "HEAD"], text=True).strip()
+    report = {"source_pins": PINS, "research_revision": research_revision, "target": "iPadOS27.0.1 / 24A446 / iPad17,3 j820ap", "kernelcache_sha256": sha(kernelcache), "original_trust_sha256": hashlib.sha256(trust).hexdigest(), "verified_root_commit": actual_verified, "soc_source": {"commit": soc_revision, "series": "patches/xnu-12377/series", "local_overlay_applied": False}, "device_operations": False, "hardware_tested": False}
     (RESULT / "prepare.json").write_text(json.dumps(report, indent=2))
     return ctx
 
@@ -321,7 +317,7 @@ def complete_package(ctx):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("stage", choices=("prepare", "policies", "data", "bootstrap", "kernel", "gpu", "firmware", "package", "package-reuse"))
+    parser.add_argument("stage", choices=("prepare", "policies", "data", "bootstrap", "kernel", "gpu", "firmware", "package", "package-reuse", "package-upstream"))
     args = parser.parse_args()
     os.environ["NOBOOT"] = "1"
     ctx = prepare()
@@ -339,6 +335,8 @@ def main():
         complete_package(ctx)
     elif args.stage == "package-reuse":
         helper("resume_package27").run(sys.modules[__name__], ctx)
+    elif args.stage == "package-upstream":
+        helper("resume_package27").run_upstream(sys.modules[__name__], ctx)
     print("PASS: requested host phase completed; no hardware operation.", flush=True)
 
 

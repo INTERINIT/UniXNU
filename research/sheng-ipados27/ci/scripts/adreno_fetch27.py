@@ -8,9 +8,13 @@ import json
 from pathlib import Path
 
 
-SOURCE_SHA256 = "273dca384310e106f3bd7691202029b85f1cd86fcc080a0e4ba279a541bf4d3c"
+SOURCE_SHA256 = "a854723a3a5530811aa628172b09096def25b6f319609b5f35dc29fe54b2fa15"
 PINS_SHA256 = "770c85b715dbd325bf8813c72b5b4cde1e204faa79c14e8272fa1c4e93bb6434"
-REQUEST_LINE = "        request = urllib.request.Request(url, headers={'User-Agent': 'sheng-offline-adreno-audit'})\n"
+REQUEST_LINE = """        headers = {'User-Agent': 'sheng-offline-adreno-audit'}
+        if TOKEN and urllib.parse.urlsplit(url).hostname in ('api.github.com', 'raw.githubusercontent.com'):
+            headers['Authorization'] = f'Bearer {TOKEN}'
+        request = urllib.request.Request(url, headers=headers)
+"""
 ROOT_LINE = "ROOT = Path(__file__).resolve().parents[1]\n"
 PINS_LINE = "pins = json.loads((ROOT / 'scripts/data/adreno-inputs.json').read_text())\n"
 AUTH_HELPER = '''def authenticated_request(url):
@@ -45,7 +49,6 @@ def transform(original, tree):
         require(source.count(boundary) == 1, "Pinned Adreno fetcher adaptation boundary differs")
     # Keep the exact fetch body, replacing only request construction. API blob
     # decoding, SHA256, byte count and Git blob SHA1 remain upstream code.
-    source = source.replace("import urllib.request\n", "import os\nimport urllib.parse\nimport urllib.request\n")
     source = source.replace(ROOT_LINE, AUTH_HELPER + "ROOT = Path(" + repr(str(Path(tree).resolve())) + ")\n")
     source = source.replace(PINS_LINE,
         "pins_path = ROOT / 'scripts/data/adreno-inputs.json'\n"

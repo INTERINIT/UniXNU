@@ -10,8 +10,8 @@ import os
 from pathlib import Path
 
 
-SOURCE_SHA256 = "03de4edd3188646d583f1ca7d00dc554d2d83a9e9fc182741fd267ad683c307a"
-DIAG_SHA256 = "b0b2ee212d8f0e7f6066b66ab6b75b01e289c6a4126b087f1e12f19425f0e227"
+SOURCE_SHA256 = "3e814261da9d98b6658f09041d171c32d9b06e4bdd0ae0996a464ce3a237a4b6"
+DIAG_SHA256 = "4eac327136e4deefc4519c4af2a111af98a5fd0c2be18086f703185a7d19eafa"
 BOOTSTRAP_ENV = "UNIXNU_SHENG_EXPORT_BOOTSTRAP"
 OLD = b"        sources.append(device_source('BootDiagExport.c'))\n"
 NEW = b"""        # This optional exporter reads GPU/display/input rings absent from the
